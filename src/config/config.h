@@ -19,6 +19,8 @@ static constexpr int SPECIAL_REG_NUM = 32;
 static constexpr int SIMD_MAX_INPUT_NUM = 4;
 static constexpr int SIMD_MAX_OPCODE = 255;
 
+static constexpr int BYTE_TO_BIT = 8;
+
 struct ControlUnitConfig {
     double controller_static_power_mW{0.0};   // mW
     double controller_dynamic_power_mW{0.0};  // mW
@@ -34,8 +36,8 @@ struct ControlUnitConfig {
 };
 
 struct SpecialRegisterBindingConfig {
-    int special;  // 0-31
-    int general;  // 0-31
+    int special{};  // 0-31
+    int general{};  // 0-31
 
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(SpecialRegisterBindingConfig)
@@ -98,7 +100,7 @@ struct SIMDFunctorConfig {
 };
 
 struct SIMDInstructionFunctorBindingConfig {
-    SIMDDataWidthConfig input_bit_width;
+    SIMDDataWidthConfig input_bit_width{};
     std::string functor_name{};
 
     [[nodiscard]] bool checkValid(unsigned int input_cnt) const;
@@ -122,8 +124,8 @@ struct SIMDInstructionConfig {
 };
 
 struct SIMDUnitConfig {
-    std::vector<SIMDFunctorConfig> functor_list;
-    std::vector<SIMDInstructionConfig> instruction_list;
+    std::vector<SIMDFunctorConfig> functor_list{};
+    std::vector<SIMDInstructionConfig> instruction_list{};
 
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(SIMDUnitConfig)
@@ -181,10 +183,10 @@ struct PimValueSparseConfig {
     int mask_bit_width{1};
 
     // Input process module config: PimUnit only has one
-    int latency_cycle{1};          // cycle
-    double static_power_mW{1.0};   // mW
-    double dynamic_power_mW{1.0};  // mW
-    int output_macro_cnt{1};       // The number of macros processed at a time
+    int latency_cycle{1};           // cycle
+    double static_power_mW{1.0};    // mW
+    double dynamic_power_mW{1.0};   // mW
+    int output_macro_group_cnt{1};  // The number of macros processed at a time
 
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(PimValueSparseConfig)
@@ -199,8 +201,21 @@ struct PimBitSparseConfig {
     double static_power_mW{1.0};   // mW
     double dynamic_power_mW{1.0};  // mW
 
+    // reg buffer
+    double reg_buffer_static_power_mW{1.0};   // mW
+    double reg_buffer_dynamic_power_mW{1.0};  // mW
+
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(PimBitSparseConfig)
+};
+
+struct AddressSpaceConfig {
+    int offset_byte{};  // byte
+    int size_byte{};    // byte
+
+    [[nodiscard]] int end() const;
+    [[nodiscard]] bool checkValid() const;
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(AddressSpaceConfig)
 };
 
 struct PimUnitConfig {
@@ -208,6 +223,9 @@ struct PimUnitConfig {
     int macro_total_cnt{};
     std::vector<int> macro_group_size_configurable_values{};
     PimMacroSizeConfig macro_size{};
+
+    // address space
+    AddressSpaceConfig address_space{};
 
     // modules config: ipu -> SRAM -> post process modules
     // ipu(input process unit) module
@@ -231,8 +249,8 @@ struct PimUnitConfig {
 };
 
 struct RAMConfig {
-    int size{1024};  // kB, total ram size
-    int width{16};   // Byte, the byte-width of single read and write data
+    int size_byte{1024};  // Byte, total ram size
+    int width_byte{16};   // Byte, the byte-width of single read and write data
 
     int write_latency_cycle{1};  // cycle
     int read_latency_cycle{1};   // cycle
@@ -241,15 +259,18 @@ struct RAMConfig {
     double write_dynamic_power_mW{1.0};  // mW
     double read_dynamic_power_mW{1.0};   // mW
 
+    bool has_image{false};     // whether RAM memory has an image file
+    std::string image_file{};  // RAM memory image file path
+
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(RAMConfig)
 };
 
 struct RegBufferConfig {
-    int size{1024};       // Byte, total register buffer size
-    int read_width{16};   // Byte, the max byte-width of single read data
-    int write_width{16};  // Byte, the max byte-width of single write data
-    int rw_unit{4};       // Byte, the min unit byte-width of single read and write data
+    int size_byte{1024};           // Byte, total register buffer size
+    int read_max_width_byte{16};   // Byte, the max byte-width of single read data
+    int write_max_width_byte{16};  // Byte, the max byte-width of single write data
+    int rw_min_unit_byte{4};       // Byte, the min unit byte-width of single read and write data
 
     double static_power_mW{1.0};               // mW
     double rw_dynamic_power_per_unit_mW{1.0};  // mW
@@ -258,20 +279,11 @@ struct RegBufferConfig {
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(RegBufferConfig)
 };
 
-struct LocalMemoryAddressSpaceConfig {
-    int offset;  // byte
-    int size;    // byte
-
-    [[nodiscard]] int end() const;
-    [[nodiscard]] bool checkValid() const;
-    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(LocalMemoryAddressSpaceConfig)
-};
-
 struct LocalMemoryConfig {
     std::string name{};
     LocalMemoryType type{LocalMemoryType::ram};
 
-    LocalMemoryAddressSpaceConfig addressing{};
+    AddressSpaceConfig addressing{};
 
     RAMConfig ram_config{};
     RegBufferConfig reg_buffer_config{};
@@ -281,7 +293,6 @@ struct LocalMemoryConfig {
 };
 
 struct LocalMemoryUnitConfig {
-    LocalMemoryAddressSpaceConfig pim_unit_address_space{};
     std::vector<LocalMemoryConfig> local_memory_list{};
 
     [[nodiscard]] bool checkValid() const;
@@ -311,9 +322,10 @@ struct ChipConfig {
 };
 
 struct SimConfig {
+    double period_ns{1.0};  // ns
     SimMode sim_mode{SimMode::run_one_round};
     DataMode data_mode{DataMode::real_data};
-    double sim_time{1.0};
+    double sim_time_ms{1.0};  // ms
 
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(SimConfig)

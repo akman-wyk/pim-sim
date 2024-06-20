@@ -45,3 +45,14 @@ add_executable(ChipTest "" src/main.cpp)
 add_dependencies(ChipTest pim-simulator)
 target_link_libraries(ChipTest PRIVATE pim-simulator)
 target_include_directories(ChipTest PRIVATE src)
+
+add_executable(ConfigTest test/config_test.cpp
+        src/config/config.h
+        src/config/config.cpp
+        src/config/config_enum.h
+        src/config/config_enum.cpp
+        src/util/macro_scope.h)
+add_dependencies(ConfigTest nlohmann_json fmt)
+target_link_libraries(ConfigTest PUBLIC nlohmann_json fmt)
+target_include_directories(ConfigTest PRIVATE src)
+target_include_directories(ConfigTest PUBLIC packages/header-only)

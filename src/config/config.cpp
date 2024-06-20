@@ -55,9 +55,9 @@ bool ControlUnitConfig::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ControlUnitConfig, controller_static_power_mW,
-                                                controller_dynamic_power_mW, fetch_static_power_mW,
-                                                fetch_dynamic_power_mW, decode_static_power_mW, decode_dynamic_power_mW)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(ControlUnitConfig, controller_static_power_mW,
+                                               controller_dynamic_power_mW, fetch_static_power_mW,
+                                               fetch_dynamic_power_mW, decode_static_power_mW, decode_dynamic_power_mW)
 
 // RegisterUnit
 bool SpecialRegisterBindingConfig::checkValid() const {
@@ -80,7 +80,7 @@ bool SpecialRegisterBindingConfig::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SpecialRegisterBindingConfig, special, general)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(SpecialRegisterBindingConfig, special, general)
 
 bool RegisterUnitConfig::checkValid() const {
     if (!check_not_negative(static_power_mW, dynamic_power_mW)) {
@@ -95,8 +95,8 @@ bool RegisterUnitConfig::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RegisterUnitConfig, static_power_mW, dynamic_power_mW,
-                                                special_register_binding)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(RegisterUnitConfig, static_power_mW, dynamic_power_mW,
+                                               special_register_binding)
 
 // ScalarUnit
 bool ScalarFunctorConfig::checkValid() const {
@@ -108,27 +108,31 @@ bool ScalarFunctorConfig::checkValid() const {
         std::cerr
             << fmt::format(
                    "ScalarFunctorConfig of '{}' not valid, 'static_power_mW, dynamic_power_mW' must be non-negative",
-                   inst_name)
+                   inst_name.c_str())
             << std::endl;
         return false;
     }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ScalarFunctorConfig, inst_name, static_power_mW, dynamic_power_mW)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(ScalarFunctorConfig, inst_name, static_power_mW, dynamic_power_mW)
 
 bool ScalarUnitConfig::checkValid() const {
-    if (const bool valid = check_not_negative(default_functor_static_power_mW, default_functor_dynamic_power_mW) &&
-                           check_vector_valid(functor_list);
-        !valid) {
+    if (!check_not_negative(default_functor_static_power_mW, default_functor_dynamic_power_mW)) {
+        std::cerr << "ScalarUnitConfig not valid, 'default_functor_static_power_mW, default_functor_dynamic_power_mW' "
+                     "must be non-negative"
+                  << std::endl;
+        return false;
+    }
+    if (!check_vector_valid(functor_list)) {
         std::cerr << "ScalarUnitConfig not valid" << std::endl;
         return false;
     }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ScalarUnitConfig, default_functor_static_power_mW,
-                                                default_functor_dynamic_power_mW, functor_list)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(ScalarUnitConfig, default_functor_static_power_mW,
+                                               default_functor_dynamic_power_mW, functor_list)
 
 // SIMDUnit
 bool SIMDDataWidthConfig::checkDataWidth(const int width) {
@@ -139,7 +143,7 @@ bool SIMDDataWidthConfig::inputBitWidthMatch(const pimsim::SIMDDataWidthConfig& 
     return input1 == other.input1 && input2 == other.input2 && input3 == other.input3 && input4 == other.input4;
 }
 
-bool SIMDDataWidthConfig::checkValid(const unsigned int input_cnt, bool check_output) const {
+bool SIMDDataWidthConfig::checkValid(const unsigned int input_cnt, const bool check_output) const {
     bool valid = checkDataWidth(input1);
     if (input_cnt >= 2) {
         valid = valid && checkDataWidth(input2);
@@ -162,7 +166,7 @@ bool SIMDDataWidthConfig::checkValid(const unsigned int input_cnt, bool check_ou
     return true;
 }
 
-inline void to_json(nlohmann::json& j, const SIMDDataWidthConfig& t) {
+void to_json(nlohmann::ordered_json& j, const SIMDDataWidthConfig& t) {
     if (t.input1 != 0) {
         j["input1"] = t.input1;
     }
@@ -180,14 +184,7 @@ inline void to_json(nlohmann::json& j, const SIMDDataWidthConfig& t) {
     }
 }
 
-inline void from_json(const nlohmann::json& j, SIMDDataWidthConfig& t) {
-    constexpr SIMDDataWidthConfig default_obj{};
-    t.input1 = j.value("input1", default_obj.input1);
-    t.input2 = j.value("input2", default_obj.input2);
-    t.input3 = j.value("input3", default_obj.input3);
-    t.input4 = j.value("input4", default_obj.input4);
-    t.output = j.value("output", default_obj.output);
-}
+DEFINE_TYPE_FROM_JSON_FUNCTION_WITH_DEFAULT(SIMDDataWidthConfig, input1, input2, input3, input4, output)
 
 bool SIMDFunctorConfig::checkValid() const {
     if (name.empty()) {
@@ -195,32 +192,32 @@ bool SIMDFunctorConfig::checkValid() const {
         return false;
     }
     if (input_cnt > SIMD_MAX_INPUT_NUM) {
-        std::cerr << fmt::format("SIMDFunctorConfig of '{}' not valid, 'input_cnt' must be not greater than {}", name,
-                                 SIMD_MAX_INPUT_NUM)
+        std::cerr << fmt::format("SIMDFunctorConfig of '{}' not valid, 'input_cnt' must be not greater than {}",
+                                 name.c_str(), SIMD_MAX_INPUT_NUM)
                   << std::endl;
         return false;
     }
     if (!check_positive(functor_cnt)) {
-        std::cerr << fmt::format("SIMDFunctorConfig of '{}' not valid, 'functor_cnt' must be positive", name)
+        std::cerr << fmt::format("SIMDFunctorConfig of '{}' not valid, 'functor_cnt' must be positive", name.c_str())
                   << std::endl;
         return false;
     }
     if (!check_not_negative(latency_cycle, static_power_per_functor_mW, dynamic_power_per_functor_mW)) {
         std::cerr << fmt::format("SIMDFunctorConfig of '{}' not valid, 'latency_cycle, static_power_per_functor_mW, "
                                  "dynamic_power_per_functor_mW' must be non-negative",
-                                 name)
+                                 name.c_str())
                   << std::endl;
         return false;
     }
     if (!data_bit_width.checkValid(input_cnt, true)) {
-        std::cerr << fmt::format("SIMDFunctorConfig of '{}' not valid", name) << std::endl;
+        std::cerr << fmt::format("SIMDFunctorConfig of '{}' not valid", name.c_str()) << std::endl;
         return false;
     }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SIMDFunctorConfig, name, data_bit_width, functor_cnt, latency_cycle,
-                                                static_power_per_functor_mW, dynamic_power_per_functor_mW)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(SIMDFunctorConfig, name, input_cnt, data_bit_width, functor_cnt,
+                                               latency_cycle, static_power_per_functor_mW, dynamic_power_per_functor_mW)
 
 bool SIMDInstructionFunctorBindingConfig::checkValid(const unsigned int input_cnt) const {
     if (functor_name.empty()) {
@@ -228,14 +225,15 @@ bool SIMDInstructionFunctorBindingConfig::checkValid(const unsigned int input_cn
         return false;
     }
     if (!input_bit_width.checkValid(input_cnt, false)) {
-        std::cerr << fmt::format("SIMDInstructionFunctorBindingConfig with functor '{}' not valid", functor_name)
+        std::cerr << fmt::format("SIMDInstructionFunctorBindingConfig with functor '{}' not valid",
+                                 functor_name.c_str())
                   << std::endl;
         return false;
     }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SIMDInstructionFunctorBindingConfig, input_bit_width, functor_name)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(SIMDInstructionFunctorBindingConfig, input_bit_width, functor_name)
 
 bool SIMDInstructionConfig::checkValid() const {
     if (name.empty()) {
@@ -244,23 +242,34 @@ bool SIMDInstructionConfig::checkValid() const {
     }
     if (input_cnt > SIMD_MAX_INPUT_NUM) {
         std::cerr << fmt::format("SIMDInstructionConfig of '{}' not valid, 'input_cnt' must be not greater than {}",
-                                 name, SIMD_MAX_INPUT_NUM)
+                                 name.c_str(), SIMD_MAX_INPUT_NUM)
                   << std::endl;
         return false;
     }
     if (opcode > SIMD_MAX_OPCODE) {
-        std::cerr << fmt::format("SIMDInstructionConfig of '{}' not valid, 'opcode' must be not greater than {}", name,
-                                 SIMD_MAX_OPCODE)
+        std::cerr << fmt::format("SIMDInstructionConfig of '{}' not valid, 'opcode' must be not greater than {}",
+                                 name.c_str(), SIMD_MAX_OPCODE)
                   << std::endl;
         return false;
     }
-    if (input1_type == +SIMDInputType::other || input2_type == +SIMDInputType::other ||
-        input3_type == +SIMDInputType::other || input4_type == +SIMDInputType::other) {
+
+    bool invalid_input_type = input1_type == +SIMDInputType::other;
+    if (input_cnt >= 2) {
+        invalid_input_type = invalid_input_type || input2_type == +SIMDInputType::other;
+    }
+    if (input_cnt >= 3) {
+        invalid_input_type = invalid_input_type || input3_type == +SIMDInputType::other;
+    }
+    if (input_cnt == 4) {
+        invalid_input_type = invalid_input_type || input4_type == +SIMDInputType::other;
+    }
+    if (invalid_input_type) {
         std::cerr << fmt::format("SIMDInstructionConfig of '{}' not valid, 'input_type' must be 'vector' or 'scalar'",
-                                 name)
+                                 name.c_str())
                   << std::endl;
         return false;
     }
+
     if (!check_vector_valid(functor_binding_list, input_cnt)) {
         std::cerr << "SIMDInstructionConfig not valid" << std::endl;
         return false;
@@ -268,8 +277,42 @@ bool SIMDInstructionConfig::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SIMDInstructionConfig, name, input_cnt, opcode, input1_type,
-                                                input2_type, input3_type, input4_type, functor_binding_list)
+void to_json(nlohmann::ordered_json& j, const SIMDInstructionConfig& t) {
+    j["name"] = t.name;
+    j["input_cnt"] = t.input_cnt;
+
+    std::stringstream ss;
+    ss << std::hex << t.opcode;
+    j["opcode"] = "0x" + ss.str();
+
+    j["input1_type"] = t.input1_type;
+    if (t.input_cnt >= 2) {
+        j["input2_type"] = t.input2_type;
+    }
+    if (t.input_cnt >= 3) {
+        j["input3_type"] = t.input3_type;
+    }
+    if (t.input_cnt == 4) {
+        j["input4_type"] = t.input4_type;
+    }
+    j["functor_binding_list"] = t.functor_binding_list;
+}
+
+void from_json(const nlohmann::ordered_json& j, SIMDInstructionConfig& t) {
+    const SIMDInstructionConfig default_obj{};
+    t.name = j.value("name", default_obj.name);
+    t.input_cnt = j.value("input_cnt", default_obj.input_cnt);
+
+    std::string opcode_str = j.value("opcode", "0x0");
+    opcode_str = opcode_str.substr(2);
+    t.opcode = std::stoul(opcode_str, nullptr, 16);
+
+    t.input1_type = j.value("input1_type", default_obj.input1_type);
+    t.input2_type = j.value("input2_type", default_obj.input2_type);
+    t.input3_type = j.value("input3_type", default_obj.input3_type);
+    t.input4_type = j.value("input4_type", default_obj.input4_type);
+    t.functor_binding_list = j.value("functor_binding_list", default_obj.functor_binding_list);
+}
 
 bool SIMDUnitConfig::checkValid() const {
     if (const bool valid = check_vector_valid(functor_list) && check_vector_valid(instruction_list); !valid) {
@@ -278,7 +321,7 @@ bool SIMDUnitConfig::checkValid() const {
     }
 
     // check instruction functor binding
-    std::unordered_map<std::string, const SIMDFunctorConfig&> functor_map;
+    std::unordered_map<std::string, SIMDFunctorConfig> functor_map;
     std::transform(functor_list.begin(), functor_list.end(), std::inserter(functor_map, functor_map.end()),
                    [](const SIMDFunctorConfig& functor) { return std::make_pair(functor.name, functor); });
     for (const auto& instruction : instruction_list) {
@@ -287,17 +330,17 @@ bool SIMDUnitConfig::checkValid() const {
             // check functor exist
             if (functor_found == functor_map.end()) {
                 std::cerr << "SIMDUnitConfig not valid, instruction functor binding error" << std::endl;
-                std::cerr << fmt::format("Functor '{}' not exist", functor_binding.functor_name) << std::endl;
+                std::cerr << fmt::format("\tFunctor '{}' not exist", functor_binding.functor_name.c_str()) << std::endl;
                 return false;
             }
 
-            auto& functor = functor_found->second;
+            const auto& functor = functor_found->second;
 
             // check input cnt match
             if (instruction.input_cnt != functor.input_cnt) {
                 std::cerr << "SIMDUnitConfig not valid, instruction functor binding error" << std::endl;
-                std::cerr << fmt::format("Input cnt not match between instruction '{}' functor '{}'", instruction.name,
-                                         functor.name)
+                std::cerr << fmt::format("\tInput count not match between instruction '{}' and functor '{}'",
+                                         instruction.name.c_str(), functor.name.c_str())
                           << std::endl;
                 return false;
             }
@@ -305,8 +348,8 @@ bool SIMDUnitConfig::checkValid() const {
             // check input bit width match
             if (!functor_binding.input_bit_width.inputBitWidthMatch(functor.data_bit_width)) {
                 std::cerr << "SIMDUnitConfig not valid, instruction functor binding error" << std::endl;
-                std::cerr << fmt::format("Input bit-width not match between instruction '{}' functor '{}'",
-                                         instruction.name, functor.name)
+                std::cerr << fmt::format("\tInput bit-width not match between instruction '{}' and functor '{}'",
+                                         instruction.name.c_str(), functor.name.c_str())
                           << std::endl;
                 return false;
             }
@@ -315,7 +358,7 @@ bool SIMDUnitConfig::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SIMDUnitConfig, functor_list, instruction_list)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(SIMDUnitConfig, functor_list, instruction_list)
 
 // PimUnit
 bool PimMacroSizeConfig::checkValid() const {
@@ -329,21 +372,21 @@ bool PimMacroSizeConfig::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PimMacroSizeConfig, compartment_cnt_per_macro,
-                                                element_cnt_per_compartment, row_cnt_per_element, bit_width_per_row)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimMacroSizeConfig, compartment_cnt_per_macro,
+                                               element_cnt_per_compartment, row_cnt_per_element, bit_width_per_row)
 
 bool PimModuleConfig::checkValid(const std::string& module_name) const {
     if (!check_not_negative(latency_cycle, static_power_mW, dynamic_power_mW)) {
         std::cerr << fmt::format("PimModuleConfig of '{}' not valid, 'latency_cycle, static_power_mW, "
                                  "dynamic_power_mW' must be non-negative",
-                                 module_name)
+                                 module_name.c_str())
                   << std::endl;
         return false;
     }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PimModuleConfig, latency_cycle, static_power_mW, dynamic_power_mW)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimModuleConfig, latency_cycle, static_power_mW, dynamic_power_mW)
 
 bool PimSRAMConfig::checkValid() const {
     if (as_mode == +PimSRAMAddressSpaceContinuousMode::other) {
@@ -360,12 +403,13 @@ bool PimSRAMConfig::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PimSRAMConfig, write_latency_cycle, read_latency_cycle, static_power_mW,
-                                                write_dynamic_power_per_bit_mW, read_dynamic_power_per_bit_mW)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimSRAMConfig, write_latency_cycle, read_latency_cycle, static_power_mW,
+                                               write_dynamic_power_per_bit_mW, read_dynamic_power_per_bit_mW)
 
 bool PimValueSparseConfig::checkValid() const {
-    if (!check_positive(mask_bit_width, output_macro_cnt)) {
-        std::cerr << "PimValueSparseConfig not valid, 'mask_bit_width, output_macro_cnt' must be positive" << std::endl;
+    if (!check_positive(mask_bit_width, output_macro_group_cnt)) {
+        std::cerr << "PimValueSparseConfig not valid, 'mask_bit_width, output_macro_group_cnt' must be positive"
+                  << std::endl;
         return false;
     }
     if (!check_not_negative(latency_cycle, static_power_mW, dynamic_power_mW)) {
@@ -377,25 +421,27 @@ bool PimValueSparseConfig::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PimValueSparseConfig, mask_bit_width, latency_cycle, static_power_mW,
-                                                dynamic_power_mW, output_macro_cnt)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimValueSparseConfig, mask_bit_width, latency_cycle, static_power_mW,
+                                               dynamic_power_mW, output_macro_group_cnt)
 
 bool PimBitSparseConfig::checkValid() const {
     if (!check_positive(mask_bit_width)) {
         std::cerr << "PimBitSparseConfig not valid, 'mask_bit_width' must be positive" << std::endl;
         return false;
     }
-    if (!check_not_negative(latency_cycle, static_power_mW, dynamic_power_mW)) {
-        std::cerr
-            << "PimBitSparseConfig not valid, 'latency_cycle, static_power_mW, dynamic_power_mW' must be non-negative"
-            << std::endl;
+    if (!check_not_negative(latency_cycle, static_power_mW, dynamic_power_mW, reg_buffer_static_power_mW,
+                            reg_buffer_dynamic_power_mW)) {
+        std::cerr << "PimBitSparseConfig not valid, 'latency_cycle, static_power_mW, dynamic_power_mW, "
+                     "reg_buffer_static_power_mW, reg_buffer_dynamic_power_mW' must be non-negative"
+                  << std::endl;
         return false;
     }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PimBitSparseConfig, mask_bit_width, latency_cycle, static_power_mW,
-                                                dynamic_power_mW)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimBitSparseConfig, mask_bit_width, latency_cycle, static_power_mW,
+                                               dynamic_power_mW, reg_buffer_static_power_mW,
+                                               reg_buffer_dynamic_power_mW)
 
 bool PimUnitConfig::checkValid() const {
     if (!check_positive(macro_total_cnt, macro_group_size_configurable_values)) {
@@ -403,22 +449,40 @@ bool PimUnitConfig::checkValid() const {
                   << std::endl;
         return false;
     }
-    if (const bool valid = macro_size.checkValid() && ipu.checkValid("ipu") && sram.checkValid() &&
-                           adder_tree.checkValid("adder_tree") && shift_adder.checkValid("shift_adder") &&
-                           result_adder.checkValid("result_adder") &&
+    for (int macro_group_size : macro_group_size_configurable_values) {
+        if (macro_total_cnt % macro_group_size != 0) {
+            std::cerr << fmt::format(
+                             "PimUnitConfig not valid, macro group size '{}' cannot divide macro total count '{}'",
+                             macro_group_size, macro_total_cnt)
+                      << std::endl;
+            return false;
+        }
+    }
+    if (const bool valid = macro_size.checkValid() && address_space.checkValid() && ipu.checkValid("ipu") &&
+                           sram.checkValid() && adder_tree.checkValid("adder_tree") &&
+                           shift_adder.checkValid("shift_adder") && result_adder.checkValid("result_adder") &&
                            (!value_sparse || value_sparse_config.checkValid()) &&
                            (!bit_sparse || bit_sparse_config.checkValid());
         !valid) {
         std::cerr << "PimUnitConfig not valid" << std::endl;
         return false;
     }
+
+    if (const int total_byte_size = macro_total_cnt * macro_size.compartment_cnt_per_macro *
+                                    macro_size.element_cnt_per_compartment * macro_size.row_cnt_per_element *
+                                    macro_size.bit_width_per_row / BYTE_TO_BIT;
+        total_byte_size > address_space.size_byte) {
+        std::cerr << "PimUnitConfig not valid, hardware size is greater than address space size" << std::endl;
+        return false;
+    }
     return true;
 }
 
-inline void to_json(nlohmann::json& j, const PimUnitConfig& t) {
+void to_json(nlohmann::ordered_json& j, const PimUnitConfig& t) {
     j["macro_total_cnt"] = t.macro_total_cnt;
     j["macro_group_size_configurable_values"] = t.macro_group_size_configurable_values;
     j["macro_size"] = t.macro_size;
+    j["address_space"] = t.address_space;
     j["ipu"] = t.ipu;
     j["sram"] = t.sram;
     j["adder_tree"] = t.adder_tree;
@@ -434,27 +498,18 @@ inline void to_json(nlohmann::json& j, const PimUnitConfig& t) {
     }
 }
 
-inline void from_json(const nlohmann::json& j, PimUnitConfig& t) {
-    const PimUnitConfig default_obj{};
-    t.macro_total_cnt = j.value("macro_total_cnt", default_obj.macro_total_cnt);
-    t.macro_group_size_configurable_values =
-        j.value("macro_group_size_configurable_values", default_obj.macro_group_size_configurable_values);
-    t.macro_size = j.value("macro_size", default_obj.macro_size);
-    t.ipu = j.value("ipu", default_obj.ipu);
-    t.sram = j.value("sram", default_obj.sram);
-    t.adder_tree = j.value("adder_tree", default_obj.adder_tree);
-    t.shift_adder = j.value("shift_adder", default_obj.shift_adder);
-    t.result_adder = j.value("result_adder", default_obj.result_adder);
-    t.value_sparse = j.value("value_sparse", default_obj.value_sparse);
-    t.value_sparse_config = j.value("value_sparse_config", default_obj.value_sparse_config);
-    t.bit_sparse = j.value("bit_sparse", default_obj.bit_sparse);
-    t.bit_sparse_config = j.value("bit_sparse_config", default_obj.bit_sparse_config);
-}
+DEFINE_TYPE_FROM_JSON_FUNCTION_WITH_DEFAULT(PimUnitConfig, macro_total_cnt, macro_group_size_configurable_values,
+                                            macro_size, address_space, ipu, sram, adder_tree, shift_adder, result_adder,
+                                            value_sparse, value_sparse_config, bit_sparse, bit_sparse_config)
 
 // LocalMemoryUnit
 bool RAMConfig::checkValid() const {
-    if (!check_positive(size, width)) {
-        std::cerr << "RAMConfig not valid, 'size, width' must be positive" << std::endl;
+    if (!check_positive(size_byte, width_byte)) {
+        std::cerr << "RAMConfig not valid, 'size_byte, width_byte' must be positive" << std::endl;
+        return false;
+    }
+    if (size_byte % width_byte != 0) {
+        std::cerr << "RAMConfig not valid, 'width_byte' cannot divide 'size_byte'" << std::endl;
         return false;
     }
     if (!check_not_negative(write_latency_cycle, read_latency_cycle, static_power_mW, write_dynamic_power_mW,
@@ -464,15 +519,47 @@ bool RAMConfig::checkValid() const {
                   << std::endl;
         return false;
     }
+    if (has_image && image_file.empty()) {
+        std::cerr << "RAMConfig not valid, 'image_file' must be non-empty when RAM has a image file." << std::endl;
+        return false;
+    }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RAMConfig, size, width, write_latency_cycle, read_latency_cycle,
-                                                static_power_mW, write_dynamic_power_mW, read_dynamic_power_mW)
+void to_json(nlohmann::ordered_json& j, const RAMConfig& t) {
+    j["size_byte"] = t.size_byte;
+    j["width_byte"] = t.width_byte;
+    j["write_latency_cycle"] = t.write_latency_cycle;
+    j["read_latency_cycle"] = t.read_latency_cycle;
+    j["static_power_mW"] = t.static_power_mW;
+    j["write_dynamic_power_mW"] = t.write_dynamic_power_mW;
+    j["read_dynamic_power_mW"] = t.read_dynamic_power_mW;
+    j["has_image"] = t.has_image;
+    if (t.has_image) {
+        j["image_file"] = t.image_file;
+    }
+}
+
+DEFINE_TYPE_FROM_JSON_FUNCTION_WITH_DEFAULT(RAMConfig, size_byte, width_byte, write_latency_cycle, read_latency_cycle,
+                                            static_power_mW, write_dynamic_power_mW, read_dynamic_power_mW, has_image,
+                                            image_file)
 
 bool RegBufferConfig::checkValid() const {
-    if (!check_positive(size, read_width, write_width, rw_unit)) {
-        std::cerr << "RegBufferConfig not valid, 'size, read_width, write_width, rw_unit' must be positive"
+    if (!check_positive(size_byte, read_max_width_byte, write_max_width_byte, rw_min_unit_byte)) {
+        std::cerr << "RegBufferConfig not valid, 'size_byte, read_max_width_byte, write_max_width_byte, "
+                     "rw_min_unit_byte' must be positive"
+                  << std::endl;
+        return false;
+    }
+    if (size_byte % read_max_width_byte != 0 || size_byte % write_max_width_byte != 0) {
+        std::cerr
+            << "RegBufferConfig not valid, 'read_max_width_byte' and 'write_max_width_byte' cannot divide 'size_byte'"
+            << std::endl;
+        return false;
+    }
+    if (read_max_width_byte % rw_min_unit_byte != 0 || write_max_width_byte % rw_min_unit_byte != 0) {
+        std::cerr << "RegBufferConfig not valid, 'rw_min_unit_byte' cannot divide 'read_max_width_byte' and "
+                     "'write_max_width_byte'"
                   << std::endl;
         return false;
     }
@@ -484,22 +571,22 @@ bool RegBufferConfig::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RegBufferConfig, size, read_width, write_width, rw_unit,
-                                                static_power_mW, rw_dynamic_power_per_unit_mW)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(RegBufferConfig, size_byte, read_max_width_byte, write_max_width_byte,
+                                               rw_min_unit_byte, static_power_mW, rw_dynamic_power_per_unit_mW)
 
-int LocalMemoryAddressSpaceConfig::end() const {
-    return offset + size;
+int AddressSpaceConfig::end() const {
+    return offset_byte + size_byte;
 }
 
-bool LocalMemoryAddressSpaceConfig::checkValid() const {
-    if (!check_not_negative(offset, size)) {
-        std::cerr << "LocalMemoryAddressSpaceConfig not valid, 'offset, size' must be non-negative" << std::endl;
+bool AddressSpaceConfig::checkValid() const {
+    if (!check_not_negative(offset_byte, size_byte)) {
+        std::cerr << "AddressSpaceConfig not valid, 'offset_byte, size_byte' must be non-negative" << std::endl;
         return false;
     }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(LocalMemoryAddressSpaceConfig, offset, size)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(AddressSpaceConfig, offset_byte, size_byte)
 
 bool LocalMemoryConfig::checkValid() const {
     if (name.empty()) {
@@ -507,7 +594,8 @@ bool LocalMemoryConfig::checkValid() const {
         return false;
     }
     if (type == +LocalMemoryType::other) {
-        std::cerr << fmt::format("LocalMemoryConfig of '{}' not valid, 'type' must be 'ram' or 'reg_buffer'", name)
+        std::cerr << fmt::format("LocalMemoryConfig of '{}' not valid, 'type' must be 'ram' or 'reg_buffer'",
+                                 name.c_str())
                   << std::endl;
         return false;
     }
@@ -515,13 +603,23 @@ bool LocalMemoryConfig::checkValid() const {
             addressing.checkValid() && ((type == +LocalMemoryType::ram && ram_config.checkValid()) ||
                                         (type == +LocalMemoryType::reg_buffer && reg_buffer_config.checkValid()));
         !valid) {
-        std::cerr << fmt::format("LocalMemoryConfig of '{}' not valid", name) << std::endl;
+        std::cerr << fmt::format("LocalMemoryConfig of '{}' not valid", name.c_str()) << std::endl;
         return false;
     }
+
+    if (const int hardware_size = (type == +LocalMemoryType::ram) ? ram_config.size_byte : reg_buffer_config.size_byte;
+        hardware_size > addressing.size_byte) {
+        std::cerr << fmt::format(
+                         "LocalMemoryConfig of '{}' not valid, hardware size is greater than address space size",
+                         name.c_str())
+                  << std::endl;
+        return false;
+    }
+
     return true;
 }
 
-inline void to_json(nlohmann::json& j, const LocalMemoryConfig& config) {
+void to_json(nlohmann::ordered_json& j, const LocalMemoryConfig& config) {
     j["name"] = config.name;
     j["type"] = config.type;
     j["addressing"] = config.addressing;
@@ -532,10 +630,10 @@ inline void to_json(nlohmann::json& j, const LocalMemoryConfig& config) {
     }
 }
 
-inline void from_json(const nlohmann::json& j, LocalMemoryConfig& config) {
+void from_json(const nlohmann::ordered_json& j, LocalMemoryConfig& config) {
     const LocalMemoryConfig default_obj{};
     config.name = j.value("name", default_obj.name);
-    config.type = j.value("type", LocalMemoryType::other);
+    config.type = j.value("type", default_obj.type);
     config.addressing = j.value("addressing", default_obj.addressing);
     if (config.type == +LocalMemoryType::ram) {
         config.ram_config = j.value("hardware_config", default_obj.ram_config);
@@ -549,30 +647,10 @@ bool LocalMemoryUnitConfig::checkValid() const {
         std::cerr << "LocalMemoryUnitConfig not valid" << std::endl;
         return false;
     }
-
-    // check if address space overlap
-    LocalMemoryConfig pim_memory_config{"PimUnit", LocalMemoryType::ram, pim_unit_address_space, {}, {}};
-    std::vector<const LocalMemoryConfig*> memory_check_list{&pim_memory_config};
-    std::transform(local_memory_list.begin(), local_memory_list.end(),
-                   std::inserter(memory_check_list, memory_check_list.end()),
-                   [](const LocalMemoryConfig& config) { return &config; });
-    std::sort(memory_check_list.begin(), memory_check_list.end(),
-              [](const LocalMemoryConfig* config1, const LocalMemoryConfig* config2) {
-                  return config1->addressing.offset < config2->addressing.offset;
-              });
-    for (int i = 0; i < memory_check_list.size() - 1; i++) {
-        if (memory_check_list[i]->addressing.end() > memory_check_list[i + 1]->addressing.offset) {
-            std::cerr << "LocalMemoryUnitConfig not valid" << std::endl;
-            std::cerr << fmt::format("There is an overlap in address space between local memory '{}' and '{}'",
-                                     memory_check_list[i]->name, memory_check_list[i + 1]->name)
-                      << std::endl;
-            return false;
-        }
-    }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(LocalMemoryUnitConfig, pim_unit_address_space, local_memory_list)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(LocalMemoryUnitConfig, local_memory_list)
 
 // CoreConfig
 bool CoreConfig::checkValid() const {
@@ -583,12 +661,32 @@ bool CoreConfig::checkValid() const {
         std::cerr << "CoreConfig not valid" << std::endl;
         return false;
     }
+
+    // check if address space overlap
+    LocalMemoryConfig pim_memory_config{"PimUnit", LocalMemoryType::ram, pim_unit_config.address_space, {}, {}};
+    std::vector<const LocalMemoryConfig*> memory_check_list{&pim_memory_config};
+    std::transform(local_memory_unit_config.local_memory_list.begin(), local_memory_unit_config.local_memory_list.end(),
+                   std::inserter(memory_check_list, memory_check_list.end()),
+                   [](const LocalMemoryConfig& config) { return &config; });
+    std::sort(memory_check_list.begin(), memory_check_list.end(),
+              [](const LocalMemoryConfig* config1, const LocalMemoryConfig* config2) {
+                  return config1->addressing.offset_byte < config2->addressing.offset_byte;
+              });
+    for (int i = 0; i < memory_check_list.size() - 1; i++) {
+        if (memory_check_list[i]->addressing.end() > memory_check_list[i + 1]->addressing.offset_byte) {
+            std::cerr << "CoreConfig not valid" << std::endl;
+            std::cerr << fmt::format("\tThere is an overlap in address space between local memory '{}' and '{}'",
+                                     memory_check_list[i]->name.c_str(), memory_check_list[i + 1]->name.c_str())
+                      << std::endl;
+            return false;
+        }
+    }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CoreConfig, control_unit_config, register_unit_config,
-                                                scalar_unit_config, simd_unit_config, pim_unit_config,
-                                                local_memory_unit_config)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(CoreConfig, control_unit_config, register_unit_config,
+                                               scalar_unit_config, simd_unit_config, pim_unit_config,
+                                               local_memory_unit_config)
 
 // ChipConfig
 bool ChipConfig::checkValid() const {
@@ -603,10 +701,14 @@ bool ChipConfig::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ChipConfig, core_cnt, core_config, global_memory_config)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(ChipConfig, core_cnt, core_config, global_memory_config)
 
 // SimConfig
 bool SimConfig::checkValid() const {
+    if (!check_positive(period_ns)) {
+        std::cerr << "SimConfig not valid, 'period_ns' must be positive" << std::endl;
+        return false;
+    }
     if (sim_mode == +SimMode::other) {
         std::cerr << "SimConfig not valid, 'sim_mode' must be 'run_until_time' or 'run_one_round'" << std::endl;
         return false;
@@ -615,14 +717,14 @@ bool SimConfig::checkValid() const {
         std::cerr << "SimConfig not valid, 'data_mode' must be 'real_data' or 'not_real_data'" << std::endl;
         return false;
     }
-    if (sim_mode == +SimMode::run_until_time && !check_positive(sim_time)) {
-        std::cerr << "SimConfig not valid, 'sim_time' must be positive" << std::endl;
+    if (sim_mode == +SimMode::run_until_time && !check_positive(sim_time_ms)) {
+        std::cerr << "SimConfig not valid, 'sim_time_ms' must be positive" << std::endl;
         return false;
     }
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SimConfig, sim_mode, data_mode, sim_time)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(SimConfig, period_ns, sim_mode, data_mode, sim_time_ms)
 
 // Config
 bool Config::checkValid() const {
@@ -633,6 +735,6 @@ bool Config::checkValid() const {
     return true;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Config, chip_config, sim_config)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(Config, chip_config, sim_config)
 
 }  // namespace pimsim
