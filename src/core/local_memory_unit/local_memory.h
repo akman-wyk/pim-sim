@@ -17,8 +17,7 @@ class LocalMemory : public BaseModule {
 public:
     SC_HAS_PROCESS(LocalMemory);
 
-    LocalMemory(const sc_core::sc_module_name& name, const LocalMemoryConfig& config, const SimConfig& sim_config,
-                Core* core, Clock* clk);
+    LocalMemory(const char* name, const LocalMemoryConfig& config, const SimConfig& sim_config, Core* core, Clock* clk);
 
     void access(MemoryAccessPayload* payload);
 

@@ -2,3 +2,4 @@
 cmake-build-debug/
 packages/
 doc/TODO.md
+build_pc

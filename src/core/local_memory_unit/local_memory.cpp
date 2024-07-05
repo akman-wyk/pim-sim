@@ -6,8 +6,8 @@
 
 namespace pimsim {
 
-LocalMemory::LocalMemory(const sc_core::sc_module_name &name, const pimsim::LocalMemoryConfig &config,
-                         const pimsim::SimConfig &sim_config, pimsim::Core *core, pimsim::Clock *clk)
+LocalMemory::LocalMemory(const char *name, const pimsim::LocalMemoryConfig &config, const pimsim::SimConfig &sim_config,
+                         pimsim::Core *core, pimsim::Clock *clk)
     : BaseModule(name, sim_config, core, clk)
     , config_(config)
     , ram(name, config.ram_config, sim_config, core, clk)
@@ -15,7 +15,7 @@ LocalMemory::LocalMemory(const sc_core::sc_module_name &name, const pimsim::Loca
     SC_THREAD(process)
 }
 
-void LocalMemory::access(MemoryAccessPayload* payload) {
+void LocalMemory::access(MemoryAccessPayload *payload) {
     access_queue_.emplace(payload);
     start_process_.notify();
 }

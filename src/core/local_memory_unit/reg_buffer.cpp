@@ -9,8 +9,8 @@
 
 namespace pimsim {
 
-RegBuffer::RegBuffer(const sc_core::sc_module_name &name, const pimsim::RegBufferConfig &config,
-                     const pimsim::SimConfig &sim_config, pimsim::Core *core, pimsim::Clock *clk)
+RegBuffer::RegBuffer(const char *name, const pimsim::RegBufferConfig &config, const pimsim::SimConfig &sim_config,
+                     pimsim::Core *core, pimsim::Clock *clk)
     : BaseModule(name, sim_config, core, clk), config_(config) {
     if (data_mode_ == +DataMode::real_data) {
         data_ = std::vector<uint8_t>(config_.size_byte, 0);

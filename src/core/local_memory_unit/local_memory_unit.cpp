@@ -8,7 +8,7 @@
 
 namespace pimsim {
 
-LocalMemoryUnit::LocalMemoryUnit(const sc_core::sc_module_name &name, const pimsim::LocalMemoryUnitConfig &config,
+LocalMemoryUnit::LocalMemoryUnit(const char *name, const pimsim::LocalMemoryUnitConfig &config,
                                  const pimsim::SimConfig &sim_config, pimsim::Core *core, pimsim::Clock *clk)
     : BaseModule(name, sim_config, core, clk), config_(config) {
     for (const auto &local_memory_config : config_.local_memory_list) {

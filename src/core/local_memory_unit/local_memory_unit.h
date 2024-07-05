@@ -16,8 +16,8 @@ class LocalMemoryUnit : public BaseModule {
 public:
     SC_HAS_PROCESS(LocalMemoryUnit);
 
-    LocalMemoryUnit(const sc_core::sc_module_name& name, const LocalMemoryUnitConfig& config,
-                    const SimConfig& sim_config, Core* core, Clock* clk);
+    LocalMemoryUnit(const char* name, const LocalMemoryUnitConfig& config, const SimConfig& sim_config, Core* core,
+                    Clock* clk);
 
     std::vector<uint8_t> read_data(const InstructionPayload& ins, int address_byte, int size_byte,
                                    sc_core::sc_event& finish_access);

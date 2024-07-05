@@ -9,8 +9,8 @@
 
 namespace pimsim {
 
-RAM::RAM(const sc_core::sc_module_name &name, const pimsim::RAMConfig &config, const pimsim::SimConfig &sim_config,
-         pimsim::Core *core, pimsim::Clock *clk)
+RAM::RAM(const char *name, const pimsim::RAMConfig &config, const pimsim::SimConfig &sim_config, pimsim::Core *core,
+         pimsim::Clock *clk)
     : BaseModule(name, sim_config, core, clk), config_(config) {
     if (data_mode_ == +DataMode::real_data) {
         initialData();

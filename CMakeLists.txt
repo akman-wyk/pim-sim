@@ -77,3 +77,8 @@ add_dependencies(ConfigTest nlohmann_json fmt)
 target_link_libraries(ConfigTest PUBLIC nlohmann_json fmt)
 target_include_directories(ConfigTest PRIVATE src)
 target_include_directories(ConfigTest PUBLIC packages/header-only)
+
+add_executable(LocalMemoryUnitTest "" test/local_memory_unit_test.cpp)
+add_dependencies(LocalMemoryUnitTest pim-simulator)
+target_link_libraries(LocalMemoryUnitTest PRIVATE pim-simulator)
+target_include_directories(LocalMemoryUnitTest PRIVATE src)
