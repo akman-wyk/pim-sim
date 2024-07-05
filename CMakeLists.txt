@@ -21,7 +21,28 @@ add_library(pim-simulator STATIC ""
         src/config/config_enum.h
         src/config/config_enum.cpp
         src/config/config_enum.h
-        src/util/macro_scope.h)
+        src/util/macro_scope.h
+        src/core/local_memory_unit/local_memory.cpp
+        src/core/local_memory_unit/local_memory.h
+        src/core/payload/payload.h
+        src/core/payload/payload_enum.h
+        src/base_component/base_module.cpp
+        src/base_component/base_module.h
+        src/base_component/clock.cpp
+        src/base_component/clock.h
+        src/base_component/energy_counter.cpp
+        src/base_component/energy_counter.h
+        src/util/reporter.cpp
+        src/util/reporter.h
+        src/core/local_memory_unit/ram.cpp
+        src/core/local_memory_unit/ram.h
+        src/util/util.cpp
+        src/util/util.h
+        src/core/local_memory_unit/reg_buffer.cpp
+        src/core/local_memory_unit/reg_buffer.h
+        src/core/local_memory_unit/local_memory_unit.cpp
+        src/core/local_memory_unit/local_memory_unit.h
+)
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE
         src
