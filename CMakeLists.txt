@@ -42,6 +42,13 @@ add_library(pim-simulator STATIC ""
         src/core/local_memory_unit/reg_buffer.h
         src/core/local_memory_unit/local_memory_unit.cpp
         src/core/local_memory_unit/local_memory_unit.h
+        src/core/simd_unit/simd_unit.cpp
+        src/core/simd_unit/simd_unit.h
+        src/base_component/fsm.h
+        src/base_component/submodule_socket.h
+        src/base_component/memory_socket.cpp
+        src/base_component/memory_socket.h
+        src/core/payload/payload.cpp
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE

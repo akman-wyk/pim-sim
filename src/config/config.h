@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -73,10 +74,7 @@ struct ScalarUnitConfig {
 
 struct SIMDDataWidthConfig {
     // data bit-width of input and output of SIMD functor
-    int input1{0};  // bit
-    int input2{0};  // bit
-    int input3{0};  // bit
-    int input4{0};  // bit
+    std::array<int, SIMD_MAX_INPUT_NUM> inputs{0, 0, 0, 0};
     int output{0};  // bit
 
     [[nodiscard]] static bool checkDataWidth(int width);
@@ -112,10 +110,8 @@ struct SIMDInstructionConfig {
     unsigned int input_cnt{2};
     unsigned int opcode{0x00};
 
-    SIMDInputType input1_type{SIMDInputType::vector};
-    SIMDInputType input2_type{SIMDInputType::vector};
-    SIMDInputType input3_type{SIMDInputType::vector};
-    SIMDInputType input4_type{SIMDInputType::vector};
+    std::array<SIMDInputType, SIMD_MAX_INPUT_NUM> inputs_type{SIMDInputType::vector, SIMDInputType::vector,
+                                                              SIMDInputType::vector, SIMDInputType::vector};
 
     std::vector<SIMDInstructionFunctorBindingConfig> functor_binding_list{};
 
@@ -124,6 +120,7 @@ struct SIMDInstructionConfig {
 };
 
 struct SIMDUnitConfig {
+    bool pipeline{false};
     std::vector<SIMDFunctorConfig> functor_list{};
     std::vector<SIMDInstructionConfig> instruction_list{};
 

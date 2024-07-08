@@ -140,20 +140,13 @@ bool SIMDDataWidthConfig::checkDataWidth(const int width) {
 }
 
 bool SIMDDataWidthConfig::inputBitWidthMatch(const pimsim::SIMDDataWidthConfig& other) const {
-    return input1 == other.input1 && input2 == other.input2 && input3 == other.input3 && input4 == other.input4;
+    return inputs == other.inputs;
 }
 
 bool SIMDDataWidthConfig::checkValid(const unsigned int input_cnt, const bool check_output) const {
-    bool valid = checkDataWidth(input1);
-    if (input_cnt >= 2) {
-        valid = valid && checkDataWidth(input2);
-    }
-    if (input_cnt >= 3) {
-        valid = valid && checkDataWidth(input3);
-    }
-    if (input_cnt == 4) {
-        valid = valid && checkDataWidth(input4);
-    }
+    bool valid = std::transform_reduce(
+        inputs.begin(), inputs.begin() + input_cnt, true, [](bool v1, bool v2) { return v1 && v2; },
+        [](int input_bit_width) { return checkDataWidth(input_bit_width); });
     if (check_output) {
         valid = valid && checkDataWidth(output);
     }
@@ -167,24 +160,22 @@ bool SIMDDataWidthConfig::checkValid(const unsigned int input_cnt, const bool ch
 }
 
 void to_json(nlohmann::ordered_json& j, const SIMDDataWidthConfig& t) {
-    if (t.input1 != 0) {
-        j["input1"] = t.input1;
-    }
-    if (t.input2 != 0) {
-        j["input2"] = t.input2;
-    }
-    if (t.input3 != 0) {
-        j["input3"] = t.input3;
-    }
-    if (t.input4 != 0) {
-        j["input4"] = t.input4;
+    for (int i = 0; i < SIMD_MAX_INPUT_NUM; i++) {
+        if (t.inputs[i] != 0) {
+            j[fmt::format("input{}", i + 1)] = t.inputs[i];
+        }
     }
     if (t.output != 0) {
         j["output"] = t.output;
     }
 }
 
-DEFINE_TYPE_FROM_JSON_FUNCTION_WITH_DEFAULT(SIMDDataWidthConfig, input1, input2, input3, input4, output)
+void from_json(const nlohmann::ordered_json& nlohmann_json_j, SIMDDataWidthConfig& nlohmann_json_t) {
+    for (int i = 0; i < SIMD_MAX_INPUT_NUM; i++) {
+        nlohmann_json_t.inputs[i] = nlohmann_json_j.value(fmt::format("input{}", i + 1), 0);
+    }
+    nlohmann_json_t.output = nlohmann_json_j.value("output", 0);
+}
 
 bool SIMDFunctorConfig::checkValid() const {
     if (name.empty()) {
@@ -253,17 +244,10 @@ bool SIMDInstructionConfig::checkValid() const {
         return false;
     }
 
-    bool invalid_input_type = input1_type == +SIMDInputType::other;
-    if (input_cnt >= 2) {
-        invalid_input_type = invalid_input_type || input2_type == +SIMDInputType::other;
-    }
-    if (input_cnt >= 3) {
-        invalid_input_type = invalid_input_type || input3_type == +SIMDInputType::other;
-    }
-    if (input_cnt == 4) {
-        invalid_input_type = invalid_input_type || input4_type == +SIMDInputType::other;
-    }
-    if (invalid_input_type) {
+    if (bool invalid_input_type = std::transform_reduce(
+            inputs_type.begin(), inputs_type.begin() + input_cnt, false, [](bool v1, bool v2) { return v1 || v2; },
+            [](SIMDInputType input_type) { return input_type == +SIMDInputType::other; });
+        invalid_input_type) {
         std::cerr << fmt::format("SIMDInstructionConfig of '{}' not valid, 'input_type' must be 'vector' or 'scalar'",
                                  name.c_str())
                   << std::endl;
@@ -285,15 +269,8 @@ void to_json(nlohmann::ordered_json& j, const SIMDInstructionConfig& t) {
     ss << std::hex << t.opcode;
     j["opcode"] = "0x" + ss.str();
 
-    j["input1_type"] = t.input1_type;
-    if (t.input_cnt >= 2) {
-        j["input2_type"] = t.input2_type;
-    }
-    if (t.input_cnt >= 3) {
-        j["input3_type"] = t.input3_type;
-    }
-    if (t.input_cnt == 4) {
-        j["input4_type"] = t.input4_type;
+    for (unsigned int i = 0; i < t.input_cnt; i++) {
+        j[fmt::format("input{}_type", i + 1)] = t.inputs_type[i];
     }
     j["functor_binding_list"] = t.functor_binding_list;
 }
@@ -307,10 +284,9 @@ void from_json(const nlohmann::ordered_json& j, SIMDInstructionConfig& t) {
     opcode_str = opcode_str.substr(2);
     t.opcode = std::stoul(opcode_str, nullptr, 16);
 
-    t.input1_type = j.value("input1_type", default_obj.input1_type);
-    t.input2_type = j.value("input2_type", default_obj.input2_type);
-    t.input3_type = j.value("input3_type", default_obj.input3_type);
-    t.input4_type = j.value("input4_type", default_obj.input4_type);
+    for (unsigned int i = 0; i < SIMD_MAX_INPUT_NUM; i++) {
+        t.inputs_type[i] = j.value(fmt::format("input{}_type", i + 1), SIMDInputType::vector);
+    }
     t.functor_binding_list = j.value("functor_binding_list", default_obj.functor_binding_list);
 }
 
@@ -358,7 +334,7 @@ bool SIMDUnitConfig::checkValid() const {
     return true;
 }
 
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(SIMDUnitConfig, functor_list, instruction_list)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(SIMDUnitConfig, pipeline, functor_list, instruction_list)
 
 // PimUnit
 bool PimMacroSizeConfig::checkValid() const {
