@@ -17,14 +17,14 @@ LocalMemoryUnit::LocalMemoryUnit(const char *name, const pimsim::LocalMemoryUnit
     }
 }
 
-std::vector<uint8_t> LocalMemoryUnit::read_data(const pimsim::InstructionPayload *ins, int address_byte, int size_byte,
+std::vector<uint8_t> LocalMemoryUnit::read_data(const pimsim::InstructionPayload &ins, int address_byte, int size_byte,
                                                 sc_core::sc_event &finish_access) {
     auto *local_memory = getLocalMemoryByAddress(address_byte);
     if (local_memory == nullptr) {
         std::cerr
             << fmt::format(
                    "Invalid memory read with ins NO.'{}': address does not match any local memory's address space",
-                   ins->pc)
+                   ins.pc)
             << std::endl;
         return {};
     }
@@ -40,14 +40,14 @@ std::vector<uint8_t> LocalMemoryUnit::read_data(const pimsim::InstructionPayload
     return std::move(payload.data);
 }
 
-void LocalMemoryUnit::write_data(const pimsim::InstructionPayload *ins, int address_byte, int size_byte,
+void LocalMemoryUnit::write_data(const pimsim::InstructionPayload &ins, int address_byte, int size_byte,
                                  std::vector<uint8_t> data, sc_core::sc_event &finish_access) {
     auto *local_memory = getLocalMemoryByAddress(address_byte);
     if (local_memory == nullptr) {
         std::cerr
             << fmt::format(
                    "Invalid memory write with ins NO.'{}': address does not match any local memory's address space",
-                   ins->pc)
+                   ins.pc)
             << std::endl;
         return;
     }
@@ -60,6 +60,14 @@ void LocalMemoryUnit::write_data(const pimsim::InstructionPayload *ins, int addr
                                 .finish_access = finish_access};
     local_memory->access(&payload);
     wait(payload.finish_access);
+}
+
+EnergyReporter LocalMemoryUnit::getEnergyReporter() {
+    EnergyReporter local_memory_unit_reporter;
+    for (auto *local_memory : local_memory_list_) {
+        local_memory_unit_reporter.addSubModule(local_memory->getName(), local_memory->getEnergyReporter());
+    }
+    return std::move(local_memory_unit_reporter);
 }
 
 LocalMemory *LocalMemoryUnit::getLocalMemoryByAddress(int address_byte) {

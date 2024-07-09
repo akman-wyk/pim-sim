@@ -25,14 +25,13 @@ struct SIMDInputOutputInfo {
 };
 
 struct SIMDInstructionInfo {
-    const InstructionPayload* ins{nullptr};
+    InstructionPayload ins{};
 
     std::vector<SIMDInputOutputInfo> scalar_inputs{};
     std::vector<SIMDInputOutputInfo> vector_inputs{};
     SIMDInputOutputInfo output{};
 
     const SIMDFunctorConfig* functor_config{nullptr};
-    bool use_pipeline{false};
 };
 
 struct SIMDBatchInfo {
@@ -68,9 +67,9 @@ private:
     std::pair<const SIMDInstructionConfig*, const SIMDFunctorConfig*> getSIMDInstructionAndFunctor(
         const SIMDInsPayload& payload);
 
-    SIMDInstructionInfo decodeAndGetInstructionInfo(const SIMDInstructionConfig* instruction,
-                                                    const SIMDFunctorConfig* functor,
-                                                    const SIMDInsPayload& payload) const;
+    static SIMDInstructionInfo decodeAndGetInstructionInfo(const SIMDInstructionConfig* instruction,
+                                                           const SIMDFunctorConfig* functor,
+                                                           const SIMDInsPayload& payload);
 
 public:
     sc_core::sc_in<SIMDInsPayload> id_simd_payload_port_;
@@ -90,7 +89,8 @@ private:
 
     MemorySocket local_memory_socket_;
 
-    sc_core::sc_event next_batch;
+    sc_core::sc_event cur_ins_next_batch_;
+    sc_core::sc_event cur_ins_finish_;
     SubmoduleSocket<SIMDSubmodulePayload> read_submodule_socket_{};
     SubmoduleSocket<SIMDSubmodulePayload> execute_submodule_socket_{};
     SubmoduleSocket<SIMDSubmodulePayload> write_submodule_socket_{};

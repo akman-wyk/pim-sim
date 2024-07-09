@@ -12,10 +12,16 @@ BaseModule::BaseModule(const char* name, const SimConfig& sim_config, Core* core
     , sim_mode_(sim_config.sim_mode)
     , data_mode_(sim_config.data_mode)
     , core_(core)
-    , clk_(clk) {}
+    , clk_(clk)
+    , name(name) {}
 
 EnergyReporter BaseModule::getEnergyReporter() {
     return EnergyReporter{energy_counter_};
 }
+
+const std::string& BaseModule::getName() const {
+    return name;
+}
+
 
 }  // namespace pimsim

@@ -24,6 +24,8 @@ public:
     [[nodiscard]] int getAddressSpaceBegin() const;
     [[nodiscard]] int getAddressSpaceEnd() const;
 
+    EnergyReporter getEnergyReporter() override;
+
 private:
     [[noreturn]] void process();
 

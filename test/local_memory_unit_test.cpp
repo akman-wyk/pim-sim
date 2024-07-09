@@ -57,6 +57,7 @@ int sc_main(int argc, char* argv[]) {
     std::ifstream ifs;
     ifs.open(CONFIG_FILE);
     nlohmann::ordered_json j = nlohmann::ordered_json::parse(ifs);
+    ifs.close();
 
     auto config = j.get<Config>();
     if (!config.checkValid()) {

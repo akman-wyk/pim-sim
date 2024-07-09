@@ -49,6 +49,7 @@ add_library(pim-simulator STATIC ""
         src/base_component/memory_socket.cpp
         src/base_component/memory_socket.h
         src/core/payload/payload.cpp
+        src/util/log.h
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE
@@ -89,3 +90,8 @@ add_executable(LocalMemoryUnitTest "" test/local_memory_unit_test.cpp)
 add_dependencies(LocalMemoryUnitTest pim-simulator)
 target_link_libraries(LocalMemoryUnitTest PRIVATE pim-simulator)
 target_include_directories(LocalMemoryUnitTest PRIVATE src)
+
+add_executable(SIMDUnitTest "" test/simd_unit_test.cpp)
+add_dependencies(SIMDUnitTest pim-simulator)
+target_link_libraries(SIMDUnitTest PRIVATE pim-simulator)
+target_include_directories(SIMDUnitTest PRIVATE src)

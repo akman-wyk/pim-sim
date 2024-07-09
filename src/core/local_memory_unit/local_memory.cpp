@@ -28,6 +28,14 @@ int LocalMemory::getAddressSpaceEnd() const {
     return config_.addressing.offset_byte + config_.addressing.size_byte;
 }
 
+EnergyReporter LocalMemory::getEnergyReporter() {
+    if (config_.type == +LocalMemoryType::ram) {
+        return ram.getEnergyReporter();
+    } else {
+        return reg_buffer.getEnergyReporter();
+    }
+}
+
 void LocalMemory::process() {
     while (true) {
         while (access_queue_.empty()) {

@@ -6,8 +6,8 @@
 
 namespace pimsim {
 
-Clock::Clock(const sc_core::sc_module_name& name11111111, double period)
-    : sc_core::sc_module(name11111111), period_(period) {
+Clock::Clock(const sc_core::sc_module_name& name, double period)
+    : sc_core::sc_module(name), period_(period) {
     SC_THREAD(process)
 
     SC_METHOD(endPosEdge)

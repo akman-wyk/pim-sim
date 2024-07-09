@@ -8,26 +8,32 @@
 #include <sstream>
 #include <vector>
 
+#include "config/config.h"
 #include "payload_enum.h"
 #include "systemc.h"
 #include "util/macro_scope.h"
-#include "config/config.h"
 
 namespace pimsim {
 
+std::stringstream& operator<<(std::stringstream& out, const std::array<int, 4>& arr);
+
 struct InstructionPayload {
-    int pc;
+    int pc{-1};
 
     [[nodiscard]] bool valid() const;
 
-    friend std::ostream& operator<<(std::ostream& out, const InstructionPayload* ins) {
-        out << "pc: " << ins->pc << "\n";
+    friend std::ostream& operator<<(std::ostream& out, const InstructionPayload& ins) {
+        out << "pc: " << ins.pc << "\n";
         return out;
+    }
+
+    bool operator==(const InstructionPayload& another) const {
+        return pc == another.pc;
     }
 };
 
 struct MemoryAccessPayload {
-    const InstructionPayload* ins;
+    InstructionPayload ins{};
 
     MemoryAccessType access_type;
     int address_byte;  // byte
@@ -36,21 +42,10 @@ struct MemoryAccessPayload {
     sc_core::sc_event& finish_access;
 };
 
-template <class V, int N>
-std::ostream& operator<<(std::ostream& out, const std::array<V, N>& arr) {
-    if (!arr.empty()) {
-        out << arr[0];
-        for (int i = 1; i < arr.size(); i++) {
-            out << ", " << arr[i];
-        }
-    }
-    return out;
-}
-
 struct SIMDInsPayload {
     MAKE_SIGNAL_TYPE_TRACE_STREAM(SIMDInsPayload)
 
-    const InstructionPayload* ins{nullptr};
+    InstructionPayload ins{};
 
     // compute type info
     unsigned int input_cnt{2};
@@ -67,11 +62,7 @@ struct SIMDInsPayload {
     // vector length info
     int len{0};
 
-    // instruction's execution can be pipelined
-    bool pipelined{false};
-
-    DEFINE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_width, output_bit_width,
-                                 inputs_address_byte, output_address_byte, len, pipelined)
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload)
 };
 
 }  // namespace pimsim

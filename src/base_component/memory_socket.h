@@ -19,9 +19,9 @@ public:
 
     void bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit);
 
-    std::vector<uint8_t> readData(const InstructionPayload* ins, int address_byte, int size_byte);
+    std::vector<uint8_t> readData(const InstructionPayload& ins, int address_byte, int size_byte);
 
-    void writeData(const InstructionPayload* ins, int address_byte, int size_byte, std::vector<uint8_t> data);
+    void writeData(const InstructionPayload& ins, int address_byte, int size_byte, std::vector<uint8_t> data);
 
 private:
     LocalMemoryUnit* local_memory_unit_{nullptr};

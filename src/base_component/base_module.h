@@ -19,6 +19,8 @@ public:
 
     virtual EnergyReporter getEnergyReporter();
 
+    const std::string& getName() const;
+
 protected:
     const double period_ns_;
     const SimMode sim_mode_;
@@ -28,6 +30,9 @@ protected:
     Clock* clk_;
 
     EnergyCounter energy_counter_;
+
+private:
+    const std::string name;
 };
 
 }  // namespace pimsim

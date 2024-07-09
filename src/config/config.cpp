@@ -285,7 +285,7 @@ void from_json(const nlohmann::ordered_json& j, SIMDInstructionConfig& t) {
     t.opcode = std::stoul(opcode_str, nullptr, 16);
 
     for (unsigned int i = 0; i < SIMD_MAX_INPUT_NUM; i++) {
-        t.inputs_type[i] = j.value(fmt::format("input{}_type", i + 1), SIMDInputType::vector);
+        t.inputs_type[i] = j.value(fmt::format("input{}_type", i + 1), default_obj.inputs_type[i]);
     }
     t.functor_binding_list = j.value("functor_binding_list", default_obj.functor_binding_list);
 }

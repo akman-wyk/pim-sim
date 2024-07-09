@@ -21,7 +21,7 @@ RegBuffer::RegBuffer(const char *name, const pimsim::RegBufferConfig &config, co
 
 sc_core::sc_time RegBuffer::accessAndGetDelay(pimsim::MemoryAccessPayload &payload) {
     if (payload.address_byte < 0 || payload.address_byte + payload.size_byte > config_.size_byte) {
-        std::cerr << fmt::format("Invalid memory access with ins NO.'{}': address overflow", payload.ins->pc)
+        std::cerr << fmt::format("Invalid memory access with ins NO.'{}': address overflow", payload.ins.pc)
                   << std::endl;
         return {0.0, sc_core::SC_NS};
     }

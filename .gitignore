@@ -1,5 +1,8 @@
 .idea/
 cmake-build-debug/
+cmake-build-release/
 packages/
 doc/TODO.md
 build_pc
+build_laptop
+report

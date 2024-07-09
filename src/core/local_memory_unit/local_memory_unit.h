@@ -19,11 +19,13 @@ public:
     LocalMemoryUnit(const char* name, const LocalMemoryUnitConfig& config, const SimConfig& sim_config, Core* core,
                     Clock* clk);
 
-    std::vector<uint8_t> read_data(const InstructionPayload* ins, int address_byte, int size_byte,
+    std::vector<uint8_t> read_data(const InstructionPayload& ins, int address_byte, int size_byte,
                                    sc_core::sc_event& finish_access);
 
-    void write_data(const InstructionPayload* ins, int address_byte, int size_byte, std::vector<uint8_t> data,
+    void write_data(const InstructionPayload& ins, int address_byte, int size_byte, std::vector<uint8_t> data,
                     sc_core::sc_event& finish_access);
+
+    EnergyReporter getEnergyReporter() override;
 
 private:
     LocalMemory* getLocalMemoryByAddress(int address_byte);

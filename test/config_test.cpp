@@ -20,11 +20,11 @@ Config get_config() {
         SpecialRegisterBindingConfig{});
     config.chip_config.core_config.scalar_unit_config.functor_list.emplace_back(ScalarFunctorConfig{});
 
-    SIMDDataWidthConfig functor_data_width_config{.input1 = 32, .input2 = 32, .output = 8};
+    SIMDDataWidthConfig functor_data_width_config{.inputs = {32, 32, 0, 0}, .output = 8};
     SIMDFunctorConfig functor_config{.name = "quantify", .data_bit_width = functor_data_width_config};
     config.chip_config.core_config.simd_unit_config.functor_list.emplace_back(functor_config);
 
-    SIMDDataWidthConfig input_data_width_config{.input1 = 32, .input2 = 32};
+    SIMDDataWidthConfig input_data_width_config{.inputs = {32, 32, 0, 0}};
     SIMDInstructionFunctorBindingConfig binding_config{.input_bit_width = input_data_width_config,
                                                        .functor_name = "quantify"};
     SIMDInstructionConfig instruction_config{.name = "vqv", .input_cnt = 2};

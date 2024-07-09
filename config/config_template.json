@@ -32,6 +32,7 @@
         ]
       },
       "simd_unit_config": {
+        "pipeline": false,
         "functor_list": [
           {
             "name": "quantify",
@@ -42,6 +43,18 @@
               "output": 4
             },
             "functor_cnt": 32,
+            "latency_cycle": 1,
+            "static_power_per_functor_mW": 1.0,
+            "dynamic_power_per_functor_mW": 1.0
+          },
+          {
+            "name": "test",
+            "input_cnt": 1,
+            "data_bit_width": {
+              "input1": 8,
+              "output": 8
+            },
+            "functor_cnt": 16,
             "latency_cycle": 1,
             "static_power_per_functor_mW": 1.0,
             "dynamic_power_per_functor_mW": 1.0
@@ -61,6 +74,20 @@
                   "input2": 16
                 },
                 "functor_name": "quantify"
+              }
+            ]
+          },
+          {
+            "name": "test",
+            "input_cnt": 1,
+            "opcode": "0x00",
+            "input1_type": "vector",
+            "functor_binding_list": [
+              {
+                "input_bit_width": {
+                  "input1": 8
+                },
+                "functor_name": "test"
               }
             ]
           }
@@ -147,9 +174,28 @@
           },
           {
             "name": "l2",
-            "type": "reg_buffer",
+            "type": "ram",
             "addressing": {
               "offset_byte": 2048,
+              "size_byte": 1024
+            },
+            "hardware_config": {
+              "size_byte": 1024,
+              "width_byte": 16,
+              "write_latency_cycle": 1,
+              "read_latency_cycle": 1,
+              "static_power_mW": 1.0,
+              "write_dynamic_power_mW": 1.0,
+              "read_dynamic_power_mW": 1.0,
+              "has_image": false,
+              "image_file": ""
+            }
+          },
+          {
+            "name": "l3",
+            "type": "reg_buffer",
+            "addressing": {
+              "offset_byte": 3072,
               "size_byte": 1024
             },
             "hardware_config": {
@@ -175,9 +221,9 @@
     }
   },
   "sim_config": {
-    "period_ns": 1.0,
+    "period_ns": 5.0,
     "sim_mode": "run_until_time",
-    "data_mode": "real_data",
+    "data_mode": "not_real_data",
     "sim_time_ms": 1.0
   }
 }
