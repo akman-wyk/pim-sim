@@ -21,7 +21,7 @@ SIMDUnit::SIMDUnit(const char* name, const SIMDUnitConfig& config, const SimConf
     SC_METHOD(checkSIMDInst)
     sensitive << id_simd_payload_port_;
 
-    SC_THREAD(process)
+    SC_THREAD(processIssue)
     SC_THREAD(processReadSubmodule)
     SC_THREAD(processExecuteSubmodule)
     SC_THREAD(processWriteSubmodule)
@@ -48,7 +48,7 @@ void SIMDUnit::checkSIMDInst() {
     }
 }
 
-void SIMDUnit::process() {
+void SIMDUnit::processIssue() {
     while (true) {
         wait(simd_fsm_.start_exec_);
 
@@ -66,9 +66,12 @@ void SIMDUnit::process() {
         int vector_total_len = ins_info.vector_inputs.empty() ? 1 : payload.len;
         int process_times = IntDivCeil(vector_total_len, functor->functor_cnt);
 
-        if (!config_.pipeline) {
-            write_submodule_socket_.waitUtilFinish();
+        SIMDInsDataConflictPayload data_conflict_payload{.pc = ins_info.ins.pc};
+        for (int i = 0; i < ins_info.vector_inputs.size(); i++) {
+            data_conflict_payload.inputs_address_byte[i] = ins_info.vector_inputs[i].start_address_byte;
         }
+        data_conflict_payload.output_address_byte = ins_info.output.start_address_byte;
+        data_conflict_port_.write(data_conflict_payload);
 
         for (int batch = 0; batch < process_times; batch++) {
             read_submodule_socket_.waitUtilFinish();
@@ -92,10 +95,6 @@ void SIMDUnit::process() {
             if (!last_batch) {
                 wait(cur_ins_next_batch_);
             }
-        }
-
-        if (!config_.pipeline) {
-            wait(cur_ins_finish_);
         }
 
         busy_port_.write(false);
@@ -134,7 +133,7 @@ void SIMDUnit::processReadSubmodule() {
         execute_submodule_socket_.payload.batch_info = payload.batch_info;
 
         execute_submodule_socket_.start_exec.notify();
-        if (config_.pipeline) {
+        if (payload.ins_info.use_pipeline && !payload.batch_info.last_batch) {
             cur_ins_next_batch_.notify();
         }
         read_submodule_socket_.finish_exec.notify();
@@ -179,7 +178,8 @@ void SIMDUnit::processWriteSubmodule() {
         LOG(fmt::format("simd write start, pc: {}, batch: {}", payload.ins_info.ins.pc, payload.batch_info.batch_num));
 
         if (payload.batch_info.last_batch) {
-            cur_ins_finish_.notify();
+            finish_ins_port_.write(true);
+            finish_ins_pc_port_.write(payload.ins_info.ins.pc);
         }
 
         int address_byte = payload.ins_info.output.start_address_byte +
@@ -190,16 +190,15 @@ void SIMDUnit::processWriteSubmodule() {
 
         LOG(fmt::format("simd write end, pc: {}, batch: {}", payload.ins_info.ins.pc, payload.batch_info.batch_num));
 
-        if (payload.batch_info.last_batch) {
-            finish_port_.write(true);
-            finish_pc_port_.write(payload.ins_info.ins.pc);
-        }
-
-        if (!config_.pipeline) {
+        if (!payload.ins_info.use_pipeline && !payload.batch_info.last_batch) {
             cur_ins_next_batch_.notify();
         }
         write_submodule_socket_.finish_exec.notify();
         write_submodule_socket_.busy = false;
+
+        if (payload.batch_info.last_batch && isEndPC(payload.ins_info.ins.pc) && sim_mode_ == +SimMode::run_one_round) {
+            finish_run_.write(true);
+        }
     }
 }
 
@@ -238,7 +237,7 @@ std::pair<const SIMDInstructionConfig*, const SIMDFunctorConfig*> SIMDUnit::getS
 
 SIMDInstructionInfo SIMDUnit::decodeAndGetInstructionInfo(const SIMDInstructionConfig* instruction,
                                                           const SIMDFunctorConfig* functor,
-                                                          const SIMDInsPayload& payload) {
+                                                          const SIMDInsPayload& payload) const {
     SIMDInputOutputInfo output = {payload.output_bit_width, payload.output_address_byte};
     std::vector<SIMDInputOutputInfo> vector_inputs;
     std::vector<SIMDInputOutputInfo> scalar_inputs;
@@ -252,11 +251,14 @@ SIMDInstructionInfo SIMDUnit::decodeAndGetInstructionInfo(const SIMDInstructionC
         }
     }
 
+    bool use_pipeline = config_.pipeline && payload.pipelined;
+
     return {.ins = payload.ins,
             .scalar_inputs = scalar_inputs,
             .vector_inputs = vector_inputs,
             .output = output,
-            .functor_config = functor};
+            .functor_config = functor,
+            .use_pipeline = use_pipeline};
 }
 
 }  // namespace pimsim

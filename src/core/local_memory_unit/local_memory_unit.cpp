@@ -70,6 +70,16 @@ EnergyReporter LocalMemoryUnit::getEnergyReporter() {
     return std::move(local_memory_unit_reporter);
 }
 
+int LocalMemoryUnit::getLocalMemoryIdByAddress(int address_byte) const {
+    for (int i = 0; i < local_memory_list_.size(); i++) {
+        auto *local_memory = local_memory_list_[i];
+        if (local_memory->getAddressSpaceBegin() <= address_byte && address_byte < local_memory->getAddressSpaceEnd()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 LocalMemory *LocalMemoryUnit::getLocalMemoryByAddress(int address_byte) {
     for (auto *local_memory : local_memory_list_) {
         if (local_memory->getAddressSpaceBegin() <= address_byte && address_byte < local_memory->getAddressSpaceEnd()) {

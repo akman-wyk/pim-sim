@@ -12,6 +12,7 @@
 #include "payload_enum.h"
 #include "systemc.h"
 #include "util/macro_scope.h"
+#include <unordered_set>
 
 namespace pimsim {
 
@@ -30,6 +31,11 @@ struct InstructionPayload {
     bool operator==(const InstructionPayload& another) const {
         return pc == another.pc;
     }
+};
+
+struct MemoryConflictInfo {
+    std::unordered_set<int> read_memory_id;
+    std::unordered_set<int> write_memory_id;
 };
 
 struct MemoryAccessPayload {
@@ -62,7 +68,22 @@ struct SIMDInsPayload {
     // vector length info
     int len{0};
 
+    // instruction's execution can be pipelined
+    bool pipelined{false};
+
     DECLARE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload)
+};
+
+struct SIMDInsDataConflictPayload {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(SIMDInsDataConflictPayload)
+
+    int pc{-1};
+
+    // data address info, by default, input and output vectors are not stored across memory.
+    std::array<int, SIMD_MAX_INPUT_NUM> inputs_address_byte{-1, -1, -1, -1};
+    int output_address_byte{-1};
+
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(SIMDInsDataConflictPayload)
 };
 
 }  // namespace pimsim

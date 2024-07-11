@@ -21,6 +21,9 @@ public:
 
     const std::string& getName() const;
 
+    void setEndPC(int pc);
+    bool isEndPC(int pc) const;
+
 protected:
     const double period_ns_;
     const SimMode sim_mode_;
@@ -33,6 +36,7 @@ protected:
 
 private:
     const std::string name;
+    int end_pc_{-1};
 };
 
 }  // namespace pimsim

@@ -32,6 +32,7 @@ struct SIMDInstructionInfo {
     SIMDInputOutputInfo output{};
 
     const SIMDFunctorConfig* functor_config{nullptr};
+    bool use_pipeline{false};
 };
 
 struct SIMDBatchInfo {
@@ -52,7 +53,7 @@ public:
 
     SIMDUnit(const char* name, const SIMDUnitConfig& config, const SimConfig& sim_config, Core* core, Clock* clk);
 
-    [[noreturn]] void process();
+    [[noreturn]] void processIssue();
     [[noreturn]] void processReadSubmodule();
     [[noreturn]] void processExecuteSubmodule();
     [[noreturn]] void processWriteSubmodule();
@@ -67,16 +68,20 @@ private:
     std::pair<const SIMDInstructionConfig*, const SIMDFunctorConfig*> getSIMDInstructionAndFunctor(
         const SIMDInsPayload& payload);
 
-    static SIMDInstructionInfo decodeAndGetInstructionInfo(const SIMDInstructionConfig* instruction,
-                                                           const SIMDFunctorConfig* functor,
-                                                           const SIMDInsPayload& payload);
+    SIMDInstructionInfo decodeAndGetInstructionInfo(const SIMDInstructionConfig* instruction,
+                                                    const SIMDFunctorConfig* functor,
+                                                    const SIMDInsPayload& payload) const;
 
 public:
     sc_core::sc_in<SIMDInsPayload> id_simd_payload_port_;
     sc_core::sc_in<bool> id_ex_enable_port_;
     sc_core::sc_out<bool> busy_port_;
-    sc_core::sc_out<bool> finish_port_;
-    sc_core::sc_out<int> finish_pc_port_;
+    sc_core::sc_out<SIMDInsDataConflictPayload> data_conflict_port_;
+
+    sc_core::sc_out<bool> finish_ins_port_;
+    sc_core::sc_out<int> finish_ins_pc_port_;
+
+    sc_core::sc_out<bool> finish_run_;
 
 private:
     const SIMDUnitConfig& config_;
@@ -90,7 +95,6 @@ private:
     MemorySocket local_memory_socket_;
 
     sc_core::sc_event cur_ins_next_batch_;
-    sc_core::sc_event cur_ins_finish_;
     SubmoduleSocket<SIMDSubmodulePayload> read_submodule_socket_{};
     SubmoduleSocket<SIMDSubmodulePayload> execute_submodule_socket_{};
     SubmoduleSocket<SIMDSubmodulePayload> write_submodule_socket_{};

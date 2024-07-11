@@ -32,17 +32,26 @@ public:
         simd_unit_.id_simd_payload_port_.bind(decode_simd_payload_);
         simd_unit_.id_ex_enable_port_.bind(id_ex_enable_);
         simd_unit_.busy_port_.bind(simd_busy_);
-        simd_unit_.finish_port_.bind(simd_finish_);
-        simd_unit_.finish_pc_port_.bind(simd_finish_pc_);
+        simd_unit_.data_conflict_port_.bind(simd_data_conflict_);
+        simd_unit_.finish_ins_port_.bind(simd_finish_);
+        simd_unit_.finish_ins_pc_port_.bind(simd_finish_pc_);
+        simd_unit_.finish_run_.bind(simd_finish_run_);
 
         simd_unit_.bindLocalMemoryUnit(&local_memory_unit_);
+        simd_unit_.setEndPC(2);
 
         SC_THREAD(issue)
 
-        SC_METHOD(processBusy)
-        sensitive << simd_busy_;
+        SC_METHOD(processStall)
+        sensitive << simd_data_conflict_ << simd_busy_ << simd_finish_ << simd_finish_pc_;
 
-        SC_METHOD(processFinish)
+        SC_METHOD(processFinishRun)
+        sensitive << simd_finish_run_;
+
+        SC_METHOD(processIdExEnable)
+        sensitive << id_stall_;
+
+        SC_METHOD(processFinishIns)
         sensitive << simd_finish_ << simd_finish_pc_;
 
         // prepare SIMD instructions
@@ -50,31 +59,52 @@ public:
     }
 
     void issue() {
-        id_ex_enable_.write(true);
         wait(8, SC_NS);
 
-        for (const auto& simd_ins : simd_ins_list_) {
-            decode_simd_payload_.write(simd_ins);
+        while (ins_index < simd_ins_list_.size()) {
+            decode_simd_payload_.write(simd_ins_list_[ins_index]);
+            ins_index++;
             wait(next_ins_);
         }
         SIMDInsPayload simd_nop{};
         decode_simd_payload_.write(simd_nop);
     }
 
-    void processBusy() {
-        if (!simd_busy_.read()) {
+    void processStall() {
+        const auto& simd_data_conflict_info = simd_data_conflict_.read();
+        auto simd_unit_conflict_infos = getSIMDUnitConflictInfos(simd_data_conflict_info);
+
+        const auto& next_ins_payload = simd_ins_list_[ins_index];
+        auto ins_conflict_infos = getInsPayloadConflictInfos(next_ins_payload);
+
+        bool simd_busy = simd_busy_.read();
+        bool simd_finish = simd_finish_.read();
+        bool simd_finish_pc = simd_finish_pc_.read();
+
+        bool stall = checkMemoryConflict(ins_conflict_infos, simd_unit_conflict_infos)
+                         ? (!simd_finish || simd_finish_pc != simd_data_conflict_info.pc)
+                         : simd_busy;
+        id_stall_.write(stall);
+        if (!stall) {
             next_ins_.notify();
         }
     }
 
-    void processFinish() {
+    void processFinishIns() {
         if (simd_finish_.read()) {
             LOG(fmt::format("simd ins finish, pc: {}", simd_finish_pc_.read()));
-            if (simd_finish_pc_.read() == simd_ins_list_.size()) {
-                running_time = sc_core::sc_time_stamp();
-                sc_stop();
-            }
         }
+    }
+
+    void processFinishRun() {
+        if (simd_finish_run_.read()) {
+            running_time = sc_core::sc_time_stamp();
+            sc_stop();
+        }
+    }
+
+    void processIdExEnable() {
+        id_ex_enable_.write(!id_stall_.read());
     }
 
     EnergyReporter getEnergyReporter() override {
@@ -97,33 +127,76 @@ private:
                                  .inputs_bit_width = {8, 0, 0, 0},
                                  .output_bit_width = 8,
                                  .inputs_address_byte = {1024, 0, 0, 0},
-                                 .output_address_byte = 1024,
-                                 .len = 63};
+                                 .output_address_byte = 1536,
+                                 .len = 63,
+                                 .pipelined = false};
 
         SIMDInsPayload simd_ins2{.ins = {.pc = 2},
                                  .input_cnt = 1,
                                  .opcode = 0x00,
                                  .inputs_bit_width = {8, 0, 0, 0},
                                  .output_bit_width = 8,
-                                 .inputs_address_byte = {1536, 0, 0, 0},
-                                 .output_address_byte = 1536,
-                                 .len = 59};
+                                 .inputs_address_byte = {2048, 0, 0, 0},
+                                 .output_address_byte = 1024,
+                                 .len = 59,
+                                 .pipelined = true};
 
         simd_ins_list_.emplace_back(simd_ins1);
         simd_ins_list_.emplace_back(simd_ins2);
     }
 
+    MemoryConflictInfo getInsPayloadConflictInfos(const SIMDInsPayload& ins_payload) const {
+        MemoryConflictInfo conflict_info;
+        for (unsigned int i = 0; i < ins_payload.input_cnt; i++) {
+            conflict_info.read_memory_id.emplace(
+                local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.inputs_address_byte[i]));
+        }
+        conflict_info.write_memory_id.emplace(
+            local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.output_address_byte));
+        return std::move(conflict_info);
+    }
+
+    MemoryConflictInfo getSIMDUnitConflictInfos(const SIMDInsDataConflictPayload& simd_data_conflict_info) const {
+        MemoryConflictInfo conflict_info;
+        for (auto input_addr : simd_data_conflict_info.inputs_address_byte) {
+            if (input_addr != -1) {
+                conflict_info.read_memory_id.emplace(local_memory_unit_.getLocalMemoryIdByAddress(input_addr));
+            }
+        }
+        if (simd_data_conflict_info.output_address_byte != -1) {
+            conflict_info.write_memory_id.emplace(
+                local_memory_unit_.getLocalMemoryIdByAddress(simd_data_conflict_info.output_address_byte));
+        }
+        return std::move(conflict_info);
+    }
+
+    static bool checkMemoryConflict(const MemoryConflictInfo& ins_conflict_info,
+                                    const MemoryConflictInfo& unit_conflict_info) {
+        return std::any_of(unit_conflict_info.write_memory_id.begin(), unit_conflict_info.write_memory_id.end(),
+                           [&](int unit_write_memory_id) {
+                               return ins_conflict_info.read_memory_id.find(unit_write_memory_id) !=
+                                      ins_conflict_info.read_memory_id.end();
+                           });
+    }
+
 private:
     std::vector<SIMDInsPayload> simd_ins_list_;
+    int ins_index{0};
 
     LocalMemoryUnit local_memory_unit_;
     SIMDUnit simd_unit_;
 
+    std::vector<MemoryConflictInfo> simd_memory_conflict_infos_{};
+
     sc_core::sc_signal<SIMDInsPayload> decode_simd_payload_;
     sc_core::sc_signal<bool> id_ex_enable_;
     sc_core::sc_signal<bool> simd_busy_;
+    sc_core::sc_signal<SIMDInsDataConflictPayload> simd_data_conflict_;
     sc_core::sc_signal<bool> simd_finish_;
     sc_core::sc_signal<int> simd_finish_pc_;
+    sc_core::sc_signal<bool> simd_finish_run_;
+
+    sc_core::sc_signal<bool> id_stall_;
 
     sc_core::sc_event next_ins_;
 

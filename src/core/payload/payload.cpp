@@ -19,6 +19,8 @@ std::stringstream& operator<<(std::stringstream& out, const std::array<int, 4>& 
 }
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_width, output_bit_width,
-                             inputs_address_byte, output_address_byte, len)
+                             inputs_address_byte, output_address_byte, len, pipelined)
+
+DEFINE_PIM_PAYLOAD_FUNCTIONS(SIMDInsDataConflictPayload, inputs_address_byte, output_address_byte)
 
 }  // namespace pimsim

@@ -27,6 +27,8 @@ public:
 
     EnergyReporter getEnergyReporter() override;
 
+    int getLocalMemoryIdByAddress(int address_byte) const;
+
 private:
     LocalMemory* getLocalMemoryByAddress(int address_byte);
 
