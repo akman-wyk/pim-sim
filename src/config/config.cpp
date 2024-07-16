@@ -628,11 +628,18 @@ bool LocalMemoryUnitConfig::checkValid() const {
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(LocalMemoryUnitConfig, local_memory_list)
 
+bool TransferUnitConfig::checkValid() const {
+    return true;
+}
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(TransferUnitConfig, pipeline)
+
 // CoreConfig
 bool CoreConfig::checkValid() const {
     if (const bool valid = control_unit_config.checkValid() && register_unit_config.checkValid() &&
                            scalar_unit_config.checkValid() && simd_unit_config.checkValid() &&
-                           pim_unit_config.checkValid() && local_memory_unit_config.checkValid();
+                           pim_unit_config.checkValid() && local_memory_unit_config.checkValid() &&
+                           transfer_unit_config.checkValid();
         !valid) {
         std::cerr << "CoreConfig not valid" << std::endl;
         return false;
@@ -662,7 +669,7 @@ bool CoreConfig::checkValid() const {
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(CoreConfig, control_unit_config, register_unit_config,
                                                scalar_unit_config, simd_unit_config, pim_unit_config,
-                                               local_memory_unit_config)
+                                               local_memory_unit_config, transfer_unit_config)
 
 // ChipConfig
 bool ChipConfig::checkValid() const {

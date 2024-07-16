@@ -208,6 +208,9 @@
             }
           }
         ]
+      },
+      "transfer_unit_config": {
+        "pipeline": true
       }
     },
     "global_memory_config": {

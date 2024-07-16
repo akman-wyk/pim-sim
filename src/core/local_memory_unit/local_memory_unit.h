@@ -29,6 +29,8 @@ public:
 
     int getLocalMemoryIdByAddress(int address_byte) const;
 
+    int getMemoryDataWidthById(int memory_id, MemoryAccessType access_type) const;
+
 private:
     LocalMemory* getLocalMemoryByAddress(int address_byte);
 

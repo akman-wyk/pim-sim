@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.20)
 project(pim-sim LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17 CACHE STRING "Use C++ 17")
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 # dependency
 add_subdirectory(packages/fmt)
@@ -50,6 +50,8 @@ add_library(pim-simulator STATIC ""
         src/base_component/memory_socket.h
         src/core/payload/payload.cpp
         src/util/log.h
+        src/core/transfer_unit/transfer_unit.cpp
+        src/core/transfer_unit/transfer_unit.h
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE
@@ -95,3 +97,8 @@ add_executable(SIMDUnitTest "" test/simd_unit_test.cpp)
 add_dependencies(SIMDUnitTest pim-simulator)
 target_link_libraries(SIMDUnitTest PRIVATE pim-simulator)
 target_include_directories(SIMDUnitTest PRIVATE src)
+
+add_executable(TransferUnitTest "" test/transfer_unit_test.cpp)
+add_dependencies(TransferUnitTest pim-simulator)
+target_link_libraries(TransferUnitTest PRIVATE pim-simulator)
+target_include_directories(TransferUnitTest PRIVATE src)

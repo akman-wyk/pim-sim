@@ -38,7 +38,7 @@ public:
         simd_unit_.finish_run_.bind(simd_finish_run_);
 
         simd_unit_.bindLocalMemoryUnit(&local_memory_unit_);
-        simd_unit_.setEndPC(2);
+
 
         SC_THREAD(issue)
 
@@ -56,6 +56,7 @@ public:
 
         // prepare SIMD instructions
         prepareInstructions();
+        simd_unit_.setEndPC(static_cast<int>(simd_ins_list_.size()));
     }
 
     void issue() {
@@ -79,7 +80,7 @@ public:
 
         bool simd_busy = simd_busy_.read();
         bool simd_finish = simd_finish_.read();
-        bool simd_finish_pc = simd_finish_pc_.read();
+        int simd_finish_pc = simd_finish_pc_.read();
 
         bool stall = checkMemoryConflict(ins_conflict_infos, simd_unit_conflict_infos)
                          ? (!simd_finish || simd_finish_pc != simd_data_conflict_info.pc)
@@ -127,22 +128,71 @@ private:
                                  .inputs_bit_width = {8, 0, 0, 0},
                                  .output_bit_width = 8,
                                  .inputs_address_byte = {1024, 0, 0, 0},
-                                 .output_address_byte = 1536,
-                                 .len = 63,
-                                 .pipelined = false};
-
+                                 .output_address_byte = 2048,
+                                 .len = 16,
+                                 .pipelined = true};
         SIMDInsPayload simd_ins2{.ins = {.pc = 2},
                                  .input_cnt = 1,
                                  .opcode = 0x00,
                                  .inputs_bit_width = {8, 0, 0, 0},
                                  .output_bit_width = 8,
-                                 .inputs_address_byte = {2048, 0, 0, 0},
-                                 .output_address_byte = 1024,
-                                 .len = 59,
+                                 .inputs_address_byte = {1024, 0, 0, 0},
+                                 .output_address_byte = 2048,
+                                 .len = 16,
+                                 .pipelined = true};
+        SIMDInsPayload simd_ins3{.ins = {.pc = 3},
+                                 .input_cnt = 1,
+                                 .opcode = 0x00,
+                                 .inputs_bit_width = {8, 0, 0, 0},
+                                 .output_bit_width = 8,
+                                 .inputs_address_byte = {1024, 0, 0, 0},
+                                 .output_address_byte = 2048,
+                                 .len = 16,
+                                 .pipelined = true};
+        SIMDInsPayload simd_ins4{.ins = {.pc = 4},
+                                 .input_cnt = 1,
+                                 .opcode = 0x00,
+                                 .inputs_bit_width = {8, 0, 0, 0},
+                                 .output_bit_width = 8,
+                                 .inputs_address_byte = {1024, 0, 0, 0},
+                                 .output_address_byte = 2048,
+                                 .len = 16,
+                                 .pipelined = true};
+        SIMDInsPayload simd_ins5{.ins = {.pc = 5},
+                                 .input_cnt = 1,
+                                 .opcode = 0x00,
+                                 .inputs_bit_width = {8, 0, 0, 0},
+                                 .output_bit_width = 8,
+                                 .inputs_address_byte = {1024, 0, 0, 0},
+                                 .output_address_byte = 2048,
+                                 .len = 16,
+                                 .pipelined = true};
+        SIMDInsPayload simd_ins6{.ins = {.pc = 6},
+                                 .input_cnt = 1,
+                                 .opcode = 0x00,
+                                 .inputs_bit_width = {8, 0, 0, 0},
+                                 .output_bit_width = 8,
+                                 .inputs_address_byte = {1024, 0, 0, 0},
+                                 .output_address_byte = 2048,
+                                 .len = 16,
+                                 .pipelined = true};
+        SIMDInsPayload simd_ins7{.ins = {.pc = 7},
+                                 .input_cnt = 1,
+                                 .opcode = 0x00,
+                                 .inputs_bit_width = {8, 0, 0, 0},
+                                 .output_bit_width = 8,
+                                 .inputs_address_byte = {1024, 0, 0, 0},
+                                 .output_address_byte = 2048,
+                                 .len = 16,
                                  .pipelined = true};
 
         simd_ins_list_.emplace_back(simd_ins1);
         simd_ins_list_.emplace_back(simd_ins2);
+        simd_ins_list_.emplace_back(simd_ins3);
+        simd_ins_list_.emplace_back(simd_ins4);
+        simd_ins_list_.emplace_back(simd_ins5);
+        simd_ins_list_.emplace_back(simd_ins6);
+        simd_ins_list_.emplace_back(simd_ins7);
     }
 
     MemoryConflictInfo getInsPayloadConflictInfos(const SIMDInsPayload& ins_payload) const {

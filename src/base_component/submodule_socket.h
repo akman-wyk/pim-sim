@@ -14,7 +14,7 @@ struct SubmoduleSocket {
     sc_core::sc_event start_exec;
     sc_core::sc_event finish_exec;
 
-    void waitUtilFinish() const {
+    void waitUtilFinishIfBusy() const {
         if (busy) {
             wait(finish_exec);
         }

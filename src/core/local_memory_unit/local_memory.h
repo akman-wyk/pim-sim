@@ -23,6 +23,7 @@ public:
 
     [[nodiscard]] int getAddressSpaceBegin() const;
     [[nodiscard]] int getAddressSpaceEnd() const;
+    [[nodiscard]] int getMemoryDataWidthByte(MemoryAccessType access_type) const;
 
     EnergyReporter getEnergyReporter() override;
 

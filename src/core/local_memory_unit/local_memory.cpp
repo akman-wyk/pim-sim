@@ -28,6 +28,15 @@ int LocalMemory::getAddressSpaceEnd() const {
     return config_.addressing.offset_byte + config_.addressing.size_byte;
 }
 
+int LocalMemory::getMemoryDataWidthByte(MemoryAccessType access_type) const {
+    if (config_.type == +LocalMemoryType::ram) {
+        return config_.ram_config.width_byte;
+    } else {
+        return access_type == +MemoryAccessType::read ? config_.reg_buffer_config.read_max_width_byte
+                                                      : config_.reg_buffer_config.write_max_width_byte;
+    }
+}
+
 EnergyReporter LocalMemory::getEnergyReporter() {
     if (config_.type == +LocalMemoryType::ram) {
         return ram.getEnergyReporter();

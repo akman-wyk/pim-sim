@@ -26,6 +26,9 @@ SIMDUnit::SIMDUnit(const char* name, const SIMDUnitConfig& config, const SimConf
     SC_THREAD(processExecuteSubmodule)
     SC_THREAD(processWriteSubmodule)
 
+    SC_METHOD(finishInstruction)
+    sensitive << finish_trigger_;
+
     for (const auto& ins_config : config_.instruction_list) {
         instruction_config_map_.emplace(getSIMDInstructionIdentityCode(ins_config.input_cnt, ins_config.opcode),
                                         &ins_config);
@@ -74,7 +77,7 @@ void SIMDUnit::processIssue() {
         data_conflict_port_.write(data_conflict_payload);
 
         for (int batch = 0; batch < process_times; batch++) {
-            read_submodule_socket_.waitUtilFinish();
+            read_submodule_socket_.waitUtilFinishIfBusy();
 
             bool first_batch = (batch == 0);
             bool last_batch = (batch == process_times - 1);
@@ -125,7 +128,7 @@ void SIMDUnit::processReadSubmodule() {
             local_memory_socket_.readData(payload.ins_info.ins, address_byte, size_byte);
         }
 
-        execute_submodule_socket_.waitUtilFinish();
+        execute_submodule_socket_.waitUtilFinishIfBusy();
 
         if (payload.batch_info.first_batch) {
             execute_submodule_socket_.payload.ins_info = payload.ins_info;
@@ -156,7 +159,7 @@ void SIMDUnit::processExecuteSubmodule() {
         energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
         wait(latency, SC_NS);
 
-        write_submodule_socket_.waitUtilFinish();
+        write_submodule_socket_.waitUtilFinishIfBusy();
 
         if (payload.batch_info.first_batch) {
             write_submodule_socket_.payload.ins_info = payload.ins_info;
@@ -178,8 +181,9 @@ void SIMDUnit::processWriteSubmodule() {
         LOG(fmt::format("simd write start, pc: {}, batch: {}", payload.ins_info.ins.pc, payload.batch_info.batch_num));
 
         if (payload.batch_info.last_batch) {
-            finish_ins_port_.write(true);
-            finish_ins_pc_port_.write(payload.ins_info.ins.pc);
+            finish_ins = true;
+            finish_ins_pc_ = payload.ins_info.ins.pc;
+            finish_trigger_.notify(SC_ZERO_TIME);
         }
 
         int address_byte = payload.ins_info.output.start_address_byte +
@@ -200,6 +204,11 @@ void SIMDUnit::processWriteSubmodule() {
             finish_run_.write(true);
         }
     }
+}
+
+void SIMDUnit::finishInstruction() {
+    finish_ins_port_.write(finish_ins);
+    finish_ins_pc_port_.write(finish_ins_pc_);
 }
 
 void SIMDUnit::bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit) {

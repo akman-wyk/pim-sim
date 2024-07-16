@@ -296,6 +296,13 @@ struct LocalMemoryUnitConfig {
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(LocalMemoryUnitConfig)
 };
 
+struct TransferUnitConfig {
+    bool pipeline{false};
+
+    [[nodiscard]] bool checkValid() const;
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(TransferUnitConfig)
+};
+
 struct CoreConfig {
     ControlUnitConfig control_unit_config{};
     RegisterUnitConfig register_unit_config{};
@@ -303,6 +310,7 @@ struct CoreConfig {
     SIMDUnitConfig simd_unit_config{};
     PimUnitConfig pim_unit_config{};
     LocalMemoryUnitConfig local_memory_unit_config{};
+    TransferUnitConfig transfer_unit_config{};
 
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(CoreConfig)
