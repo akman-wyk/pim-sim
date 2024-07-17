@@ -8,8 +8,14 @@
 
 namespace pimsim {
 
+static constexpr double delta = 1e-8;
+
 inline int IntDivCeil(int a, int b) {
     return (a - 1) / b + 1;
+}
+
+inline bool DoubleEqual(double a, double b) {
+    return std::abs(a - b) < delta;
 }
 
 template <class V>

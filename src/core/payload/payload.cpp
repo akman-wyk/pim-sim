@@ -47,4 +47,11 @@ DEFINE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(TransferInsPayload, ins, src_address_byte, dst_address_byte, size_byte)
 
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(InstructionPayload, pc)
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_width,
+                                               output_bit_width, inputs_address_byte, output_address_byte, len)
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(TransferInsPayload, ins, src_address_byte, dst_address_byte, size_byte)
+
 }  // namespace pimsim

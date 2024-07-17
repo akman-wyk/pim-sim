@@ -7,9 +7,7 @@
 #include "core/transfer_unit/transfer_unit.h"
 #include "fmt/core.h"
 #include "util/log.h"
-
-static const std::string CONFIG_FILE = "../config/config_template.json";
-static const std::string TEST_REPORT_FILE = "../report/Transfer_unit_test_report.txt";
+#include "util/util.h"
 
 namespace pimsim {
 
@@ -17,7 +15,7 @@ class TransferUnitTestModule : public BaseModule {
 public:
     SC_HAS_PROCESS(TransferUnitTestModule);
 
-    TransferUnitTestModule(const char* name, const Config& config, Clock* clk)
+    TransferUnitTestModule(const char* name, const Config& config, Clock* clk, std::vector<TransferInsPayload> codes)
         : BaseModule(name, config.sim_config, nullptr, clk)
         , local_memory_unit_("local_memory_unit", config.chip_config.core_config.local_memory_unit_config,
                              config.sim_config, nullptr, clk)
@@ -47,7 +45,7 @@ public:
         sensitive << transfer_finish_run_;
 
         transfer_unit_.bindLocalMemoryUnit(&local_memory_unit_);
-        prepareInstructions();
+        transfer_ins_list_ = std::move(codes);
         transfer_unit_.setEndPC(static_cast<int>(transfer_ins_list_.size()));
     }
 
@@ -111,37 +109,6 @@ private:
     }
 
 private:
-    void prepareInstructions() {
-        TransferInsPayload ins1 = {
-            .ins = {.pc = 1}, .src_address_byte = 1024, .dst_address_byte = 2048, .size_byte = 64};
-        TransferInsPayload ins2 = {
-            .ins = {.pc = 2}, .src_address_byte = 2048, .dst_address_byte = 2560, .size_byte = 64};
-        TransferInsPayload ins3 = {
-            .ins = {.pc = 3}, .src_address_byte = 1024, .dst_address_byte = 1536, .size_byte = 64};
-        TransferInsPayload ins4 = {
-            .ins = {.pc = 4}, .src_address_byte = 1024, .dst_address_byte = 1536, .size_byte = 64};
-        TransferInsPayload ins5 = {
-            .ins = {.pc = 5}, .src_address_byte = 2048, .dst_address_byte = 1024, .size_byte = 64};
-        TransferInsPayload ins6 = {
-            .ins = {.pc = 6}, .src_address_byte = 2048, .dst_address_byte = 1024, .size_byte = 64};
-        TransferInsPayload ins7 = {
-            .ins = {.pc = 7}, .src_address_byte = 2048, .dst_address_byte = 2560, .size_byte = 64};
-        TransferInsPayload ins8 = {
-            .ins = {.pc = 8}, .src_address_byte = 2048, .dst_address_byte = 1024, .size_byte = 64};
-        TransferInsPayload ins9 = {
-            .ins = {.pc = 9}, .src_address_byte = 1024, .dst_address_byte = 2048, .size_byte = 64};
-
-        transfer_ins_list_.emplace_back(ins1);
-        transfer_ins_list_.emplace_back(ins2);
-        transfer_ins_list_.emplace_back(ins3);
-        transfer_ins_list_.emplace_back(ins4);
-        transfer_ins_list_.emplace_back(ins5);
-        transfer_ins_list_.emplace_back(ins6);
-        transfer_ins_list_.emplace_back(ins7);
-        transfer_ins_list_.emplace_back(ins8);
-        transfer_ins_list_.emplace_back(ins9);
-    }
-
     MemoryConflictPayload getInsPayloadConflictPayload(const TransferInsPayload& ins_payload) const {
         MemoryConflictPayload conflict_payload{.pc = ins_payload.ins.pc};
 
@@ -180,6 +147,24 @@ private:
     sc_core::sc_time running_time_;
 };
 
+struct ExpectedInfo {
+    double time_ns{0.0};
+    double energy_pj{0.0};
+
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(ExpectedInfo)
+};
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(ExpectedInfo, time_ns, energy_pj)
+
+struct TestInfo {
+    std::vector<TransferInsPayload> code{};
+    ExpectedInfo expected{};
+
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(TestInfo)
+};
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(TestInfo, code, expected)
+
 }  // namespace pimsim
 
 using namespace pimsim;
@@ -187,26 +172,47 @@ using namespace pimsim;
 int sc_main(int argc, char* argv[]) {
     sc_core::sc_report_handler::set_actions(sc_core::SC_WARNING, sc_core::SC_DO_NOTHING);
 
-    std::ifstream ifs;
-    ifs.open(CONFIG_FILE);
-    nlohmann::ordered_json j = nlohmann::ordered_json::parse(ifs);
-    ifs.close();
+    if (argc != 4) {
+        std::cout << "Usage: ./TransferUnitTest [config_file] [instruction_file] [report_file]" << std::endl;
+        return 1;
+    }
 
-    auto config = j.get<Config>();
+    auto* config_file = argv[1];
+    auto* instruction_file = argv[2];
+    auto* report_file = argv[3];
+
+    std::ifstream config_ifs;
+    config_ifs.open(config_file);
+    nlohmann::ordered_json config_j = nlohmann::ordered_json::parse(config_ifs);
+    config_ifs.close();
+    auto config = config_j.get<Config>();
     if (!config.checkValid()) {
         std::cout << "Config not valid" << std::endl;
         return 1;
     }
 
+    std::ifstream ins_ifs;
+    ins_ifs.open(instruction_file);
+    nlohmann::ordered_json ins_j = nlohmann::ordered_json::parse(ins_ifs);
+    ins_ifs.close();
+    auto test_info = ins_j.get<TestInfo>();
+
     Clock clk{"clock", config.sim_config.period_ns};
-    TransferUnitTestModule test_module{"transfer_unit_test_module", config, &clk};
+    TransferUnitTestModule test_module{"transfer_unit_test_module", config, &clk, std::move(test_info.code)};
     sc_start();
 
     std::ofstream ofs;
-    ofs.open(TEST_REPORT_FILE);
+    ofs.open(report_file);
     auto reporter = test_module.getReporter();
     reporter.report(ofs);
     ofs.close();
 
-    return 0;
+    if (DoubleEqual(reporter.getLatencyNs(), test_info.expected.time_ns) &&
+        DoubleEqual(reporter.getTotalEnergyPJ(), test_info.expected.energy_pj)) {
+        std::cout << "Test Pass" << std::endl;
+        return 0;
+    } else {
+        std::cout << "Test Failed" << std::endl;
+        return 1;
+    }
 }

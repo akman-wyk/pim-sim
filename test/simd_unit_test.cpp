@@ -13,9 +13,7 @@
 #include "core/simd_unit/simd_unit.h"
 #include "fmt/core.h"
 #include "util/log.h"
-
-static const std::string CONFIG_FILE = "../config/config_template.json";
-static const std::string TEST_REPORT_FILE = "../report/SIMD_unit_test_report.txt";
+#include "util/util.h"
 
 namespace pimsim {
 
@@ -23,7 +21,7 @@ class SIMDUnitTestModule : public BaseModule {
 public:
     SC_HAS_PROCESS(SIMDUnitTestModule);
 
-    SIMDUnitTestModule(const char* name, const Config& config, Clock* clk)
+    SIMDUnitTestModule(const char* name, const Config& config, Clock* clk, std::vector<SIMDInsPayload> codes)
         : BaseModule(name, config.sim_config, nullptr, clk)
         , local_memory_unit_("local_memory_unit", config.chip_config.core_config.local_memory_unit_config,
                              config.sim_config, nullptr, clk)
@@ -52,7 +50,7 @@ public:
         sensitive << simd_finish_run_;
 
         simd_unit_.bindLocalMemoryUnit(&local_memory_unit_);
-        prepareInstructions();
+        simd_ins_list_ = std::move(codes);
         simd_unit_.setEndPC(static_cast<int>(simd_ins_list_.size()));
     }
 
@@ -116,91 +114,6 @@ private:
     }
 
 private:
-    void prepareInstructions() {
-        SIMDInsPayload simd_ins1{.ins = {.pc = 1},
-                                 .input_cnt = 1,
-                                 .opcode = 0x00,
-                                 .inputs_bit_width = {8, 0, 0, 0},
-                                 .output_bit_width = 8,
-                                 .inputs_address_byte = {1024, 0, 0, 0},
-                                 .output_address_byte = 2048,
-                                 .len = 63};
-        SIMDInsPayload simd_ins2{.ins = {.pc = 2},
-                                 .input_cnt = 1,
-                                 .opcode = 0x00,
-                                 .inputs_bit_width = {8, 0, 0, 0},
-                                 .output_bit_width = 8,
-                                 .inputs_address_byte = {2048, 0, 0, 0},
-                                 .output_address_byte = 2560,
-                                 .len = 49};
-        SIMDInsPayload simd_ins3{.ins = {.pc = 3},
-                                 .input_cnt = 1,
-                                 .opcode = 0x00,
-                                 .inputs_bit_width = {8, 0, 0, 0},
-                                 .output_bit_width = 8,
-                                 .inputs_address_byte = {1024, 0, 0, 0},
-                                 .output_address_byte = 1536,
-                                 .len = 64};
-        SIMDInsPayload simd_ins4{.ins = {.pc = 4},
-                                 .input_cnt = 1,
-                                 .opcode = 0x00,
-                                 .inputs_bit_width = {8, 0, 0, 0},
-                                 .output_bit_width = 8,
-                                 .inputs_address_byte = {1024, 0, 0, 0},
-                                 .output_address_byte = 1536,
-                                 .len = 64};
-        SIMDInsPayload simd_ins5{.ins = {.pc = 5},
-                                 .input_cnt = 1,
-                                 .opcode = 0x00,
-                                 .inputs_bit_width = {8, 0, 0, 0},
-                                 .output_bit_width = 8,
-                                 .inputs_address_byte = {2048, 0, 0, 0},
-                                 .output_address_byte = 1024,
-                                 .len = 64};
-        SIMDInsPayload simd_ins6{.ins = {.pc = 6},
-                                 .input_cnt = 1,
-                                 .opcode = 0x00,
-                                 .inputs_bit_width = {8, 0, 0, 0},
-                                 .output_bit_width = 8,
-                                 .inputs_address_byte = {2048, 0, 0, 0},
-                                 .output_address_byte = 1024,
-                                 .len = 64};
-        SIMDInsPayload simd_ins7{.ins = {.pc = 7},
-                                 .input_cnt = 1,
-                                 .opcode = 0x00,
-                                 .inputs_bit_width = {8, 0, 0, 0},
-                                 .output_bit_width = 8,
-                                 .inputs_address_byte = {2048, 0, 0, 0},
-                                 .output_address_byte = 2560,
-                                 .len = 64};
-        SIMDInsPayload simd_ins8{.ins = {.pc = 8},
-                                 .input_cnt = 1,
-                                 .opcode = 0x00,
-                                 .inputs_bit_width = {8, 0, 0, 0},
-                                 .output_bit_width = 8,
-                                 .inputs_address_byte = {2048, 0, 0, 0},
-                                 .output_address_byte = 1024,
-                                 .len = 64};
-        SIMDInsPayload simd_ins9{.ins = {.pc = 9},
-                                 .input_cnt = 1,
-                                 .opcode = 0x00,
-                                 .inputs_bit_width = {8, 0, 0, 0},
-                                 .output_bit_width = 8,
-                                 .inputs_address_byte = {1024, 0, 0, 0},
-                                 .output_address_byte = 2048,
-                                 .len = 64};
-
-        simd_ins_list_.emplace_back(simd_ins1);
-        simd_ins_list_.emplace_back(simd_ins2);
-        simd_ins_list_.emplace_back(simd_ins3);
-        simd_ins_list_.emplace_back(simd_ins4);
-        simd_ins_list_.emplace_back(simd_ins5);
-        simd_ins_list_.emplace_back(simd_ins6);
-        simd_ins_list_.emplace_back(simd_ins7);
-        simd_ins_list_.emplace_back(simd_ins8);
-        simd_ins_list_.emplace_back(simd_ins9);
-    }
-
     MemoryConflictPayload getInsPayloadConflictInfos(const SIMDInsPayload& ins_payload) const {
         MemoryConflictPayload conflict_payload{.pc = ins_payload.ins.pc};
         for (unsigned int i = 0; i < ins_payload.input_cnt; i++) {
@@ -239,6 +152,24 @@ private:
     sc_core::sc_time running_time;
 };
 
+struct ExpectedInfo {
+    double time_ns{0.0};
+    double energy_pj{0.0};
+
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(ExpectedInfo)
+};
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(ExpectedInfo, time_ns, energy_pj)
+
+struct TestInfo {
+    std::vector<SIMDInsPayload> code{};
+    ExpectedInfo expected{};
+
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(TestInfo)
+};
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(TestInfo, code, expected)
+
 }  // namespace pimsim
 
 using namespace pimsim;
@@ -246,26 +177,47 @@ using namespace pimsim;
 int sc_main(int argc, char* argv[]) {
     sc_core::sc_report_handler::set_actions(sc_core::SC_WARNING, sc_core::SC_DO_NOTHING);
 
-    std::ifstream ifs;
-    ifs.open(CONFIG_FILE);
-    nlohmann::ordered_json j = nlohmann::ordered_json::parse(ifs);
-    ifs.close();
+    if (argc != 4) {
+        std::cout << "Usage: ./SIMDUnitTest [config_file] [instruction_file] [report_file]" << std::endl;
+        return 1;
+    }
 
-    auto config = j.get<Config>();
+    auto* config_file = argv[1];
+    auto* instruction_file = argv[2];
+    auto* report_file = argv[3];
+
+    std::ifstream config_ifs;
+    config_ifs.open(config_file);
+    nlohmann::ordered_json config_j = nlohmann::ordered_json::parse(config_ifs);
+    config_ifs.close();
+    auto config = config_j.get<Config>();
     if (!config.checkValid()) {
         std::cout << "Config not valid" << std::endl;
         return 1;
     }
 
+    std::ifstream ins_ifs;
+    ins_ifs.open(instruction_file);
+    nlohmann::ordered_json ins_j = nlohmann::ordered_json::parse(ins_ifs);
+    ins_ifs.close();
+    auto test_info = ins_j.get<TestInfo>();
+
     Clock clk{"clock", config.sim_config.period_ns};
-    SIMDUnitTestModule test_module{"SIMD_unit_test_module", config, &clk};
+    SIMDUnitTestModule test_module{"SIMD_unit_test_module", config, &clk, std::move(test_info.code)};
     sc_start();
 
     std::ofstream ofs;
-    ofs.open(TEST_REPORT_FILE);
+    ofs.open(report_file);
     auto reporter = test_module.getReporter();
     reporter.report(ofs);
     ofs.close();
 
-    return 0;
+    if (DoubleEqual(reporter.getLatencyNs(), test_info.expected.time_ns) &&
+        DoubleEqual(reporter.getTotalEnergyPJ(), test_info.expected.energy_pj)) {
+        std::cout << "Test Pass" << std::endl;
+        return 0;
+    } else {
+        std::cout << "Test Failed" << std::endl;
+        return 1;
+    }
 }

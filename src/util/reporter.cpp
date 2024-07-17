@@ -193,6 +193,10 @@ double Reporter::getTotalEnergyPJ() const {
     return total_energy_;
 }
 
+double Reporter::getLatencyNs() const {
+    return latency_ * 1e6;
+}
+
 Reporter& Reporter::operator+=(const Reporter& another) {
     latency_ += another.latency_;
     total_energy_ += another.total_energy_;
@@ -258,4 +262,4 @@ ReporterCompare Reporter::compare(const Reporter& r2) const {
 
 #undef MAX
 
-}  // namespace pim
+}  // namespace pimsim

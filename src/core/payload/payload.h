@@ -33,6 +33,8 @@ struct InstructionPayload {
     bool operator==(const InstructionPayload& another) const {
         return pc == another.pc;
     }
+
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(InstructionPayload)
 };
 
 struct MemoryConflictInfo {
@@ -86,6 +88,7 @@ struct SIMDInsPayload {
     int len{0};
 
     DECLARE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload)
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(SIMDInsPayload)
 };
 
 struct TransferInsPayload {
@@ -98,6 +101,7 @@ struct TransferInsPayload {
     int size_byte{0};
 
     DECLARE_PIM_PAYLOAD_FUNCTIONS(TransferInsPayload)
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(TransferInsPayload)
 };
 
 }  // namespace pimsim

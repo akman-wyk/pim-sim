@@ -85,6 +85,7 @@ public:
 
     [[nodiscard]] double getAveragePowerMW() const;
     [[nodiscard]] double getTotalEnergyPJ() const;
+    [[nodiscard]] double getLatencyNs() const;
 
     Reporter& operator+=(const Reporter& another);
 

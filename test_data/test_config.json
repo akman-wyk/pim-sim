@@ -1,0 +1,25 @@
+{
+  "root_dir": "/mnt/d/Dropbox/Dropbox/Workspace/code/pim-sim",
+  "unit_test_list": [
+    {
+      "name": "SIMDUnitTest",
+      "test_cases": [
+        {
+          "config_file": "config/config_template.json",
+          "instruction_file": "test_data/simd_unit_test_data_1.json",
+          "report_file": "report/SIMD_unit_test_report.txt"
+        }
+      ]
+    },
+    {
+      "name": "TransferUnitTest",
+      "test_cases": [
+        {
+          "config_file": "config/config_template.json",
+          "instruction_file": "test_data/transfer_unit_test_data_1.json",
+          "report_file": "report/Transfer_unit_test_report.txt"
+        }
+      ]
+    }
+  ]
+}
