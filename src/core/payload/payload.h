@@ -85,22 +85,7 @@ struct SIMDInsPayload {
     // vector length info
     int len{0};
 
-    // instruction's execution can be pipelined
-    bool pipelined{false};
-
     DECLARE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload)
-};
-
-struct SIMDInsDataConflictPayload {
-    MAKE_SIGNAL_TYPE_TRACE_STREAM(SIMDInsDataConflictPayload)
-
-    int pc{-1};
-
-    // data address info, by default, input and output vectors are not stored across memory.
-    std::array<int, SIMD_MAX_INPUT_NUM> inputs_address_byte{-1, -1, -1, -1};
-    int output_address_byte{-1};
-
-    DECLARE_PIM_PAYLOAD_FUNCTIONS(SIMDInsDataConflictPayload)
 };
 
 struct TransferInsPayload {

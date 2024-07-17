@@ -65,17 +65,11 @@ void SIMDUnit::processIssue() {
         }
 
         // Decode instruction
-        auto ins_info = decodeAndGetInstructionInfo(instruction, functor, payload);
+        const auto& [ins_info, conflict_payload] = decodeAndGetInfo(instruction, functor, payload);
+        data_conflict_port_.write(conflict_payload);
+
         int vector_total_len = ins_info.vector_inputs.empty() ? 1 : payload.len;
         int process_times = IntDivCeil(vector_total_len, functor->functor_cnt);
-
-        SIMDInsDataConflictPayload data_conflict_payload{.pc = ins_info.ins.pc};
-        for (int i = 0; i < ins_info.vector_inputs.size(); i++) {
-            data_conflict_payload.inputs_address_byte[i] = ins_info.vector_inputs[i].start_address_byte;
-        }
-        data_conflict_payload.output_address_byte = ins_info.output.start_address_byte;
-        data_conflict_port_.write(data_conflict_payload);
-
         for (int batch = 0; batch < process_times; batch++) {
             read_submodule_socket_.waitUtilFinishIfBusy();
 
@@ -201,7 +195,7 @@ void SIMDUnit::processWriteSubmodule() {
         write_submodule_socket_.busy = false;
 
         if (payload.batch_info.last_batch && isEndPC(payload.ins_info.ins.pc) && sim_mode_ == +SimMode::run_one_round) {
-            finish_run_.write(true);
+            finish_run_port_.write(true);
         }
     }
 }
@@ -244,9 +238,8 @@ std::pair<const SIMDInstructionConfig*, const SIMDFunctorConfig*> SIMDUnit::getS
     return {nullptr, nullptr};
 }
 
-SIMDInstructionInfo SIMDUnit::decodeAndGetInstructionInfo(const SIMDInstructionConfig* instruction,
-                                                          const SIMDFunctorConfig* functor,
-                                                          const SIMDInsPayload& payload) const {
+std::pair<SIMDInstructionInfo, MemoryConflictPayload> SIMDUnit::decodeAndGetInfo(
+    const SIMDInstructionConfig* instruction, const SIMDFunctorConfig* functor, const SIMDInsPayload& payload) const {
     SIMDInputOutputInfo output = {payload.output_bit_width, payload.output_address_byte};
     std::vector<SIMDInputOutputInfo> vector_inputs;
     std::vector<SIMDInputOutputInfo> scalar_inputs;
@@ -260,14 +253,26 @@ SIMDInstructionInfo SIMDUnit::decodeAndGetInstructionInfo(const SIMDInstructionC
         }
     }
 
-    bool use_pipeline = config_.pipeline && payload.pipelined;
+    MemoryConflictPayload conflict_payload{.pc = payload.ins.pc};
+    for (const auto& vector_input : vector_inputs) {
+        int read_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(vector_input.start_address_byte);
+        conflict_payload.read_memory_id.insert(read_memory_id);
+        conflict_payload.used_memory_id.insert(read_memory_id);
+    }
+    int write_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(output.start_address_byte);
+    conflict_payload.write_memory_id.insert(write_memory_id);
+    conflict_payload.used_memory_id.insert(write_memory_id);
 
-    return {.ins = payload.ins,
-            .scalar_inputs = scalar_inputs,
-            .vector_inputs = vector_inputs,
-            .output = output,
-            .functor_config = functor,
-            .use_pipeline = use_pipeline};
+    bool use_pipeline =
+        config_.pipeline && !SetsIntersection(conflict_payload.write_memory_id, conflict_payload.read_memory_id);
+    SIMDInstructionInfo ins_info{.ins = payload.ins,
+                                 .scalar_inputs = scalar_inputs,
+                                 .vector_inputs = vector_inputs,
+                                 .output = output,
+                                 .functor_config = functor,
+                                 .use_pipeline = use_pipeline};
+
+    return {ins_info, std::move(conflict_payload)};
 }
 
 }  // namespace pimsim

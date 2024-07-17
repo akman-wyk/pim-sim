@@ -4,6 +4,8 @@
 
 #include "payload.h"
 
+#include "util/util.h"
+
 namespace pimsim {
 
 bool InstructionPayload::valid() const {
@@ -32,26 +34,16 @@ bool MemoryConflictPayload::checkMemoryConflict(const pimsim::MemoryConflictPayl
                                                 const pimsim::MemoryConflictPayload& unit_conflict_payload,
                                                 bool has_unit_conflict) {
     if (has_unit_conflict) {
-        return std::any_of(unit_conflict_payload.write_memory_id.begin(), unit_conflict_payload.write_memory_id.end(),
-                           [&](int unit_write_memory_id) {
-                               return ins_conflict_payload.read_memory_id.find(unit_write_memory_id) !=
-                                      ins_conflict_payload.read_memory_id.end();
-                           });
+        return SetsIntersection(unit_conflict_payload.write_memory_id, ins_conflict_payload.read_memory_id);
     } else {
-        return std::any_of(unit_conflict_payload.used_memory_id.begin(), unit_conflict_payload.used_memory_id.end(),
-                           [&](int unit_write_memory_id) {
-                               return ins_conflict_payload.used_memory_id.find(unit_write_memory_id) !=
-                                      ins_conflict_payload.used_memory_id.end();
-                           });
+        return SetsIntersection(unit_conflict_payload.used_memory_id, ins_conflict_payload.used_memory_id);
     }
 }
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(MemoryConflictPayload, pc, read_memory_id, write_memory_id, used_memory_id)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_width, output_bit_width,
-                             inputs_address_byte, output_address_byte, len, pipelined)
-
-DEFINE_PIM_PAYLOAD_FUNCTIONS(SIMDInsDataConflictPayload, pc, inputs_address_byte, output_address_byte)
+                             inputs_address_byte, output_address_byte, len)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(TransferInsPayload, ins, src_address_byte, dst_address_byte, size_byte)
 
