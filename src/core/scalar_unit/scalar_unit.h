@@ -9,6 +9,7 @@
 #include "base_component/base_module.h"
 #include "base_component/fsm.h"
 #include "base_component/memory_socket.h"
+#include "base_component/reg_unit_socket.h"
 #include "config/config.h"
 #include "core/local_memory_unit/local_memory_unit.h"
 #include "core/payload/payload.h"
@@ -28,6 +29,7 @@ public:
     void checkScalarInst();
 
     void bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit);
+    void bindRegUnit(RegUnit* reg_unit);
 
 private:
     void executeInst(const ScalarInsPayload& payload);
@@ -52,6 +54,7 @@ private:
     sc_core::sc_signal<FSMPayload<ScalarInsPayload>> scalar_fsm_in_;
 
     MemorySocket local_memory_socket_;
+    RegUnitSocket reg_unit_socket_;
 
     sc_core::sc_event finish_trigger_;
     int finish_ins_pc_{-1};

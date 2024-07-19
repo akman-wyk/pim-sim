@@ -6,6 +6,7 @@
 #include <array>
 #include <cstdint>
 #include <sstream>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -20,6 +21,10 @@ namespace pimsim {
 std::stringstream& operator<<(std::stringstream& out, const std::array<int, 4>& arr);
 
 std::stringstream& operator<<(std::stringstream& out, const std::unordered_set<int>& set);
+
+std::stringstream& operator<<(std::stringstream& out, const std::vector<int>& list);
+
+std::stringstream& operator<<(std::stringstream& out, const std::unordered_map<int, int>& map);
 
 struct InstructionPayload {
     int pc{-1};
@@ -125,6 +130,28 @@ struct ScalarInsPayload {
 
     DECLARE_PIM_PAYLOAD_FUNCTIONS(ScalarInsPayload)
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(ScalarInsPayload)
+};
+
+struct RegUnitReadRequest {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(RegUnitReadRequest)
+
+    int rs1_id{0}, rs2_id{0}, rs3_id{0}, rs4_id{0}, rd_id{0};
+    bool rs1_read_double{false}, rs2_read_double{false};
+
+    std::vector<int> special_reg_ids{};
+
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(RegUnitReadRequest)
+};
+
+struct RegUnitReadResponse {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(RegUnitReadResponse)
+
+    int rs1_value{0}, rs2_value{0}, rs3_value{0}, rs4_value{0}, rd_value{0};
+    int rs1_double_value{0}, rs2_double_value{0};
+
+    std::unordered_map<int, int> special_reg_values{};
+
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(RegUnitReadResponse)
 };
 
 struct RegUnitWriteRequest {

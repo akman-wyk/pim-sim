@@ -82,6 +82,10 @@ void ScalarUnit::bindLocalMemoryUnit(pimsim::LocalMemoryUnit *local_memory_unit)
     local_memory_socket_.bindLocalMemoryUnit(local_memory_unit);
 }
 
+void ScalarUnit::bindRegUnit(pimsim::RegUnit *reg_unit) {
+    reg_unit_socket_.bindRegUnit(reg_unit);
+}
+
 void ScalarUnit::executeInst(const pimsim::ScalarInsPayload &payload) {
     if (payload.op == +ScalarOperator::store) {
         finish_ins_ = true;
@@ -147,6 +151,13 @@ void ScalarUnit::executeInst(const pimsim::ScalarInsPayload &payload) {
             case ScalarOperator::assign: {
                 reg_file_write_req.reg_value = payload.src1_value;
                 reg_file_write_req.write_special_register = payload.write_special_register;
+                if (payload.write_special_register) {
+                    int special_bound_general_id = reg_unit_socket_.getSpecialBoundGeneralId(reg_file_write_req.reg_id);
+                    if (special_bound_general_id != -1) {
+                        reg_file_write_req.reg_id = special_bound_general_id;
+                        reg_file_write_req.write_special_register = false;
+                    }
+                }
                 break;
             }
             default: {

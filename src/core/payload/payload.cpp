@@ -30,6 +30,26 @@ std::stringstream& operator<<(std::stringstream& out, const std::unordered_set<i
     return out;
 }
 
+std::stringstream& operator<<(std::stringstream& out, const std::vector<int>& list) {
+    for (auto it = list.begin(); it != list.end(); ++it) {
+        if (it != list.begin()) {
+            out << ", ";
+        }
+        out << *it;
+    }
+    return out;
+}
+
+std::stringstream& operator<<(std::stringstream& out, const std::unordered_map<int, int>& map) {
+    for (auto it = map.begin(); it != map.end(); ++it) {
+        if (it != map.begin()) {
+            out << ", ";
+        }
+        out << it->first << ": " << it->second;
+    }
+    return out;
+}
+
 bool DataConflictPayload::checkMemoryConflict(const pimsim::DataConflictPayload& ins_conflict_payload,
                                               const pimsim::DataConflictPayload& unit_conflict_payload,
                                               bool has_unit_conflict) {
@@ -61,6 +81,12 @@ DEFINE_PIM_PAYLOAD_FUNCTIONS(TransferInsPayload, ins, src_address_byte, dst_addr
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(ScalarInsPayload, ins, op, src1_value, src2_value, offset, dst_reg, access_global_memory,
                              write_special_register)
+
+DEFINE_PIM_PAYLOAD_FUNCTIONS(RegUnitReadRequest, rs1_id, rs2_id, rs3_id, rs4_id, rd_id, rs1_read_double,
+                             rs2_read_double, special_reg_ids)
+
+DEFINE_PIM_PAYLOAD_FUNCTIONS(RegUnitReadResponse, rs1_value, rs2_value, rs3_value, rs4_value, rd_value,
+                             rs1_double_value, rs2_double_value, special_reg_values)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(RegUnitWriteRequest, reg_id, reg_value, write_special_register)
 

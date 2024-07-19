@@ -11,8 +11,17 @@ namespace pimsim {
 BETTER_ENUM(InstClass, int,  // NOLINT(*-explicit-constructor)
             pim = 0b00, simd = 0b01, scalar = 0b10, transfer = 0b110, control = 0b111)
 
+BETTER_ENUM(PIMInstType, int,  // NOLINT(*-explicit-constructor)
+            compute = 0b0, batch = 0b1)
+
 BETTER_ENUM(ScalarInstType, int,  // NOLINT(*-explicit-constructor)
             RR = 0b00, RI = 0b01, SL = 0b10, Assign = 0b11)
+
+BETTER_ENUM(TransferInstType, int,  // NOLINT(*-explicit-constructor)
+            trans = 0b0, send = 0b10, receive = 0b11)
+
+BETTER_ENUM(ControlInstType, int,  // NOLINT(*-explicit-constructor)
+            beq = 0b000, bne = 0b001, bgt = 0b010, blt = 0b011, jmp = 0b100, wait = 0b101, barrier = 0b110)
 
 BETTER_ENUM(ScalarRRInstOpcode, int,  // NOLINT(*-explicit-constructor)
             add = 0b000, sub = 0b001, mul = 0b010, div = 0b011, sll = 0b100, srl = 0b101, sra = 0b110, mod = 0b111)
