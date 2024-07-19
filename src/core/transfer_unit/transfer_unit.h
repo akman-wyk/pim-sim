@@ -53,14 +53,14 @@ public:
     void bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit);
 
 private:
-    std::pair<TransferInstructionInfo, MemoryConflictPayload> decodeAndGetInfo(const TransferInsPayload& payload) const;
+    std::pair<TransferInstructionInfo, DataConflictPayload> decodeAndGetInfo(const TransferInsPayload& payload) const;
 
 public:
     sc_core::sc_in<TransferInsPayload> id_transfer_payload_port_;
     sc_core::sc_in<bool> id_ex_enable_port_;
 
     sc_core::sc_out<bool> busy_port_;
-    sc_core::sc_out<MemoryConflictPayload> data_conflict_port_;
+    sc_core::sc_out<DataConflictPayload> data_conflict_port_;
     sc_core::sc_out<bool> finish_ins_port_;
     sc_core::sc_out<int> finish_ins_pc_port_;
     sc_core::sc_out<bool> finish_run_port_;
@@ -80,7 +80,7 @@ private:
 
     sc_core::sc_event finish_trigger_;
     int finish_ins_pc_{-1};
-    bool finish_ins{false};
+    bool finish_ins_{false};
 };
 
 }  // namespace pimsim

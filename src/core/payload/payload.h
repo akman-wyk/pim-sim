@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "config/config.h"
+#include "isa/isa.h"
 #include "payload_enum.h"
 #include "systemc.h"
 #include "util/macro_scope.h"
@@ -37,11 +38,6 @@ struct InstructionPayload {
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(InstructionPayload)
 };
 
-struct MemoryConflictInfo {
-    std::unordered_set<int> read_memory_id;
-    std::unordered_set<int> write_memory_id;
-};
-
 struct MemoryAccessPayload {
     InstructionPayload ins{};
 
@@ -52,8 +48,8 @@ struct MemoryAccessPayload {
     sc_core::sc_event& finish_access;
 };
 
-struct MemoryConflictPayload {
-    MAKE_SIGNAL_TYPE_TRACE_STREAM(MemoryConflictPayload)
+struct DataConflictPayload {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(DataConflictPayload)
 
     int pc{-1};
 
@@ -61,10 +57,19 @@ struct MemoryConflictPayload {
     std::unordered_set<int> write_memory_id;
     std::unordered_set<int> used_memory_id;
 
-    DECLARE_PIM_PAYLOAD_FUNCTIONS(MemoryConflictPayload)
+    std::unordered_set<int> read_reg_id;
+    int write_reg_id{-1};
 
-    static bool checkMemoryConflict(const MemoryConflictPayload& ins_conflict_payload,
-                                    const MemoryConflictPayload& unit_conflict_payload, bool has_unit_conflict);
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload)
+
+    static bool checkMemoryConflict(const DataConflictPayload& ins_conflict_payload,
+                                    const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict);
+
+    static bool checkRegisterConflict(const DataConflictPayload& ins_conflict_payload,
+                                      const DataConflictPayload& unit_conflict_payload);
+
+    static bool checkDataConflict(const DataConflictPayload& ins_conflict_payload,
+                                  const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict);
 };
 
 struct SIMDInsPayload {
@@ -102,6 +107,33 @@ struct TransferInsPayload {
 
     DECLARE_PIM_PAYLOAD_FUNCTIONS(TransferInsPayload)
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(TransferInsPayload)
+};
+
+struct ScalarInsPayload {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(ScalarInsPayload)
+
+    InstructionPayload ins{};
+
+    ScalarOperator op{};
+
+    int src1_value{0}, src2_value{0}, offset{0};
+    ;
+    int dst_reg{0};
+
+    bool access_global_memory{false};
+    bool write_special_register{false};
+
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(ScalarInsPayload)
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(ScalarInsPayload)
+};
+
+struct RegUnitWriteRequest {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(RegUnitWriteRequest)
+
+    int reg_id{0}, reg_value{0};
+    bool write_special_register{false};
+
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(RegUnitWriteRequest)
 };
 
 }  // namespace pimsim

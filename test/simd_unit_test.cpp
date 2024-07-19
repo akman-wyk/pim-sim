@@ -87,7 +87,7 @@ private:
         bool simd_finish = simd_finish_ins_.read();
         int simd_finish_pc = simd_finish_ins_pc_.read();
 
-        bool stall = MemoryConflictPayload::checkMemoryConflict(ins_conflict_payload, simd_conflict_payload, true)
+        bool stall = DataConflictPayload::checkDataConflict(ins_conflict_payload, simd_conflict_payload, true)
                          ? (!simd_finish || simd_finish_pc != simd_conflict_payload.pc)
                          : simd_busy;
         id_stall_.write(stall);
@@ -114,8 +114,8 @@ private:
     }
 
 private:
-    MemoryConflictPayload getInsPayloadConflictInfos(const SIMDInsPayload& ins_payload) const {
-        MemoryConflictPayload conflict_payload{.pc = ins_payload.ins.pc};
+    DataConflictPayload getInsPayloadConflictInfos(const SIMDInsPayload& ins_payload) const {
+        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc};
         for (unsigned int i = 0; i < ins_payload.input_cnt; i++) {
             int read_memory_id = local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.inputs_address_byte[i]);
             conflict_payload.read_memory_id.insert(read_memory_id);
@@ -143,7 +143,7 @@ private:
 
     // port about busy, finish and data conflict
     sc_core::sc_signal<bool> simd_busy_;
-    sc_core::sc_signal<MemoryConflictPayload> simd_data_conflict_;
+    sc_core::sc_signal<DataConflictPayload> simd_data_conflict_;
     sc_core::sc_signal<bool> simd_finish_ins_;
     sc_core::sc_signal<int> simd_finish_ins_pc_;
     sc_core::sc_signal<bool> simd_finish_run_;

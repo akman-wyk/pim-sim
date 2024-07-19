@@ -82,7 +82,7 @@ private:
         auto transfer_finish = transfer_finish_ins_.read();
         auto transfer_finish_pc = transfer_finish_ins_pc_.read();
 
-        bool stall = MemoryConflictPayload::checkMemoryConflict(ins_conflict_payload, transfer_conflict_payload, true)
+        bool stall = DataConflictPayload::checkDataConflict(ins_conflict_payload, transfer_conflict_payload, true)
                          ? !(transfer_finish && transfer_finish_pc == transfer_conflict_payload.pc)
                          : transfer_busy;
         id_stall_.write(stall);
@@ -109,8 +109,8 @@ private:
     }
 
 private:
-    MemoryConflictPayload getInsPayloadConflictPayload(const TransferInsPayload& ins_payload) const {
-        MemoryConflictPayload conflict_payload{.pc = ins_payload.ins.pc};
+    DataConflictPayload getInsPayloadConflictPayload(const TransferInsPayload& ins_payload) const {
+        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc};
 
         int src_memory_id = local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.src_address_byte);
         int dst_memory_id = local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.dst_address_byte);
@@ -138,7 +138,7 @@ private:
 
     // port about busy, finish and data conflict
     sc_core::sc_signal<bool> transfer_busy_;
-    sc_core::sc_signal<MemoryConflictPayload> transfer_data_conflict_;
+    sc_core::sc_signal<DataConflictPayload> transfer_data_conflict_;
     sc_core::sc_signal<bool> transfer_finish_ins_;
     sc_core::sc_signal<int> transfer_finish_ins_pc_;
     sc_core::sc_signal<bool> transfer_finish_run_;

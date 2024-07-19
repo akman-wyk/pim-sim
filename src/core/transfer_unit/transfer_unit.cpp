@@ -114,7 +114,7 @@ void TransferUnit::processWriteSubmodule() {
                         payload.batch_info.batch_num));
 
         if (payload.batch_info.last_batch) {
-            finish_ins = true;
+            finish_ins_ = true;
             finish_ins_pc_ = payload.ins_info.ins.pc;
             finish_trigger_.notify(SC_ZERO_TIME);
         }
@@ -141,7 +141,7 @@ void TransferUnit::processWriteSubmodule() {
 }
 
 void TransferUnit::finishInstruction() {
-    finish_ins_port_.write(finish_ins);
+    finish_ins_port_.write(finish_ins_);
     finish_ins_pc_port_.write(finish_ins_pc_);
 }
 
@@ -149,7 +149,7 @@ void TransferUnit::bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit) {
     local_memory_socket_.bindLocalMemoryUnit(local_memory_unit);
 }
 
-std::pair<TransferInstructionInfo, MemoryConflictPayload> TransferUnit::decodeAndGetInfo(
+std::pair<TransferInstructionInfo, DataConflictPayload> TransferUnit::decodeAndGetInfo(
     const TransferInsPayload& payload) const {
     int src_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(payload.src_address_byte);
     int dst_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(payload.dst_address_byte);
@@ -163,7 +163,7 @@ std::pair<TransferInstructionInfo, MemoryConflictPayload> TransferUnit::decodeAn
                                      .dst_start_address_byte = payload.dst_address_byte,
                                      .data_width_byte = data_width_byte,
                                      .use_pipeline = use_pipeline};
-    MemoryConflictPayload conflict_payload{.pc = payload.ins.pc};
+    DataConflictPayload conflict_payload{.pc = payload.ins.pc};
     conflict_payload.read_memory_id.insert(src_memory_id);
     conflict_payload.write_memory_id.insert(dst_memory_id);
     conflict_payload.used_memory_id.insert({src_memory_id, dst_memory_id});

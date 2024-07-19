@@ -10,8 +10,6 @@
 
 namespace pimsim {
 
-static constexpr int SIMD_INSTRUCTION_OPCODE_BIT_LENGTH = 8;
-
 SIMDUnit::SIMDUnit(const char* name, const SIMDUnitConfig& config, const SimConfig& sim_config, Core* core, Clock* clk)
     : BaseModule(name, sim_config, core, clk), config_(config), simd_fsm_("SIMD_UNIT_FSM", clk) {
     simd_fsm_.input_.bind(simd_fsm_in_);
@@ -175,7 +173,7 @@ void SIMDUnit::processWriteSubmodule() {
         LOG(fmt::format("simd write start, pc: {}, batch: {}", payload.ins_info.ins.pc, payload.batch_info.batch_num));
 
         if (payload.batch_info.last_batch) {
-            finish_ins = true;
+            finish_ins_ = true;
             finish_ins_pc_ = payload.ins_info.ins.pc;
             finish_trigger_.notify(SC_ZERO_TIME);
         }
@@ -201,7 +199,7 @@ void SIMDUnit::processWriteSubmodule() {
 }
 
 void SIMDUnit::finishInstruction() {
-    finish_ins_port_.write(finish_ins);
+    finish_ins_port_.write(finish_ins_);
     finish_ins_pc_port_.write(finish_ins_pc_);
 }
 
@@ -238,7 +236,7 @@ std::pair<const SIMDInstructionConfig*, const SIMDFunctorConfig*> SIMDUnit::getS
     return {nullptr, nullptr};
 }
 
-std::pair<SIMDInstructionInfo, MemoryConflictPayload> SIMDUnit::decodeAndGetInfo(
+std::pair<SIMDInstructionInfo, DataConflictPayload> SIMDUnit::decodeAndGetInfo(
     const SIMDInstructionConfig* instruction, const SIMDFunctorConfig* functor, const SIMDInsPayload& payload) const {
     SIMDInputOutputInfo output = {payload.output_bit_width, payload.output_address_byte};
     std::vector<SIMDInputOutputInfo> vector_inputs;
@@ -253,7 +251,7 @@ std::pair<SIMDInstructionInfo, MemoryConflictPayload> SIMDUnit::decodeAndGetInfo
         }
     }
 
-    MemoryConflictPayload conflict_payload{.pc = payload.ins.pc};
+    DataConflictPayload conflict_payload{.pc = payload.ins.pc};
     for (const auto& vector_input : vector_inputs) {
         int read_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(vector_input.start_address_byte);
         conflict_payload.read_memory_id.insert(read_memory_id);

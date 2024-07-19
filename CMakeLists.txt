@@ -52,6 +52,10 @@ add_library(pim-simulator STATIC ""
         src/util/log.h
         src/core/transfer_unit/transfer_unit.cpp
         src/core/transfer_unit/transfer_unit.h
+        src/isa/isa.h
+        src/core/payload/payload_enum.cpp
+        src/core/scalar_unit/scalar_unit.cpp
+        src/core/scalar_unit/scalar_unit.h
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE
