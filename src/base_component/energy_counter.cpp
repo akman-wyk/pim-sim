@@ -10,13 +10,15 @@ double EnergyCounter::running_time_ = 0.0;
 bool EnergyCounter::set_running_time_ = false;
 
 EnergyCounter::EnergyCounter(const EnergyCounter& another)
-    : static_power_(another.static_power_), dynamic_energy_(another.dynamic_energy_), activity_time_(another.activity_time_) {}
+    : static_power_(another.static_power_)
+    , dynamic_energy_(another.dynamic_energy_)
+    , activity_time_(another.activity_time_) {}
 
 void EnergyCounter::clear() {
     static_power_ = 0.0;
     dynamic_energy_ = 0.0;
     activity_time_ = 0.0;
-    dynamic_time_tag_ = std::map<int, sc_core::sc_time>();
+    dynamic_time_tag_ = sc_time{0.0, SC_NS};
 }
 
 void EnergyCounter::setStaticPowerMW(double power) {
@@ -28,12 +30,11 @@ void EnergyCounter::addDynamicEnergyPJ(double latency, double power) {
     dynamic_energy_ += latency * power;
 }
 
-void EnergyCounter::addDynamicEnergyPJ(int tag, const sc_core::sc_time& time, double latency, double power) {
-    if (dynamic_time_tag_.find(tag) == dynamic_time_tag_.end()) {
-        dynamic_time_tag_.emplace(tag, time);
-        addDynamicEnergyPJ(latency, power);
-    } else if (dynamic_time_tag_[tag] != time) {
-        addDynamicEnergyPJ(latency, power);
+void EnergyCounter::addDynamicEnergyPJ(double latency, double power, const sc_core::sc_time& time_tag) {
+    if (dynamic_time_tag_ != time_tag) {
+        dynamic_time_tag_ = time_tag;
+        activity_time_ += latency;
+        dynamic_energy_ += latency * power;
     }
 }
 
@@ -91,4 +92,4 @@ EnergyCounter& EnergyCounter::operator+=(const EnergyCounter& another) {
     return *this;
 }
 
-}  // namespace pim
+}  // namespace pimsim

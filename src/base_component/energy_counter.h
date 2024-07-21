@@ -33,7 +33,7 @@ public:
     void setStaticPowerMW(double power);
 
     void addDynamicEnergyPJ(double latency, double power);
-    void addDynamicEnergyPJ(int tag, const sc_core::sc_time& time, double latency, double power);
+    void addDynamicEnergyPJ(double latency, double power, const sc_core::sc_time& time_tag);
 
     void addPipelineDynamicEnergyPJ(int unit_latency_cycle, int pipeline_length, double period, double power);
 
@@ -50,7 +50,7 @@ private:
     double dynamic_energy_ = 0.0;  // pJ
     double activity_time_ = 0.0;   // ns
 
-    std::map<int, sc_core::sc_time> dynamic_time_tag_;  // for dynamic energy record
+    sc_core::sc_time dynamic_time_tag_{0.0, SC_NS};  // for dynamic energy record
 };
 
-}  // namespace pim
+}  // namespace pimsim

@@ -66,12 +66,15 @@ public:
 private:
     static unsigned int getSIMDInstructionIdentityCode(unsigned int input_cnt, unsigned int opcode);
 
+    static void waitAndStartNextSubmodule(const SIMDSubmodulePayload& cur_payload,
+                                          SubmoduleSocket<SIMDSubmodulePayload>& next_submodule_socket);
+
     std::pair<const SIMDInstructionConfig*, const SIMDFunctorConfig*> getSIMDInstructionAndFunctor(
         const SIMDInsPayload& payload);
 
     std::pair<SIMDInstructionInfo, DataConflictPayload> decodeAndGetInfo(const SIMDInstructionConfig* instruction,
-                                                                           const SIMDFunctorConfig* functor,
-                                                                           const SIMDInsPayload& payload) const;
+                                                                         const SIMDFunctorConfig* functor,
+                                                                         const SIMDInsPayload& payload) const;
 
 public:
     sc_core::sc_in<SIMDInsPayload> id_simd_payload_port_;

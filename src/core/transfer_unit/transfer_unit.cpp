@@ -18,7 +18,7 @@ TransferUnit::TransferUnit(const char* name, const TransferUnitConfig& config, c
     transfer_fsm_.enable_.bind(id_ex_enable_port_);
     transfer_fsm_.output_.bind(transfer_fsm_out_);
 
-    SC_METHOD(checkTransferInst);
+    SC_METHOD(checkTransferInst)
     sensitive << id_transfer_payload_port_;
 
     SC_THREAD(processIssue)
@@ -47,24 +47,18 @@ void TransferUnit::processIssue() {
         data_conflict_port_.write(conflict_payload);
 
         int process_times = IntDivCeil(payload.size_byte, ins_info.data_width_byte);
+        TransferSubmodulePayload submodule_payload{.ins_info = ins_info};
         for (int batch = 0; batch < process_times; batch++) {
-            read_submodule_socket_.waitUtilFinishIfBusy();
-
-            bool first_batch = (batch == 0);
-            bool last_batch = (batch == process_times - 1);
-
-            if (first_batch) {
-                read_submodule_socket_.payload.ins_info = ins_info;
-            }
-            read_submodule_socket_.payload.batch_info = {
+            submodule_payload.batch_info = {
                 .batch_num = batch,
-                .batch_data_size_byte =
-                    last_batch ? payload.size_byte - batch * ins_info.data_width_byte : ins_info.data_width_byte,
-                .first_batch = first_batch,
-                .last_batch = last_batch};
-            read_submodule_socket_.start_exec.notify();
+                .batch_data_size_byte = (batch == process_times - 1)
+                                            ? payload.size_byte - batch * ins_info.data_width_byte
+                                            : ins_info.data_width_byte,
+                .first_batch = (batch == 0),
+                .last_batch = (batch == process_times - 1)};
+            waitAndStartNextSubmodule(submodule_payload, read_submodule_socket_);
 
-            if (!last_batch) {
+            if (!submodule_payload.batch_info.last_batch) {
                 wait(cur_ins_next_batch_);
             }
         }
@@ -76,8 +70,7 @@ void TransferUnit::processIssue() {
 
 void TransferUnit::processReadSubmodule() {
     while (true) {
-        wait(read_submodule_socket_.start_exec);
-        read_submodule_socket_.busy = true;
+        read_submodule_socket_.waitUntilStart();
 
         const auto& payload = read_submodule_socket_.payload;
         LOG(fmt::format("transfer read start, pc: {}, batch: {}", payload.ins_info.ins.pc,
@@ -88,26 +81,19 @@ void TransferUnit::processReadSubmodule() {
         int size_byte = payload.batch_info.batch_data_size_byte;
         local_memory_socket_.readData(payload.ins_info.ins, address_byte, size_byte);
 
-        write_submodule_socket_.waitUtilFinishIfBusy();
-        if (payload.batch_info.first_batch) {
-            write_submodule_socket_.payload.ins_info = payload.ins_info;
-        }
-        write_submodule_socket_.payload.batch_info = payload.batch_info;
-        write_submodule_socket_.start_exec.notify();
+        waitAndStartNextSubmodule(payload, write_submodule_socket_);
 
         if (!payload.batch_info.last_batch && payload.ins_info.use_pipeline) {
             cur_ins_next_batch_.notify();
         }
 
-        read_submodule_socket_.finish_exec.notify();
-        read_submodule_socket_.busy = false;
+        read_submodule_socket_.finish();
     }
 }
 
 void TransferUnit::processWriteSubmodule() {
     while (true) {
-        wait(write_submodule_socket_.start_exec);
-        write_submodule_socket_.busy = true;
+        write_submodule_socket_.waitUntilStart();
 
         const auto& payload = write_submodule_socket_.payload;
         LOG(fmt::format("transfer write start, pc: {}, batch: {}", payload.ins_info.ins.pc,
@@ -131,8 +117,7 @@ void TransferUnit::processWriteSubmodule() {
             cur_ins_next_batch_.notify();
         }
 
-        write_submodule_socket_.finish_exec.notify();
-        write_submodule_socket_.busy = false;
+        write_submodule_socket_.finish();
 
         if (payload.batch_info.last_batch && isEndPC(payload.ins_info.ins.pc) && sim_mode_ == +SimMode::run_one_round) {
             finish_run_port_.write(true);
@@ -147,6 +132,16 @@ void TransferUnit::finishInstruction() {
 
 void TransferUnit::bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit) {
     local_memory_socket_.bindLocalMemoryUnit(local_memory_unit);
+}
+
+void TransferUnit::waitAndStartNextSubmodule(const pimsim::TransferSubmodulePayload& cur_payload,
+                                             SubmoduleSocket<pimsim::TransferSubmodulePayload>& next_submodule_socket) {
+    next_submodule_socket.waitUntilFinishIfBusy();
+    if (cur_payload.batch_info.first_batch) {
+        next_submodule_socket.payload.ins_info = cur_payload.ins_info;
+    }
+    next_submodule_socket.payload.batch_info = cur_payload.batch_info;
+    next_submodule_socket.start_exec.notify();
 }
 
 std::pair<TransferInstructionInfo, DataConflictPayload> TransferUnit::decodeAndGetInfo(

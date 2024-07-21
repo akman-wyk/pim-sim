@@ -53,6 +53,9 @@ public:
     void bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit);
 
 private:
+    static void waitAndStartNextSubmodule(const TransferSubmodulePayload& cur_payload,
+                                          SubmoduleSocket<TransferSubmodulePayload>& next_submodule_socket);
+
     std::pair<TransferInstructionInfo, DataConflictPayload> decodeAndGetInfo(const TransferInsPayload& payload) const;
 
 public:

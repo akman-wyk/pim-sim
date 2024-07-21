@@ -61,6 +61,9 @@ add_library(pim-simulator STATIC ""
         src/base_component/register.h
         src/base_component/reg_unit_socket.cpp
         src/base_component/reg_unit_socket.h
+        src/core/pim_unit/macro.cpp
+        src/core/pim_unit/macro.h
+        src/core/pim_unit/pim_payload.h
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE
