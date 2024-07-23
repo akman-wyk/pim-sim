@@ -244,6 +244,8 @@ struct PimUnitConfig {
     bool bit_sparse{false};
     PimBitSparseConfig bit_sparse_config{};
 
+    bool input_bit_sparse{false};
+
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(PimUnitConfig)
 };

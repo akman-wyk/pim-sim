@@ -10,6 +10,7 @@ namespace pimsim {
 
 struct MacroPayload {
     int ins_pc{-1}, sub_ins_num{-1};
+    bool last_ins{false}, last_sub_ins{false};
 
     int row{0};
     int input_bit_width{0};
@@ -20,6 +21,7 @@ struct MacroPayload {
 
 struct MacroSubInsInfo {
     int ins_pc{-1}, sub_ins_num{-1};
+    bool last_ins{false}, last_sub_ins{false};
     int compartment_num{0}, element_col_num{0};
 };
 

@@ -1,0 +1,77 @@
+{
+  "code": [
+    {
+      "ins_pc": 1,
+      "sub_ins_num": 1,
+      "last_ins": true,
+      "last_sub_ins": false,
+      "row": 0,
+      "input_bit_width": 8,
+      "activation_element_col_num": 16,
+      "inputs": [1, 2, 4, 8, 16, 32, 64, 128, 255, 254, 3, 24, 65, 33, 127, 192],
+      "comments": "8 batch"
+    },
+    {
+      "ins_pc": 1,
+      "sub_ins_num": 2,
+      "last_ins": true,
+      "last_sub_ins": false,
+      "row": 0,
+      "input_bit_width": 8,
+      "activation_element_col_num": 16,
+      "inputs": [1, 2, 0, 4, 8, 16, 0, 64, 128, 0, 78, 203],
+      "comments": "7 batch"
+    },
+    {
+      "ins_pc": 1,
+      "sub_ins_num": 3,
+      "last_ins": true,
+      "last_sub_ins": false,
+      "row": 0,
+      "input_bit_width": 8,
+      "activation_element_col_num": 8,
+      "inputs": [1, 4, 16, 64, 128, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      "comments": "5 batch"
+    },
+    {
+      "ins_pc": 1,
+      "sub_ins_num": 4,
+      "last_ins": true,
+      "last_sub_ins": false,
+      "row": 0,
+      "input_bit_width": 8,
+      "activation_element_col_num": 12,
+      "inputs": [0, 1, 64, 0, 0, 128, 192, 0, 193, 0],
+      "comments": "3 batch"
+    },
+    {
+      "ins_pc": 1,
+      "sub_ins_num": 5,
+      "last_ins": true,
+      "last_sub_ins": false,
+      "row": 0,
+      "input_bit_width": 8,
+      "activation_element_col_num": 16,
+      "inputs": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+      "comments": "0 batch"
+    },
+    {
+      "ins_pc": 1,
+      "sub_ins_num": 6,
+      "last_ins": true,
+      "last_sub_ins": true,
+      "row": 0,
+      "input_bit_width": 8,
+      "activation_element_col_num": 16,
+      "inputs": [16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16],
+      "comments": "1 batch"
+    }
+  ],
+  "config": {
+    "independent_ipu": true
+  },
+  "expected": {
+    "time_ns": 235,
+    "energy_pj": 42410
+  }
+}

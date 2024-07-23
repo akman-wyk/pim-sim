@@ -18,7 +18,7 @@ void EnergyCounter::clear() {
     static_power_ = 0.0;
     dynamic_energy_ = 0.0;
     activity_time_ = 0.0;
-    dynamic_time_tag_ = sc_time{0.0, SC_NS};
+    dynamic_time_tag_map_.clear();
 }
 
 void EnergyCounter::setStaticPowerMW(double power) {
@@ -30,11 +30,14 @@ void EnergyCounter::addDynamicEnergyPJ(double latency, double power) {
     dynamic_energy_ += latency * power;
 }
 
-void EnergyCounter::addDynamicEnergyPJ(double latency, double power, const sc_core::sc_time& time_tag) {
-    if (dynamic_time_tag_ != time_tag) {
-        dynamic_time_tag_ = time_tag;
-        activity_time_ += latency;
-        dynamic_energy_ += latency * power;
+void EnergyCounter::addDynamicEnergyPJ(double latency, double power, const sc_core::sc_time& time_tag, int id_tag) {
+    auto found = dynamic_time_tag_map_.find(id_tag);
+    if (found == dynamic_time_tag_map_.end()) {
+        addDynamicEnergyPJ(latency, power);
+        dynamic_time_tag_map_.emplace(id_tag, time_tag);
+    } else if (found->second != time_tag) {
+        addDynamicEnergyPJ(latency, power);
+        dynamic_time_tag_map_[id_tag] = time_tag;
     }
 }
 

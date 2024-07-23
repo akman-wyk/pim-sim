@@ -472,11 +472,13 @@ void to_json(nlohmann::ordered_json& j, const PimUnitConfig& t) {
     if (t.bit_sparse) {
         j["bit_sparse_config"] = t.bit_sparse_config;
     }
+    j["input_bit_sparse"] = t.input_bit_sparse;
 }
 
 DEFINE_TYPE_FROM_JSON_FUNCTION_WITH_DEFAULT(PimUnitConfig, macro_total_cnt, macro_group_size_configurable_values,
                                             macro_size, address_space, ipu, sram, adder_tree, shift_adder, result_adder,
-                                            value_sparse, value_sparse_config, bit_sparse, bit_sparse_config)
+                                            value_sparse, value_sparse_config, bit_sparse, bit_sparse_config,
+                                            input_bit_sparse)
 
 // LocalMemoryUnit
 bool RAMConfig::checkValid() const {

@@ -5,7 +5,7 @@
       "name": "SIMDUnitTest",
       "test_cases": [
         {
-          "config_file": "config/config_template.json",
+          "config_file": "config/test/SIMD_Transfer_test_config.json",
           "instruction_file": "test_data/simd_unit_test_data_1.json",
           "report_file": "report/SIMD_unit_test_report.txt"
         }
@@ -15,9 +15,62 @@
       "name": "TransferUnitTest",
       "test_cases": [
         {
-          "config_file": "config/config_template.json",
+          "config_file": "config/test/SIMD_Transfer_test_config.json",
           "instruction_file": "test_data/transfer_unit_test_data_1.json",
           "report_file": "report/Transfer_unit_test_report.txt"
+        }
+      ]
+    },
+    {
+      "name": "MacroTest",
+      "test_cases": [
+        {
+          "comments": "Test for base comfig with no independent ipu",
+          "config_file": "config/test/macro_test_config_base.json",
+          "instruction_file": "test_data/macro/macro_test_data_base.json",
+          "report_file": "report/Macro_test_report.txt"
+        },
+        {
+          "comments": "Test for base comfig with independent ipu",
+          "config_file": "config/test/macro_test_config_base.json",
+          "instruction_file": "test_data/macro/macro_test_data_base_ipu.json",
+          "report_file": "report/Macro_test_report.txt"
+        },
+        {
+          "comments": "Test for comfig with weight bit sparsity and no independent ipu",
+          "config_file": "config/test/macro_test_config_wbs.json",
+          "instruction_file": "test_data/macro/macro_test_data_wbs.json",
+          "report_file": "report/Macro_test_report.txt"
+        },
+        {
+          "comments": "Test for comfig with weight bit sparsity and independent ipu",
+          "config_file": "config/test/macro_test_config_wbs.json",
+          "instruction_file": "test_data/macro/macro_test_data_wbs_ipu.json",
+          "report_file": "report/Macro_test_report.txt"
+        },
+        {
+          "comments": "Test for comfig with input bit sparsity and no independent ipu",
+          "config_file": "config/test/macro_test_config_ibs.json",
+          "instruction_file": "test_data/macro/macro_test_data_ibs.json",
+          "report_file": "report/Macro_test_report.txt"
+        },
+        {
+          "comments": "Test for comfig with input bit sparsity and independent ipu",
+          "config_file": "config/test/macro_test_config_ibs.json",
+          "instruction_file": "test_data/macro/macro_test_data_ibs_ipu.json",
+          "report_file": "report/Macro_test_report.txt"
+        },
+        {
+          "comments": "Test for comfig with input bit sparsity and weight bit sparsity and no independent ipu",
+          "config_file": "config/test/macro_test_config_wbs_ibs.json",
+          "instruction_file": "test_data/macro/macro_test_data_ibs_wbs.json",
+          "report_file": "report/Macro_test_report.txt"
+        },
+        {
+          "comments": "Test for comfig with input bit sparsity and weight bit sparsity and independent ipu",
+          "config_file": "config/test/macro_test_config_wbs_ibs.json",
+          "instruction_file": "test_data/macro/macro_test_data_ibs_wbs_ipu.json",
+          "report_file": "report/Macro_test_report.txt"
         }
       ]
     }

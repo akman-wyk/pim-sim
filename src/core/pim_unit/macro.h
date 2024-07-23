@@ -3,6 +3,8 @@
 //
 
 #pragma once
+#include <functional>
+
 #include "base_component/base_module.h"
 #include "base_component/fsm.h"
 #include "base_component/submodule_socket.h"
@@ -26,16 +28,17 @@ public:
     static void waitAndStartNextSubmodule(const MacroSubmodulePayload& cur_payload,
                                           SubmoduleSocket<MacroSubmodulePayload>& next_submodule_socket);
 
+    void setFinishFunction(std::function<void()> finish_func);
+
 private:
-    [[noreturn]] void processIssue();
-    [[noreturn]] void processIPUSubmodule();
+    [[noreturn]] void processIPUAndIssue();
     [[noreturn]] void processSRAMSubmodule();
     [[noreturn]] void processPostProcessSubmodule();
     [[noreturn]] void processAdderTreeSubmodule1();
     [[noreturn]] void processAdderTreeSubmodule2();
     [[noreturn]] void processShiftAdderSubmodule();
 
-    static int getBatchCount(const MacroPayload& payload, int valid_input_cnt);
+    std::pair<int, int> getBatchCountAndActivationCompartmentCount(const MacroPayload& payload);
 
 private:
     const PimUnitConfig& config_;
@@ -44,8 +47,6 @@ private:
 
     SubmoduleSocket<MacroPayload> macro_socket_{};
 
-    sc_core::sc_event next_batch_;
-    SubmoduleSocket<MacroSubmodulePayload> ipu_socket_{};
     SubmoduleSocket<MacroSubmodulePayload> sram_socket_{};
     SubmoduleSocket<MacroSubmodulePayload> post_process_socket_{};
     SubmoduleSocket<MacroSubmodulePayload> adder_tree_socket_1_{};
@@ -57,6 +58,9 @@ private:
     EnergyCounter post_process_energy_counter_;
     EnergyCounter adder_tree_energy_counter_;
     EnergyCounter shift_adder_energy_counter_;
+
+    // for test
+    std::function<void()> finish_func_{};
 };
 
 }  // namespace pimsim

@@ -13,11 +13,13 @@
 namespace pimsim {
 
 struct UnitTestCaseConfig {
+    std::string comments{};
     std::string config_file;
     std::string instruction_file;
     std::string report_file;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(UnitTestCaseConfig, config_file, instruction_file, report_file)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(UnitTestCaseConfig, comments, config_file, instruction_file,
+                                                report_file)
 };
 
 struct UnitTestConfig {
@@ -34,12 +36,15 @@ struct TestConfig {
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(TestConfig, root_dir, unit_test_list)
 };
 
-void unit_test(const std::string& root_dir, const UnitTestConfig& unit_test_config) {
+void unit_test(const std::string& root_dir, const UnitTestConfig& unit_test_config, bool& all_tests_passed) {
     std::cout << fmt::format("\tStart {}", unit_test_config.name) << std::endl;
 
     for (int i = 0; i < unit_test_config.test_cases.size(); i++) {
         const auto& test_case_config = unit_test_config.test_cases[i];
         std::cout << fmt::format("\t\tStart test case {}: ", i);
+        if (!test_case_config.comments.empty()) {
+            std::cout << fmt::format("{}\n\t\t\t", test_case_config.comments);
+        }
 
         auto config_file = fmt::format("{}/{}", root_dir, test_case_config.config_file);
         auto instruction_file = fmt::format("{}/{}", root_dir, test_case_config.instruction_file);
@@ -50,12 +55,13 @@ void unit_test(const std::string& root_dir, const UnitTestConfig& unit_test_conf
         if (int result = system(cmd.c_str()); result == 0) {
             std::cout << "Passed" << std::endl;
         } else {
+            all_tests_passed = false;
             std::cout << "Failed" << std::endl;
         }
     }
 }
 
-void test_wrap(const char* test_config_file) {
+void test_wrap(const char* test_config_file, bool& all_tests_passed) {
     std::ifstream ifs;
     ifs.open(test_config_file);
     auto j = nlohmann::json::parse(ifs);
@@ -65,7 +71,7 @@ void test_wrap(const char* test_config_file) {
     // Unit Tests
     std::cout << "Start Unit Tests" << std::endl;
     for (const auto& unit_test_config : test_config.unit_test_list) {
-        unit_test(test_config.root_dir, unit_test_config);
+        unit_test(test_config.root_dir, unit_test_config, all_tests_passed);
     }
     std::cout << "End Unit Tests" << std::endl;
 }
@@ -79,6 +85,12 @@ int main(int argc, char* argv[]) {
     }
 
     auto* test_config_file = argv[1];
-    pimsim::test_wrap(test_config_file);
+    bool all_tests_passed = true;
+    pimsim::test_wrap(test_config_file, all_tests_passed);
+    if (all_tests_passed) {
+        std::cout << "All Tests Passed!" << std::endl;
+    } else {
+        std::cout << "Some Tests Failed!!!!" << std::endl;
+    }
     return 0;
 }

@@ -115,6 +115,11 @@ add_dependencies(TransferUnitTest pim-simulator)
 target_link_libraries(TransferUnitTest PRIVATE pim-simulator)
 target_include_directories(TransferUnitTest PRIVATE src)
 
+add_executable(MacroTest "" test/macro_test.cpp)
+add_dependencies(MacroTest pim-simulator)
+target_link_libraries(MacroTest PRIVATE pim-simulator)
+target_include_directories(MacroTest PRIVATE src)
+
 add_executable(TestWrap "" test/test_wrap.cpp)
 add_dependencies(TestWrap nlohmann_json fmt)
 target_link_libraries(TestWrap PUBLIC nlohmann_json fmt)
