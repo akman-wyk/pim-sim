@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#include "better-enums/enum.h"
+
 namespace pimsim {
 
 struct MacroPayload {
@@ -36,4 +38,51 @@ struct MacroSubmodulePayload {
     MacroBatchInfo batch_info;
 };
 
-}
+BETTER_ENUM(PimInsOutputType, int,  // NOLINT(*-no-recursion, *-explicit-constructor)
+            no_output = 0, only_output, output_sum, output_sum_move)
+
+struct PimWriteOutputPayload {
+    PimInsOutputType output_type{PimInsOutputType::no_output};
+    int output_addr{0};
+    int out_n{0};
+    std::vector<unsigned char> out_mask{};
+};
+
+struct MacroGroupSubInsInfo {
+    // ins info and sub ins info
+    int ins_pc{-1}, sub_ins_num{-1};
+    bool last_ins{false}, last_sub_ins{false};
+
+    // group info
+    bool last_group{false};
+
+    // result adder info
+    int activation_element_col_num{0};
+
+    // output info
+    PimWriteOutputPayload output_info{};
+};
+
+struct MacroGroupPayload {
+    MacroGroupSubInsInfo sub_ins_info{};
+
+    // macro compute info
+    int row{0};
+    int input_bit_width{0};
+
+    // inputs
+    std::vector<std::vector<unsigned long long>> macro_inputs{};
+};
+
+struct MacroGroupControllerPayload {
+    MacroGroupSubInsInfo sub_ins_info{};
+
+    int input_bit_width{0};
+};
+
+struct MacroGroupSubmodulePayload {
+    MacroGroupSubInsInfo sub_ins_info{};
+    MacroBatchInfo batch_info{};
+};
+
+}  // namespace pimsim

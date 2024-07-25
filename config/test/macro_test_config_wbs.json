@@ -27,7 +27,7 @@
       },
       "pim_unit_config": {
         "macro_total_cnt": 1,
-        "macro_group_size_configurable_values": [1],
+        "macro_group_size": 1,
         "macro_size": {
           "compartment_cnt_per_macro": 16,
           "element_cnt_per_compartment": 16,

@@ -420,20 +420,19 @@ DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimBitSparseConfig, mask_bit_widt
                                                reg_buffer_dynamic_power_mW)
 
 bool PimUnitConfig::checkValid() const {
-    if (!check_positive(macro_total_cnt, macro_group_size_configurable_values)) {
+    if (!check_positive(macro_total_cnt, macro_group_size)) {
         std::cerr << "PimUnitConfig not valid, 'macro_total_cnt, macro_group_size_configurable_values' must be positive"
                   << std::endl;
         return false;
     }
-    for (int macro_group_size : macro_group_size_configurable_values) {
-        if (macro_total_cnt % macro_group_size != 0) {
-            std::cerr << fmt::format(
-                             "PimUnitConfig not valid, macro group size '{}' cannot divide macro total count '{}'",
-                             macro_group_size, macro_total_cnt)
-                      << std::endl;
-            return false;
-        }
+
+    if (macro_group_size == 0 || macro_total_cnt % macro_group_size != 0) {
+        std::cerr << fmt::format("PimUnitConfig not valid, macro group size '{}' cannot divide macro total count '{}'",
+                                 macro_group_size, macro_total_cnt)
+                  << std::endl;
+        return false;
     }
+
     if (const bool valid = macro_size.checkValid() && address_space.checkValid() && ipu.checkValid("ipu") &&
                            sram.checkValid() && adder_tree.checkValid("adder_tree") &&
                            shift_adder.checkValid("shift_adder") && result_adder.checkValid("result_adder") &&
@@ -456,7 +455,7 @@ bool PimUnitConfig::checkValid() const {
 
 void to_json(nlohmann::ordered_json& j, const PimUnitConfig& t) {
     j["macro_total_cnt"] = t.macro_total_cnt;
-    j["macro_group_size_configurable_values"] = t.macro_group_size_configurable_values;
+    j["macro_group_size"] = t.macro_group_size;
     j["macro_size"] = t.macro_size;
     j["address_space"] = t.address_space;
     j["ipu"] = t.ipu;
@@ -475,10 +474,9 @@ void to_json(nlohmann::ordered_json& j, const PimUnitConfig& t) {
     j["input_bit_sparse"] = t.input_bit_sparse;
 }
 
-DEFINE_TYPE_FROM_JSON_FUNCTION_WITH_DEFAULT(PimUnitConfig, macro_total_cnt, macro_group_size_configurable_values,
-                                            macro_size, address_space, ipu, sram, adder_tree, shift_adder, result_adder,
-                                            value_sparse, value_sparse_config, bit_sparse, bit_sparse_config,
-                                            input_bit_sparse)
+DEFINE_TYPE_FROM_JSON_FUNCTION_WITH_DEFAULT(PimUnitConfig, macro_total_cnt, macro_group_size, macro_size, address_space,
+                                            ipu, sram, adder_tree, shift_adder, result_adder, value_sparse,
+                                            value_sparse_config, bit_sparse, bit_sparse_config, input_bit_sparse)
 
 // LocalMemoryUnit
 bool RAMConfig::checkValid() const {

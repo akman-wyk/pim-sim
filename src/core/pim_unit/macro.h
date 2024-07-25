@@ -18,7 +18,7 @@ public:
     SC_HAS_PROCESS(Macro);
 
     Macro(const char* name, const PimUnitConfig& config, const SimConfig& sim_config, Core* core, Clock* clk,
-          bool independent_ipu);
+          bool independent_ipu, SubmoduleSocket<MacroGroupSubmodulePayload>* result_adder_socket_ptr = nullptr);
 
     void startExecute(MacroPayload payload);
     void waitUntilFinishIfBusy();
@@ -28,7 +28,7 @@ public:
     static void waitAndStartNextSubmodule(const MacroSubmodulePayload& cur_payload,
                                           SubmoduleSocket<MacroSubmodulePayload>& next_submodule_socket);
 
-    void setFinishFunction(std::function<void()> finish_func);
+    void setFinishRunFunction(std::function<void()> finish_func);
 
 private:
     [[noreturn]] void processIPUAndIssue();
@@ -53,6 +53,8 @@ private:
     SubmoduleSocket<MacroSubmodulePayload> adder_tree_socket_2_{};
     SubmoduleSocket<MacroSubmodulePayload> shift_adder_socket_{};
 
+    SubmoduleSocket<MacroGroupSubmodulePayload>* result_adder_socket_ptr_{nullptr};
+
     EnergyCounter ipu_energy_counter_;
     EnergyCounter sram_energy_counter_;
     EnergyCounter post_process_energy_counter_;
@@ -60,7 +62,7 @@ private:
     EnergyCounter shift_adder_energy_counter_;
 
     // for test
-    std::function<void()> finish_func_{};
+    std::function<void()> finish_run_func_{};
 };
 
 }  // namespace pimsim

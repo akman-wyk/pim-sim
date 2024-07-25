@@ -6,6 +6,7 @@
 #include "core/local_memory_unit/local_memory_unit.h"
 #include "core/transfer_unit/transfer_unit.h"
 #include "fmt/core.h"
+#include "test_macro.h"
 #include "util/log.h"
 #include "util/util.h"
 
@@ -174,7 +175,7 @@ int sc_main(int argc, char* argv[]) {
 
     if (argc != 4) {
         std::cout << "Usage: ./TransferUnitTest [config_file] [instruction_file] [report_file]" << std::endl;
-        return 1;
+        return INVALID_USAGE;
     }
 
     auto* config_file = argv[1];
@@ -188,7 +189,7 @@ int sc_main(int argc, char* argv[]) {
     auto config = config_j.get<Config>();
     if (!config.checkValid()) {
         std::cout << "Config not valid" << std::endl;
-        return 1;
+        return INVALID_CONFIG;
     }
 
     std::ifstream ins_ifs;
@@ -210,9 +211,9 @@ int sc_main(int argc, char* argv[]) {
     if (DoubleEqual(reporter.getLatencyNs(), test_info.expected.time_ns) &&
         DoubleEqual(reporter.getTotalEnergyPJ(), test_info.expected.energy_pj)) {
         std::cout << "Test Pass" << std::endl;
-        return 0;
+        return TEST_PASSED;
     } else {
         std::cout << "Test Failed" << std::endl;
-        return 1;
+        return TEST_FAILED;
     }
 }

@@ -220,8 +220,8 @@ struct AddressSpaceConfig {
 
 struct PimUnitConfig {
     // macro scale config
-    int macro_total_cnt{};
-    std::vector<int> macro_group_size_configurable_values{};
+    int macro_total_cnt{0};
+    int macro_group_size{0};
     PimMacroSizeConfig macro_size{};
 
     // address space

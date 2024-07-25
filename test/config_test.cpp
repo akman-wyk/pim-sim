@@ -33,8 +33,7 @@ Config get_config() {
 
     config.chip_config.core_config.pim_unit_config.address_space =
         AddressSpaceConfig{.offset_byte = 0, .size_byte = 1024};
-    config.chip_config.core_config.pim_unit_config.macro_group_size_configurable_values.emplace_back(16);
-    config.chip_config.core_config.pim_unit_config.macro_group_size_configurable_values.emplace_back(8);
+    config.chip_config.core_config.pim_unit_config.macro_group_size = 16;
     config.chip_config.core_config.pim_unit_config.value_sparse = true;
     config.chip_config.core_config.pim_unit_config.bit_sparse = true;
 

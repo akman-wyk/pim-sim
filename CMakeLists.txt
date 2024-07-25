@@ -64,6 +64,10 @@ add_library(pim-simulator STATIC ""
         src/core/pim_unit/macro.cpp
         src/core/pim_unit/macro.h
         src/core/pim_unit/pim_payload.h
+        src/core/pim_unit/macro_group.cpp
+        src/core/pim_unit/macro_group.h
+        src/core/pim_unit/macro_group_controller.cpp
+        src/core/pim_unit/macro_group_controller.h
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE

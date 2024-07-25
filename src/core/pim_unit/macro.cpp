@@ -10,11 +10,13 @@
 namespace pimsim {
 
 Macro::Macro(const char *name, const pimsim::PimUnitConfig &config, const pimsim::SimConfig &sim_config,
-             pimsim::Core *core, pimsim::Clock *clk, bool independent_ipu)
+             pimsim::Core *core, pimsim::Clock *clk, bool independent_ipu,
+             SubmoduleSocket<MacroGroupSubmodulePayload> *result_adder_socket_ptr)
     : BaseModule(name, sim_config, core, clk)
     , config_(config)
     , macro_size_(config.macro_size)
-    , independent_ipu_(independent_ipu) {
+    , independent_ipu_(independent_ipu)
+    , result_adder_socket_ptr_(result_adder_socket_ptr) {
     SC_THREAD(processIPUAndIssue)
     SC_THREAD(processSRAMSubmodule)
     SC_THREAD(processPostProcessSubmodule)
@@ -48,15 +50,15 @@ void Macro::waitUntilFinishIfBusy() {
 }
 
 EnergyReporter Macro::getEnergyReporter() {
-    EnergyReporter pim_unit_reporter;
+    EnergyReporter macro_reporter;
     if (independent_ipu_) {
-        pim_unit_reporter.addSubModule("ipu", EnergyReporter{ipu_energy_counter_});
+        macro_reporter.addSubModule("ipu", EnergyReporter{ipu_energy_counter_});
     }
-    pim_unit_reporter.addSubModule("sram read", EnergyReporter{sram_energy_counter_});
-    pim_unit_reporter.addSubModule("post process", EnergyReporter{post_process_energy_counter_});
-    pim_unit_reporter.addSubModule("adder tree", EnergyReporter{adder_tree_energy_counter_});
-    pim_unit_reporter.addSubModule("shift adder", EnergyReporter{shift_adder_energy_counter_});
-    return std::move(pim_unit_reporter);
+    macro_reporter.addSubModule("sram read", EnergyReporter{sram_energy_counter_});
+    macro_reporter.addSubModule("post process", EnergyReporter{post_process_energy_counter_});
+    macro_reporter.addSubModule("adder tree", EnergyReporter{adder_tree_energy_counter_});
+    macro_reporter.addSubModule("shift adder", EnergyReporter{shift_adder_energy_counter_});
+    return std::move(macro_reporter);
 }
 
 void Macro::waitAndStartNextSubmodule(const pimsim::MacroSubmodulePayload &cur_payload,
@@ -69,8 +71,8 @@ void Macro::waitAndStartNextSubmodule(const pimsim::MacroSubmodulePayload &cur_p
     next_submodule_socket.start_exec.notify();
 }
 
-void Macro::setFinishFunction(std::function<void()> finish_func) {
-    finish_func_ = std::move(finish_func);
+void Macro::setFinishRunFunction(std::function<void()> finish_func) {
+    finish_run_func_ = std::move(finish_func);
 }
 
 void Macro::processIPUAndIssue() {
@@ -206,9 +208,13 @@ void Macro::processShiftAdderSubmodule() {
         shift_adder_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
         wait(latency, SC_NS);
 
+        if (payload.batch_info.last_batch && result_adder_socket_ptr_ != nullptr) {
+            result_adder_socket_ptr_->waitUntilFinishIfBusy();
+        }
+
         if (payload.sub_ins_info.last_ins && payload.sub_ins_info.last_sub_ins && payload.batch_info.last_batch &&
-            finish_func_) {
-            finish_func_();
+            finish_run_func_) {
+            finish_run_func_();
         }
 
         shift_adder_socket_.finish();

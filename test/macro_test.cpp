@@ -6,6 +6,7 @@
 #include "config/config.h"
 #include "core/pim_unit/macro.h"
 #include "core/pim_unit/pim_payload.h"
+#include "test_macro.h"
 #include "util/macro_scope.h"
 #include "util/util.h"
 
@@ -48,7 +49,7 @@ public:
 
         SC_THREAD(issue)
 
-        macro_.setFinishFunction([&]() {
+        macro_.setFinishRunFunction([&]() {
             this->running_time_ = sc_core::sc_time_stamp();
             sc_stop();
         });
@@ -96,7 +97,7 @@ int sc_main(int argc, char* argv[]) {
 
     if (argc != 4) {
         std::cout << "Usage: ./MacroTest [config_file] [instruction_file] [report_file]" << std::endl;
-        return 1;
+        return INVALID_USAGE;
     }
 
     auto* config_file = argv[1];
@@ -110,7 +111,7 @@ int sc_main(int argc, char* argv[]) {
     auto config = config_j.get<Config>();
     if (!config.checkValid()) {
         std::cout << "Config not valid" << std::endl;
-        return 1;
+        return INVALID_CONFIG;
     }
 
     std::ifstream ins_ifs;
@@ -132,9 +133,9 @@ int sc_main(int argc, char* argv[]) {
     if (DoubleEqual(reporter.getLatencyNs(), test_info.expected.time_ns) &&
         DoubleEqual(reporter.getTotalEnergyPJ(), test_info.expected.energy_pj)) {
         std::cout << "Test Pass" << std::endl;
-        return 0;
+        return TEST_PASSED;
     } else {
         std::cout << "Test Failed" << std::endl;
-        return 1;
+        return TEST_FAILED;
     }
 }
