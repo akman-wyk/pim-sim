@@ -124,6 +124,11 @@ add_dependencies(MacroTest pim-simulator)
 target_link_libraries(MacroTest PRIVATE pim-simulator)
 target_include_directories(MacroTest PRIVATE src)
 
+add_executable(MacroGroupTest "" test/macro_group_test.cpp)
+add_dependencies(MacroGroupTest pim-simulator)
+target_link_libraries(MacroGroupTest PRIVATE pim-simulator)
+target_include_directories(MacroGroupTest PRIVATE src)
+
 add_executable(TestWrap "" test/test_wrap.cpp)
 add_dependencies(TestWrap nlohmann_json fmt)
 target_link_libraries(TestWrap PUBLIC nlohmann_json fmt)

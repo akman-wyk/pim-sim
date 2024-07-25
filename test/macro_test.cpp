@@ -27,15 +27,6 @@ struct MacroTestInfo {
     MacroExpectedInfo expected{};
 };
 
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroPayload, ins_pc, sub_ins_num, last_ins, last_sub_ins, row,
-                                               input_bit_width, activation_element_col_num, inputs)
-
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroTestConfig, independent_ipu)
-
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroExpectedInfo, time_ns, energy_pj)
-
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroTestInfo, code, config, expected)
-
 class MacroTestModule : public BaseModule {
 public:
     SC_HAS_PROCESS(MacroTestModule);
@@ -87,6 +78,17 @@ private:
 
     sc_core::sc_time running_time_;
 };
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimInsInfo, ins_pc, sub_ins_num, last_ins, last_sub_ins)
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroPayload, pim_ins_info, row, input_bit_width,
+                                               activation_element_col_num, inputs)
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroTestConfig, independent_ipu)
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroExpectedInfo, time_ns, energy_pj)
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroTestInfo, code, config, expected)
 
 }  // namespace pimsim
 

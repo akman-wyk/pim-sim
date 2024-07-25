@@ -1,10 +1,12 @@
 {
   "code": [
     {
-      "ins_pc": 1,
-      "sub_ins_num": 1,
-      "last_ins": true,
-      "last_sub_ins": false,
+      "pim_ins_info": {
+        "ins_pc": 1,
+        "sub_ins_num": 1,
+        "last_ins": true,
+        "last_sub_ins": false
+      },
       "row": 0,
       "input_bit_width": 8,
       "activation_element_col_num": 16,
@@ -12,10 +14,12 @@
       "comments": "8 batch"
     },
     {
-      "ins_pc": 1,
-      "sub_ins_num": 2,
-      "last_ins": true,
-      "last_sub_ins": false,
+      "pim_ins_info": {
+        "ins_pc": 1,
+        "sub_ins_num": 2,
+        "last_ins": true,
+        "last_sub_ins": false
+      },
       "row": 0,
       "input_bit_width": 8,
       "activation_element_col_num": 16,
@@ -23,10 +27,12 @@
       "comments": "7 batch"
     },
     {
-      "ins_pc": 1,
-      "sub_ins_num": 3,
-      "last_ins": true,
-      "last_sub_ins": false,
+      "pim_ins_info": {
+        "ins_pc": 1,
+        "sub_ins_num": 3,
+        "last_ins": true,
+        "last_sub_ins": false
+      },
       "row": 0,
       "input_bit_width": 8,
       "activation_element_col_num": 8,
@@ -34,10 +40,12 @@
       "comments": "5 batch"
     },
     {
-      "ins_pc": 1,
-      "sub_ins_num": 4,
-      "last_ins": true,
-      "last_sub_ins": false,
+      "pim_ins_info": {
+        "ins_pc": 1,
+        "sub_ins_num": 4,
+        "last_ins": true,
+        "last_sub_ins": false
+      },
       "row": 0,
       "input_bit_width": 8,
       "activation_element_col_num": 12,
@@ -45,10 +53,12 @@
       "comments": "3 batch"
     },
     {
-      "ins_pc": 1,
-      "sub_ins_num": 5,
-      "last_ins": true,
-      "last_sub_ins": false,
+      "pim_ins_info": {
+        "ins_pc": 1,
+        "sub_ins_num": 5,
+        "last_ins": true,
+        "last_sub_ins": false
+      },
       "row": 0,
       "input_bit_width": 8,
       "activation_element_col_num": 16,
@@ -56,10 +66,12 @@
       "comments": "0 batch"
     },
     {
-      "ins_pc": 1,
-      "sub_ins_num": 6,
-      "last_ins": true,
-      "last_sub_ins": true,
+      "pim_ins_info": {
+        "ins_pc": 1,
+        "sub_ins_num": 6,
+        "last_ins": true,
+        "last_sub_ins": true
+      },
       "row": 0,
       "input_bit_width": 8,
       "activation_element_col_num": 16,

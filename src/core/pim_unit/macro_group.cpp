@@ -53,8 +53,9 @@ void MacroGroup::processIssue() {
 
         auto &payload = macro_group_socket_.payload;
         auto &sub_ins_info = payload.sub_ins_info;
-        LOG(fmt::format("{} start, ins pc: {}, sub ins num: {}", getName(), sub_ins_info.ins_pc,
-                        sub_ins_info.sub_ins_num));
+        auto &pim_ins_info = sub_ins_info.pim_ins_info;
+        LOG(fmt::format("{} start, ins pc: {}, sub ins num: {}", getName(), pim_ins_info.ins_pc,
+                        pim_ins_info.sub_ins_num));
 
         int activation_element_col_num = std::min(sub_ins_info.activation_element_col_num,
                                                   macro_size_.element_cnt_per_compartment * config_.macro_group_size);
@@ -65,10 +66,7 @@ void MacroGroup::processIssue() {
                     ? macro_size_.element_cnt_per_compartment
                     : activation_element_col_num - macro_id * macro_size_.element_cnt_per_compartment;
 
-            MacroPayload macro_payload{.ins_pc = sub_ins_info.ins_pc,
-                                       .sub_ins_num = sub_ins_info.sub_ins_num,
-                                       .last_ins = sub_ins_info.last_ins,
-                                       .last_sub_ins = sub_ins_info.last_sub_ins,
+            MacroPayload macro_payload{.pim_ins_info = pim_ins_info,
                                        .row = payload.row,
                                        .input_bit_width = payload.input_bit_width,
                                        .activation_element_col_num = macro_activation_element_col_num};
@@ -94,23 +92,28 @@ void MacroGroup::processResultAdderSubmodule() {
         result_adder_socket_.waitUntilStart();
 
         auto &sub_ins_info = result_adder_socket_.payload.sub_ins_info;
-        LOG(fmt::format("{} start result adder, ins pc: {}, sub ins num: {}", getName(), sub_ins_info.ins_pc,
-                        sub_ins_info.sub_ins_num));
+        auto &pim_ins_info = sub_ins_info.pim_ins_info;
+        LOG(fmt::format("{} start result adder, ins pc: {}, sub ins num: {}", getName(), pim_ins_info.ins_pc,
+                        pim_ins_info.sub_ins_num));
 
         double dynamic_power_mW = config_.result_adder.dynamic_power_mW * sub_ins_info.activation_element_col_num;
         double latency = config_.result_adder.latency_cycle * period_ns_;
         result_adder_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
         wait(latency, SC_NS);
 
-        if (sub_ins_info.last_sub_ins && sub_ins_info.output_info.output_type != +PimInsOutputType::no_output) {
+        if (pim_ins_info.last_sub_ins && sub_ins_info.output_info.output_type != +PimInsOutputType::no_output) {
             if (sub_ins_info.last_group) {
                 // start PIMUnit's processWriteOutput
-                write_output_socket_.payload = std::move(sub_ins_info.output_info);
+                write_output_socket_.payload = {.pim_ins_info = pim_ins_info, .output_info = sub_ins_info.output_info};
                 write_output_socket_.start_exec.notify();
             }
             // wait until PIMUnit's processWriteOutput finish
             wait(write_output_socket_.finish_exec);
         }
+
+        LOG(fmt::format("{} end result adder, ins pc: {}, sub ins num: {}", getName(), pim_ins_info.ins_pc,
+                        pim_ins_info.sub_ins_num));
+        result_adder_socket_.finish();
     }
 }
 
