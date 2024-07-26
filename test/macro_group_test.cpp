@@ -30,12 +30,17 @@ public:
 
     MacroGroupTestModule(const char* name, const Config& config, Clock* clk, std::vector<MacroGroupPayload> codes)
         : BaseModule(name, config.sim_config, nullptr, clk)
-        , macro_group_("MacroGroup_0", config.chip_config.core_config.pim_unit_config, config.sim_config, nullptr, clk,
-                       write_output_socket) {
+        , macro_group_("MacroGroup_0", config.chip_config.core_config.pim_unit_config, config.sim_config, nullptr,
+                       clk) {
         macro_group_ins_list_ = std::move(codes);
 
         SC_THREAD(issue)
-        SC_THREAD(processWriteOutput)
+
+        macro_group_.setFinishRunFunc([&]() {
+            wait(SC_ZERO_TIME);
+            running_time_ = sc_core::sc_time_stamp();
+            sc_stop();
+        });
     }
 
     EnergyReporter getEnergyReporter() override {
@@ -59,50 +64,18 @@ private:
         }
     }
 
-    [[noreturn]] void processWriteOutput() {
-        while (true) {
-            write_output_socket.waitUntilStart();
-
-            const auto& payload = write_output_socket.payload;
-            if (payload.pim_ins_info.last_sub_ins && payload.output_info.output_type != +PimInsOutputType::no_output) {
-                wait(period_ns_, SC_NS);
-            }
-
-            write_output_socket.finish();
-
-            if (payload.pim_ins_info.last_ins && payload.pim_ins_info.last_sub_ins) {
-                wait(SC_ZERO_TIME);
-                running_time_ = sc_core::sc_time_stamp();
-                sc_stop();
-            }
-        }
-    }
-
 private:
     std::vector<MacroGroupPayload> macro_group_ins_list_;
 
     MacroGroup macro_group_;
 
-    SubmoduleSocket<PimWriteOutputPayload> write_output_socket;
-
     sc_core::sc_time running_time_;
 };
 
-void to_json(nlohmann::ordered_json& j, const PimInsOutputType& m) {
-    j = m._to_string();
-}
-
-void from_json(const nlohmann::ordered_json& j, PimInsOutputType& m) {
-    const auto str = j.get<std::string>();
-    m = PimInsOutputType::_from_string(str.c_str());
-}
-
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimInsInfo, ins_pc, sub_ins_num, last_ins, last_sub_ins)
 
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimWriteOutputInfo, output_type, output_addr, out_n, out_mask)
-
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroGroupSubInsInfo, pim_ins_info, last_group,
-                                               activation_element_col_num, output_info)
+                                               activation_element_col_num)
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroGroupPayload, sub_ins_info, row, input_bit_width, macro_inputs)
 

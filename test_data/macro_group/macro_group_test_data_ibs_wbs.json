@@ -9,10 +9,7 @@
           "last_sub_ins": false
         },
         "last_group": true,
-        "activation_element_col_num": 32,
-        "output_info": {
-          "output_type": "no_output"
-        }
+        "activation_element_col_num": 32
       },
       "row": 0,
       "input_bit_width": 8,
@@ -31,10 +28,7 @@
           "last_sub_ins": true
         },
         "last_group": true,
-        "activation_element_col_num": 32,
-        "output_info": {
-          "output_type": "only_output"
-        }
+        "activation_element_col_num": 32
       },
       "row": 0,
       "input_bit_width": 8,
@@ -53,10 +47,7 @@
           "last_sub_ins": false
         },
         "last_group": true,
-        "activation_element_col_num": 24,
-        "output_info": {
-          "output_type": "no_output"
-        }
+        "activation_element_col_num": 24
       },
       "row": 0,
       "input_bit_width": 8,
@@ -75,10 +66,7 @@
           "last_sub_ins": true
         },
         "last_group": true,
-        "activation_element_col_num": 24,
-        "output_info": {
-          "output_type": "only_output"
-        }
+        "activation_element_col_num": 24
       },
       "row": 0,
       "input_bit_width": 8,
@@ -97,10 +85,7 @@
           "last_sub_ins": false
         },
         "last_group": true,
-        "activation_element_col_num": 16,
-        "output_info": {
-          "output_type": "no_output"
-        }
+        "activation_element_col_num": 16
       },
       "row": 0,
       "input_bit_width": 8,
@@ -118,10 +103,7 @@
           "last_sub_ins": true
         },
         "last_group": true,
-        "activation_element_col_num": 16,
-        "output_info": {
-          "output_type": "only_output"
-        }
+        "activation_element_col_num": 16
       },
       "row": 0,
       "input_bit_width": 8,
@@ -132,7 +114,7 @@
     }
   ],
   "expected": {
-    "time_ns": 280,
-    "energy_pj": 273720
+    "time_ns": 275,
+    "energy_pj": 270825
   }
 }

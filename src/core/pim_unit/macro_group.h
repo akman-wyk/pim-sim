@@ -16,13 +16,15 @@ class MacroGroup : public BaseModule {
 public:
     SC_HAS_PROCESS(MacroGroup);
 
-    MacroGroup(const char* name, const PimUnitConfig& config, const SimConfig& sim_config, Core* core, Clock* clk,
-               SubmoduleSocket<PimWriteOutputPayload>& write_output_socket);
+    MacroGroup(const char* name, const PimUnitConfig& config, const SimConfig& sim_config, Core* core, Clock* clk);
 
     void startExecute(MacroGroupPayload payload);
     void waitUntilFinishIfBusy();
 
     EnergyReporter getEnergyReporter() override;
+
+    void setFinishInsFunc(std::function<void(int ins_pc)> finish_ins_func);
+    void setFinishRunFunc(std::function<void()> finish_run_func);
 
 private:
     [[noreturn]] void processIssue();
@@ -37,7 +39,9 @@ private:
 
     SubmoduleSocket<MacroGroupPayload> macro_group_socket_{};
     SubmoduleSocket<MacroGroupSubmodulePayload> result_adder_socket_{};
-    SubmoduleSocket<PimWriteOutputPayload>& write_output_socket_;
+
+    std::function<void(int ins_pc)> finish_ins_func_;
+    std::function<void()> finish_run_func_;
 
     sc_core::sc_event next_sub_ins_;
 

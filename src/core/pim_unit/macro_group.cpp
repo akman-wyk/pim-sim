@@ -11,13 +11,12 @@
 namespace pimsim {
 
 MacroGroup::MacroGroup(const char *name, const pimsim::PimUnitConfig &config, const pimsim::SimConfig &sim_config,
-                       pimsim::Core *core, pimsim::Clock *clk,
-                       SubmoduleSocket<PimWriteOutputPayload> &write_output_socket)
+                       pimsim::Core *core, pimsim::Clock *clk)
     : BaseModule(name, sim_config, core, clk)
     , config_(config)
     , macro_size_(config.macro_size)
-    , controller_(std::string(name) + "_controller", config, sim_config, core, clk, next_sub_ins_, result_adder_socket_)
-    , write_output_socket_(write_output_socket) {
+    , controller_(std::string(name) + "_controller", config, sim_config, core, clk, next_sub_ins_,
+                  result_adder_socket_) {
     SC_THREAD(processIssue)
     SC_THREAD(processResultAdderSubmodule)
 
@@ -45,6 +44,14 @@ EnergyReporter MacroGroup::getEnergyReporter() {
     }
     macro_group_reporter.addSubModule("result adder", EnergyReporter{result_adder_energy_counter_});
     return std::move(macro_group_reporter);
+}
+
+void MacroGroup::setFinishInsFunc(std::function<void(int)> finish_ins_func) {
+    finish_ins_func_ = std::move(finish_ins_func);
+}
+
+void MacroGroup::setFinishRunFunc(std::function<void()> finish_run_func) {
+    finish_run_func_ = std::move(finish_run_func);
 }
 
 void MacroGroup::processIssue() {
@@ -80,7 +87,7 @@ void MacroGroup::processIssue() {
         }
 
         controller_.waitUntilFinishIfBusy();
-        controller_.start({.sub_ins_info = std::move(sub_ins_info), .input_bit_width = payload.input_bit_width});
+        controller_.start({.sub_ins_info = sub_ins_info, .input_bit_width = payload.input_bit_width});
         wait(next_sub_ins_);
 
         macro_group_socket_.finish();
@@ -96,19 +103,17 @@ void MacroGroup::processResultAdderSubmodule() {
         LOG(fmt::format("{} start result adder, ins pc: {}, sub ins num: {}", getName(), pim_ins_info.ins_pc,
                         pim_ins_info.sub_ins_num));
 
+        if (sub_ins_info.last_group && pim_ins_info.last_sub_ins && finish_ins_func_) {
+            finish_ins_func_(pim_ins_info.ins_pc);
+        }
+
         double dynamic_power_mW = config_.result_adder.dynamic_power_mW * sub_ins_info.activation_element_col_num;
         double latency = config_.result_adder.latency_cycle * period_ns_;
         result_adder_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
         wait(latency, SC_NS);
 
-        if (pim_ins_info.last_sub_ins && sub_ins_info.output_info.output_type != +PimInsOutputType::no_output) {
-            if (sub_ins_info.last_group) {
-                // start PIMUnit's processWriteOutput
-                write_output_socket_.payload = {.pim_ins_info = pim_ins_info, .output_info = sub_ins_info.output_info};
-                write_output_socket_.start_exec.notify();
-            }
-            // wait until PIMUnit's processWriteOutput finish
-            wait(write_output_socket_.finish_exec);
+        if (sub_ins_info.last_group && pim_ins_info.last_sub_ins && pim_ins_info.last_ins && finish_run_func_) {
+            finish_run_func_();
         }
 
         LOG(fmt::format("{} end result adder, ins pc: {}, sub ins num: {}", getName(), pim_ins_info.ins_pc,

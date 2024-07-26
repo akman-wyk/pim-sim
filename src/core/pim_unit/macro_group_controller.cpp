@@ -28,7 +28,7 @@ MacroGroupController::MacroGroupController(const std::string &name, const pimsim
 }
 
 void MacroGroupController::start(pimsim::MacroGroupControllerPayload payload) {
-    controller_socket_.payload = std::move(payload);
+    controller_socket_.payload = payload;
     controller_socket_.start_exec.notify();
 }
 

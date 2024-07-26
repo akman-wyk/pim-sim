@@ -41,17 +41,6 @@ struct MacroSubmodulePayload {
     MacroBatchInfo batch_info;
 };
 
-BETTER_ENUM(PimInsOutputType, int,  // NOLINT(*-no-recursion, *-explicit-constructor)
-            no_output = 0, only_output, output_sum, output_sum_move)
-
-struct PimWriteOutputInfo {
-    PimInsOutputType output_type{PimInsOutputType::no_output};
-    int output_addr{0};
-    int output_bit_width{0};
-    int out_n{0};
-    std::vector<unsigned char> out_mask{};
-};
-
 struct MacroGroupSubInsInfo {
     // ins info and sub ins info
     PimInsInfo pim_ins_info{};
@@ -61,9 +50,6 @@ struct MacroGroupSubInsInfo {
 
     // result adder info
     int activation_element_col_num{0};
-
-    // output info
-    PimWriteOutputInfo output_info{};
 };
 
 struct MacroGroupPayload {
@@ -86,11 +72,6 @@ struct MacroGroupControllerPayload {
 struct MacroGroupSubmodulePayload {
     MacroGroupSubInsInfo sub_ins_info{};
     MacroBatchInfo batch_info{};
-};
-
-struct PimWriteOutputPayload {
-    PimInsInfo pim_ins_info{};
-    PimWriteOutputInfo output_info{};
 };
 
 }  // namespace pimsim

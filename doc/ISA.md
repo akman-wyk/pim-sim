@@ -26,8 +26,6 @@
     - 6：group input step/offset addr，每一组输入向量的起始地址相对于上一组的增量（step），或相对于rs1的偏移量的地址（offset addr）
     - 7：value sparse mask addr，值稀疏掩码Mask的起始地址
     - 8：bit sparse meta addr，Bit级稀疏Meta数据的起始地址
-    - 9：out n，对输出结果应用部分和加法时，涉及到的运算结果数量
-    - 10：out mask addr：对输出结果应用部分和加法时的掩码地址
     - :11-15：留作扩展
   + 16-31：SIMD单元专用寄存器
     - 16：input 1 bit width：输入向量1每个元素的bit长度
@@ -37,7 +35,7 @@
     - 20：output bit width：输出向量每个元素的bit长度
     - 21-31：留作其他指令扩展
   + 专用寄存器绑定通用寄存器：对于运算过程中数值频繁变化的专用寄存器，为了减小赋值专用寄存器指令的数量，可在config文件中指定，某个专用寄存器绑定到某个通用寄存器上，即该通用寄存器既可以用作通用运算，又可在部分运算时作为专用寄存器，类似MIPS32架构里的sp、ra等寄存器。绑定格式如下：
-
+  
   ```json
   {
       "special register binding": [
@@ -51,7 +49,7 @@
       ]
   }
   ```
-
+  
 + 指令类别码：class，[31, 30]或[31, 29]，2或3bit长
 
   + 00：Pim指令
@@ -114,57 +112,30 @@
 
 ### Pim指令
 
-指令类型码：type，[29]，1bit长
+指令类型码：type，[29, 28]，2bit长
 
-+ 0：pim运算
-+ 1：pim批处理
++ 00：pim运算
++ 01：pim批处理
++ 10：pim输出
++ 11：pim数据传输
 
 #### pim计算：pim-compute
 
 指令字段划分：
 
 + [31, 30]，2bit：class，指令类别码，值为00
-
-+ [29, 29]，1bit：type，指令类型码，值为0
-
-+ [28, 20]，9bit：flag，功能扩展字段
-  
-  + [26]，1bit：outsum-move，针对连续的阈值为2的权重，是否对【pim运算结果】应用部分和加法以及移动，涉及到的运算结果数量由专用寄存器给出
-  
-    + 设指针B为数据起始地址，则该flag为1则表示需要额外进行以下运算：
-  
-      ```c++
-      for (i = 0; i < out_n; i++) {
-          B[i] = B[2i] + B[2i + 1]
-      }
-      ```
-  
-  + [25]，1bit：outsum，是否对【使用”基于CSD编码的bit-level sparsity“算法的pim运算结果】应用部分和加法，加法掩码的长度（即涉及到的运算结果数量）和地址由专用寄存器给出
-  
-    + 掩码的意义：1表示需要和后一个输出加起来，0则不需要任何操作
-  
-  + [24]，1bit：value sparse，表示是否使用值稀疏，稀疏掩码Mask的起始地址由专用寄存器给出
-  
-  + [23]，1bit：bit sparse，表示是否使用bit级稀疏，稀疏Meta数据的起始地址由专用寄存器给出
-  
-  + [22]，1bit：group，表示是否进行分组，组大小及激活的组数量由专用寄存器给出
-  
-  + [21]，1bit：group input mode，表示多组输入的模式
-    
++ [29, 28]，2bit：type，指令类型码，值为00
++ [27, 20]，8bit：flag，功能扩展字段
+  + [23]，1bit：value sparse，表示是否使用值稀疏，稀疏掩码Mask的起始地址由专用寄存器给出
+  + [22]，1bit：bit sparse，表示是否使用bit级稀疏，稀疏Meta数据的起始地址由专用寄存器给出
+  + [21]，1bit：group，表示是否进行分组，组大小及激活的组数量由专用寄存器给出
+  + [20]，1bit：group input mode，表示多组输入的模式
     + 0：每一组输入向量的起始地址相对于上一组的增量（步长，step）是一个定值，由专用寄存器给出
     + 1：每一组输入向量的起始地址相对于上一组的增量不是定值，其相对于rs1的偏移量（offset）在存储器中给出，地址（offset addr）由专用寄存器给出
-    
-  + [20]，1bit：write result，表示结果是否写入memory
-  
-    + result adder内部有寄存器暂存结果并进行累加，若该flag位为1，则将result adder内部寄存器的结果写入rd寄存器表示的memory地址中，并将result adder内部寄存器清零
-  
 + [19, 15]，5bit：rs1，通用寄存器1，表示input向量起始地址
-
 + [14, 10]，5bit：rs2，通用寄存器2，表示input向量长度
-
 + [9, 5]，5bit：rs3，通用寄存器3，表示激活的row的index
-
-+ [4, 0]，5bit：rd，通用寄存器4，表示output写入的起始地址
++ [4, 0]，5bit：reserve，保留字段
 
 使用的专用寄存器：
 
@@ -177,8 +148,6 @@
 + group input step/offset addr：每一组输入向量的起始地址相对于上一组的增量（step），或相对于rs1的偏移量的地址（offset addr）
 + value sparse mask addr：值稀疏掩码Mask的起始地址
 + bit sparse meta addr：Bit级稀疏Meta数据的起始地址
-+ out n：对输出结果应用部分和加法时，涉及到的运算结果数量
-+ out mask addr：对输出结果应用部分和加法时的掩码地址
 
 #### pim批处理：pim-batch
 
@@ -187,8 +156,8 @@ pim-batch指令进行批处理的预处理，即设置批处理的部分参数�
 指令字段划分：
 
 + [31, 30]，2bit：class，指令类别码，值为00
-+ [29, 29]，1bit：type，指令类型码，值为1
-+ [28, 23]，6bit：reserve，保留字段
++ [29, 28]，2bit：type，指令类型码，值为01
++ [27, 23]，5bit：reserve，保留字段
 + [22, 20]，3bit：flag，功能字段
   + [22]，1bit：表示不同批次间值稀疏掩码Mask的起始地址的变化模式
   + [21]，1bit：表示不同批次间Bit级稀疏Meta数据的起始地址的变化模式
@@ -200,9 +169,64 @@ pim-batch指令进行批处理的预处理，即设置批处理的部分参数�
 + [9, 5]，5bit：rs3，通用寄存器3，表示Bit级稀疏Meta数据的起始地址的增量或偏移量地址
 + [4, 0]，5bit：rs4，通用寄存器4，表示值稀疏掩码Mask的起始地址的增量或偏移量地址
 
-注：
+#### pim输出：pim-output
 
-+ 若使用pim-batch和pim-compute，则该pim-compute的功能扩展字段中，write result、outsum和outsum-move仅对该batch中的最后一条指令生效，而其他功能扩展字段对该batch中所有指令生效
+将PIM单元内部寄存器里暂存的结果，输出到本地存储器中，需要等待前一条pim-compute或pim-batch执行完成后才能执行。该指令对激活的每个group执行相同的操作。
+
+指令字段划分：
+
++ [31, 30]，2bit：class，指令类别码，值为00
+
++ [29, 28]，2bit：type，指令类型码，值为10
+
++ [27, 22]，6bit：reserve，保留字段
+
++ [21, 20]，2bit：flag，功能字段
+
+  + [21]，1bit：outsum-move，针对连续的阈值为2的权重，是否对【pim运算结果】应用部分和加法以及移动，涉及到的运算结果数量由寄存器rs1给出
+
+    + 设指针B为数据起始地址，则该flag为1则表示需要额外进行以下运算：
+
+
+    ```c++
+    for (i = 0; i < out_n; i++) {
+        B[i] = B[2i] + B[2i + 1]
+    }
+    ```
+
+  + [20]，1bit：outsum，是否对【使用”基于CSD编码的bit-level sparsity“算法的pim运算结果】应用部分和加法，加法掩码的长度（即涉及到的运算结果数量）和地址由寄存器rs1和rs2给出
+
+    + 掩码的意义：1表示需要和后一个输出加起来，0则不需要任何操作
+
++ [19, 15]，5bit：rs1，通用寄存器1，out n，**一个MacroGroup内**，对输出结果应用部分和加法时，涉及到的运算结果数量
+
++ [14, 10]，5bit：rs2，通用寄存器2，out mask addr，**一个MacroGroup内**，对输出结果应用部分和加法时的掩码地址
+
++ [9, 5]，5bit：reserve，保留字段
+
++ [4, 0]，5bit：rd，通用寄存器3，output addr，表示output写入的本地存储器的起始地址
+
+使用的专用寄存器：
+
++ output bit width：输出的bit长度
++ activation group num：激活的group的数量
+
+#### pim数据传输：pim-transfer
+
+该指令针对【使用”基于CSD编码的bit-level sparsity“算法的pim运算结果】，在阈值有1和2的情况下，在output reg buffer中不规则、不连续的问题，专门用于搬运pim运算结果，且该指令需要使用缓冲区
+
+指令字段划分：
+
++ [31, 30]，2bit：class，指令类别码，值为00
++ [29, 28]，2bit：type，指令类型码，值为11
++ [19, 15]，5bit：rs1，通用寄存器1，src addr，表示源本地存储器的地址
++ [14, 10]，5bit：rs2，通用寄存器2，output num，表示output的数量，包含有效值和无效值，也即掩码的长度
++ [9, 5]，5bit：rs3，通用寄存器3，output mask，表示掩码的存储地址，掩码的每一bit表示对应的output是否有效，掩码长度由rs2指定
++ [4, 0]，5bit：rd，通用寄存器4，dst addr，表示目的本地存储器的地址
+
+使用的专用寄存器：
+
++ output bit width：输出的bit长度
 
 
 

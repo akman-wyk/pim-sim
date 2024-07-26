@@ -41,6 +41,7 @@ public:
         SC_THREAD(issue)
 
         macro_.setFinishRunFunction([&]() {
+            wait(SC_ZERO_TIME);
             this->running_time_ = sc_core::sc_time_stamp();
             sc_stop();
         });
