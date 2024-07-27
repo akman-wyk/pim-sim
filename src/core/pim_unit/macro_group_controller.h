@@ -23,6 +23,8 @@ public:
     void start(MacroGroupControllerPayload payload);
     void waitUntilFinishIfBusy();
 
+    EnergyReporter getEnergyReporter() override;
+
 private:
     static void waitAndStartNextSubmodule(const MacroGroupSubmodulePayload& cur_payload,
                                           SubmoduleSocket<MacroGroupSubmodulePayload>& next_submodule_socket);
@@ -50,6 +52,8 @@ private:
     // sockets to MacroGroup
     sc_core::sc_event& next_sub_ins_;
     SubmoduleSocket<MacroGroupSubmodulePayload>& result_adder_socket_;
+
+    EnergyCounter meta_buffer_energy_counter_;
 };
 
 }  // namespace pimsim

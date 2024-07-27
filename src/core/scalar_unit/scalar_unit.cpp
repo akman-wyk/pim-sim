@@ -135,6 +135,10 @@ void ScalarUnit::executeInst(const pimsim::ScalarInsPayload &payload) {
                 reg_file_write_req.reg_value = payload.src1_value % payload.src2_value;
                 break;
             }
+            case ScalarOperator::min: {
+                reg_file_write_req.reg_value = std::min(payload.src1_value, payload.src2_value);
+                break;
+            }
             case ScalarOperator::lui: {
                 reg_file_write_req.reg_value = (payload.src2_value << 16);
                 break;

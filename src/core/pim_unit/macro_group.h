@@ -44,8 +44,6 @@ private:
     std::function<void()> finish_run_func_;
 
     sc_core::sc_event next_sub_ins_;
-
-    EnergyCounter result_adder_energy_counter_;
 };
 
 }  // namespace pimsim

@@ -34,12 +34,14 @@ Macro::Macro(const char *name, const pimsim::PimUnitConfig &config, const pimsim
                                      : 0;
     const int adder_tree_cnt = macro_size_.element_cnt_per_compartment;
     const int shift_adder_cnt = macro_size_.element_cnt_per_compartment;
+    const int result_adder_cnt = macro_size_.element_cnt_per_compartment;
 
     ipu_energy_counter_.setStaticPowerMW(config_.ipu.static_power_mW * ipu_cnt);
     sram_energy_counter_.setStaticPowerMW(config_.sram.static_power_mW * sram_cnt);
     post_process_energy_counter_.setStaticPowerMW(config_.bit_sparse_config.static_power_mW * post_process_cnt);
     adder_tree_energy_counter_.setStaticPowerMW(config_.adder_tree.static_power_mW * adder_tree_cnt);
     shift_adder_energy_counter_.setStaticPowerMW(config_.shift_adder.static_power_mW * shift_adder_cnt);
+    result_adder_energy_counter_.setStaticPowerMW(config_.result_adder.static_power_mW * result_adder_cnt);
 }
 
 void Macro::startExecute(pimsim::MacroPayload payload) {
@@ -60,6 +62,7 @@ EnergyReporter Macro::getEnergyReporter() {
     macro_reporter.addSubModule("post process", EnergyReporter{post_process_energy_counter_});
     macro_reporter.addSubModule("adder tree", EnergyReporter{adder_tree_energy_counter_});
     macro_reporter.addSubModule("shift adder", EnergyReporter{shift_adder_energy_counter_});
+    macro_reporter.addSubModule("result adder", EnergyReporter{result_adder_energy_counter_});
     return std::move(macro_reporter);
 }
 
@@ -212,8 +215,13 @@ void Macro::processShiftAdderSubmodule() {
         shift_adder_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
         wait(latency, SC_NS);
 
-        if (payload.batch_info.last_batch && result_adder_socket_ptr_ != nullptr) {
-            result_adder_socket_ptr_->waitUntilFinishIfBusy();
+        if (payload.batch_info.last_batch) {
+            if (result_adder_socket_ptr_ != nullptr) {
+                result_adder_socket_ptr_->waitUntilFinishIfBusy();
+            }
+            dynamic_power_mW = config_.result_adder.dynamic_power_mW * payload.sub_ins_info.element_col_num;
+            latency = config_.result_adder.latency_cycle * period_ns_;
+            result_adder_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
         }
 
         if (pim_ins_info.last_ins && pim_ins_info.last_sub_ins && payload.batch_info.last_batch && finish_run_func_) {

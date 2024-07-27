@@ -78,6 +78,18 @@
       "name": "MacroGroupTest",
       "test_cases": [
         {
+          "comments": "Test for comfig without any sparsity",
+          "config_file": "config/test/macro_group_test_config_base.json",
+          "instruction_file": "test_data/macro_group/macro_group_test_data_base.json",
+          "report_file": "report/MacroGroup_test_report.txt"
+        },
+        {
+          "comments": "Test for comfig with weight value sparsity",
+          "config_file": "config/test/macro_group_test_config_wvs.json",
+          "instruction_file": "test_data/macro_group/macro_group_test_data_wvs.json",
+          "report_file": "report/MacroGroup_test_report.txt"
+        },
+        {
           "comments": "Test for comfig with input bit sparsity and weight bit sparsity",
           "config_file": "config/test/macro_group_test_config_wbs_ibs.json",
           "instruction_file": "test_data/macro_group/macro_group_test_data_ibs_wbs.json",

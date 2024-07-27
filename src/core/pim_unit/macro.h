@@ -60,6 +60,7 @@ private:
     EnergyCounter post_process_energy_counter_;
     EnergyCounter adder_tree_energy_counter_;
     EnergyCounter shift_adder_energy_counter_;
+    EnergyCounter result_adder_energy_counter_;
 
     // for test
     std::function<void()> finish_run_func_{};

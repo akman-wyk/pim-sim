@@ -42,7 +42,7 @@ EnergyReporter MacroGroup::getEnergyReporter() {
     for (auto *macro : macro_list_) {
         macro_group_reporter += macro->getEnergyReporter();
     }
-    macro_group_reporter.addSubModule("result adder", EnergyReporter{result_adder_energy_counter_});
+    macro_group_reporter += controller_.getEnergyReporter();
     return std::move(macro_group_reporter);
 }
 
@@ -107,9 +107,7 @@ void MacroGroup::processResultAdderSubmodule() {
             finish_ins_func_(pim_ins_info.ins_pc);
         }
 
-        double dynamic_power_mW = config_.result_adder.dynamic_power_mW * sub_ins_info.activation_element_col_num;
         double latency = config_.result_adder.latency_cycle * period_ns_;
-        result_adder_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
         wait(latency, SC_NS);
 
         if (sub_ins_info.last_group && pim_ins_info.last_sub_ins && pim_ins_info.last_ins && finish_run_func_) {
