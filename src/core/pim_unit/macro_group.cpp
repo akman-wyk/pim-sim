@@ -59,12 +59,11 @@ void MacroGroup::processIssue() {
         macro_group_socket_.waitUntilStart();
 
         auto &payload = macro_group_socket_.payload;
-        auto &sub_ins_info = payload.sub_ins_info;
-        auto &pim_ins_info = sub_ins_info.pim_ins_info;
+        auto &pim_ins_info = payload.pim_ins_info;
         LOG(fmt::format("{} start, ins pc: {}, sub ins num: {}", getName(), pim_ins_info.ins_pc,
                         pim_ins_info.sub_ins_num));
 
-        int activation_element_col_num = std::min(sub_ins_info.activation_element_col_num,
+        int activation_element_col_num = std::min(payload.activation_element_col_num,
                                                   macro_size_.element_cnt_per_compartment * config_.macro_group_size);
         int activation_macro_num = IntDivCeil(activation_element_col_num, macro_size_.element_cnt_per_compartment);
         for (int macro_id = 0; macro_id < activation_macro_num; macro_id++) {
@@ -76,7 +75,8 @@ void MacroGroup::processIssue() {
             MacroPayload macro_payload{.pim_ins_info = pim_ins_info,
                                        .row = payload.row,
                                        .input_bit_width = payload.input_bit_width,
-                                       .activation_element_col_num = macro_activation_element_col_num};
+                                       .activation_element_col_num = macro_activation_element_col_num,
+                                       .bit_sparse = payload.bit_sparse};
             if (macro_id < payload.macro_inputs.size()) {
                 macro_payload.inputs.swap(payload.macro_inputs[macro_id]);
             }
@@ -87,7 +87,10 @@ void MacroGroup::processIssue() {
         }
 
         controller_.waitUntilFinishIfBusy();
-        controller_.start({.sub_ins_info = sub_ins_info, .input_bit_width = payload.input_bit_width});
+        controller_.start({.pim_ins_info = pim_ins_info,
+                           .last_group = payload.last_group,
+                           .input_bit_width = payload.input_bit_width,
+                           .bit_sparse = payload.bit_sparse});
         wait(next_sub_ins_);
 
         macro_group_socket_.finish();

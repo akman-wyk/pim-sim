@@ -92,7 +92,8 @@ void Macro::processIPUAndIssue() {
         auto [batch_cnt, activation_compartment_num] = getBatchCountAndActivationCompartmentCount(payload);
         MacroSubInsInfo sub_ins_info{.pim_ins_info = pim_ins_info,
                                      .compartment_num = activation_compartment_num,
-                                     .element_col_num = payload.activation_element_col_num};
+                                     .element_col_num = payload.activation_element_col_num,
+                                     .bit_sparse = payload.bit_sparse};
         MacroSubmodulePayload submodule_payload{.sub_ins_info = sub_ins_info};
 
         for (int batch = 0; batch < batch_cnt; batch++) {
@@ -140,7 +141,7 @@ void Macro::processPostProcessSubmodule() {
 
         const auto &payload = post_process_socket_.payload;
         const auto &pim_ins_info = payload.sub_ins_info.pim_ins_info;
-        if (config_.bit_sparse) {
+        if (config_.bit_sparse && payload.sub_ins_info.bit_sparse) {
             LOG(fmt::format("{} start post process, ins pc: {}, sub ins num: {}, batch: {}", getName(),
                             pim_ins_info.ins_pc, pim_ins_info.sub_ins_num, payload.batch_info.batch_num));
 
@@ -237,7 +238,7 @@ std::pair<int, int> Macro::getBatchCountAndActivationCompartmentCount(const Macr
     int activation_compartment_num = static_cast<int>(std::count_if(
         payload.inputs.begin(), payload.inputs.begin() + valid_input_cnt, [](auto input) { return input != 0; }));
     int batch_num;
-    if (config_.input_bit_sparse) {
+    if (config_.input_bit_sparse && payload.bit_sparse) {
         batch_num = 0;
         for (int i = 0; i < payload.input_bit_width; i++) {
             if (std::any_of(payload.inputs.begin(), payload.inputs.begin() + valid_input_cnt,

@@ -60,11 +60,13 @@ void MacroGroupController::processIPUAndIssue() {
         controller_socket_.waitUntilStart();
 
         const auto &payload = controller_socket_.payload;
-        const auto &pim_ins_info = payload.sub_ins_info.pim_ins_info;
+        const auto &pim_ins_info = payload.pim_ins_info;
         LOG(fmt::format("{} start, ins pc: {}, sub ins num: {}", getName(), pim_ins_info.ins_pc,
                         pim_ins_info.sub_ins_num));
 
-        MacroGroupSubmodulePayload submodule_payload{.sub_ins_info = payload.sub_ins_info};
+        MacroGroupSubmodulePayload submodule_payload{.sub_ins_info = {.pim_ins_info = pim_ins_info,
+                                                                      .last_group = payload.last_group,
+                                                                      .bit_sparse = payload.bit_sparse}};
         int batch_count = payload.input_bit_width;
         for (int batch = 0; batch < batch_count; batch++) {
             submodule_payload.batch_info = {
@@ -106,7 +108,7 @@ void MacroGroupController::processPostProcessSubmodule() {
 
         const auto &payload = post_process_socket_.payload;
         const auto &pim_ins_info = payload.sub_ins_info.pim_ins_info;
-        if (config_.bit_sparse) {
+        if (config_.bit_sparse && payload.sub_ins_info.bit_sparse) {
             LOG(fmt::format("{} start post process, ins pc: {}, sub ins num: {}, batch: {}", getName(),
                             pim_ins_info.ins_pc, pim_ins_info.sub_ins_num, payload.batch_info.batch_num));
             if (payload.batch_info.first_batch) {
