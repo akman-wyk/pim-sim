@@ -122,10 +122,8 @@ struct ScalarInsPayload {
     ScalarOperator op{};
 
     int src1_value{0}, src2_value{0}, offset{0};
-    ;
     int dst_reg{0};
 
-    bool access_global_memory{false};
     bool write_special_register{false};
 
     DECLARE_PIM_PAYLOAD_FUNCTIONS(ScalarInsPayload)

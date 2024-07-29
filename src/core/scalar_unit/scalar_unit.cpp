@@ -95,9 +95,7 @@ void ScalarUnit::executeInst(const pimsim::ScalarInsPayload &payload) {
         int address_byte = payload.src1_value + payload.offset;
         int size_byte = WORD_BYTE_SIZE;
         auto write_data = IntToBytes(payload.src2_value, true);
-        if (payload.access_global_memory) {
-            local_memory_socket_.writeData(payload.ins, address_byte, size_byte, std::move(write_data));
-        }
+        local_memory_socket_.writeData(payload.ins, address_byte, size_byte, std::move(write_data));
     } else {
         RegUnitWriteRequest reg_file_write_req{.reg_id = payload.dst_reg, .write_special_register = false};
         switch (payload.op) {
@@ -146,9 +144,7 @@ void ScalarUnit::executeInst(const pimsim::ScalarInsPayload &payload) {
             case ScalarOperator::load: {
                 int address_byte = payload.src1_value + payload.offset;
                 int size_byte = WORD_BYTE_SIZE;
-                auto read_result = payload.access_global_memory
-                                       ? std::vector<unsigned char>{0, 0, 0, 0}
-                                       : local_memory_socket_.readData(payload.ins, address_byte, size_byte);
+                auto read_result = local_memory_socket_.readData(payload.ins, address_byte, size_byte);
                 reg_file_write_req.reg_value = BytesToInt(read_result, true);
                 break;
             }

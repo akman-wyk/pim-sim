@@ -76,17 +76,12 @@ void RegUnit::updateValue() {
     if (last_write_req.write_special_register) {
         special_regs_[last_write_req.reg_id] = last_write_req.reg_value;
     } else {
-        if (last_write_req.reg_id != 0) {
-            general_regs_[last_write_req.reg_id] = last_write_req.reg_value;
-        }
+        general_regs_[last_write_req.reg_id] = last_write_req.reg_value;
     }
 }
 
 int RegUnit::readGeneralRegValue(int id, const pimsim::RegUnitWriteRequest &cur_write_req,
                                  const pimsim::RegUnitWriteRequest &last_write_req) const {
-    if (id == 0) {
-        return 0;
-    }
     if (!cur_write_req.write_special_register && id == cur_write_req.reg_id) {
         return cur_write_req.reg_value;
     }
