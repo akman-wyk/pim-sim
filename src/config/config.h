@@ -202,8 +202,9 @@ struct PimBitSparseConfig {
     double dynamic_power_mW{1.0};  // mW
 
     // reg buffer
+    int unit_byte{1};
     double reg_buffer_static_power_mW{1.0};   // mW
-    double reg_buffer_dynamic_power_mW{1.0};  // mW
+    double reg_buffer_dynamic_power_mW_per_unit{1.0};  // mW
 
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(PimBitSparseConfig)

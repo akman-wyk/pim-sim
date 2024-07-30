@@ -6,6 +6,7 @@
 
 #include "fmt/format.h"
 #include "util/log.h"
+#include "util/util.h"
 
 namespace pimsim {
 
@@ -57,6 +58,9 @@ EnergyReporter Macro::getEnergyReporter() {
     EnergyReporter macro_reporter;
     if (independent_ipu_) {
         macro_reporter.addSubModule("ipu", EnergyReporter{ipu_energy_counter_});
+    }
+    if (config_.bit_sparse) {
+        macro_reporter.addSubModule("meta buffer", EnergyReporter{meta_buffer_energy_counter_});
     }
     macro_reporter.addSubModule("sram read", EnergyReporter{sram_energy_counter_});
     macro_reporter.addSubModule("post process", EnergyReporter{post_process_energy_counter_});
@@ -144,6 +148,15 @@ void Macro::processPostProcessSubmodule() {
         if (config_.bit_sparse && payload.sub_ins_info.bit_sparse) {
             LOG(fmt::format("{} start post process, ins pc: {}, sub ins num: {}, batch: {}", getName(),
                             pim_ins_info.ins_pc, pim_ins_info.sub_ins_num, payload.batch_info.batch_num));
+
+            if (payload.batch_info.first_batch) {
+                int meta_size_byte = config_.bit_sparse_config.mask_bit_width *
+                                     macro_size_.element_cnt_per_compartment * macro_size_.compartment_cnt_per_macro /
+                                     BYTE_TO_BIT;
+                double meta_read_dynamic_power_mW = config_.bit_sparse_config.reg_buffer_dynamic_power_mW_per_unit *
+                                                    IntDivCeil(meta_size_byte, config_.bit_sparse_config.unit_byte);
+                meta_buffer_energy_counter_.addDynamicEnergyPJ(period_ns_, meta_read_dynamic_power_mW);
+            }
 
             double dynamic_power_mW = config_.bit_sparse_config.dynamic_power_mW *
                                       payload.sub_ins_info.element_col_num * payload.sub_ins_info.compartment_num;

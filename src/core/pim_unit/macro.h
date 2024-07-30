@@ -57,6 +57,7 @@ private:
 
     EnergyCounter ipu_energy_counter_;
     EnergyCounter sram_energy_counter_;
+    EnergyCounter meta_buffer_energy_counter_;
     EnergyCounter post_process_energy_counter_;
     EnergyCounter adder_tree_energy_counter_;
     EnergyCounter shift_adder_energy_counter_;

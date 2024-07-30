@@ -79,8 +79,9 @@
           "latency_cycle": 0,
           "static_power_mW": 1.0,
           "dynamic_power_mW": 1.0,
+          "unit_byte": 96,
           "reg_buffer_static_power_mW": 1.0,
-          "reg_buffer_dynamic_power_mW": 1.0
+          "reg_buffer_dynamic_power_mW_per_unit": 1.0
         },
         "input_bit_sparse": true
       },

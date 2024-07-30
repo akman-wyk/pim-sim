@@ -401,12 +401,12 @@ DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimValueSparseConfig, mask_bit_wi
                                                dynamic_power_mW, output_macro_group_cnt)
 
 bool PimBitSparseConfig::checkValid() const {
-    if (!check_positive(mask_bit_width)) {
-        std::cerr << "PimBitSparseConfig not valid, 'mask_bit_width' must be positive" << std::endl;
+    if (!check_positive(mask_bit_width, unit_byte)) {
+        std::cerr << "PimBitSparseConfig not valid, 'mask_bit_width, unit_byte' must be positive" << std::endl;
         return false;
     }
     if (!check_not_negative(latency_cycle, static_power_mW, dynamic_power_mW, reg_buffer_static_power_mW,
-                            reg_buffer_dynamic_power_mW)) {
+                            reg_buffer_dynamic_power_mW_per_unit)) {
         std::cerr << "PimBitSparseConfig not valid, 'latency_cycle, static_power_mW, dynamic_power_mW, "
                      "reg_buffer_static_power_mW, reg_buffer_dynamic_power_mW' must be non-negative"
                   << std::endl;
@@ -416,8 +416,8 @@ bool PimBitSparseConfig::checkValid() const {
 }
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimBitSparseConfig, mask_bit_width, latency_cycle, static_power_mW,
-                                               dynamic_power_mW, reg_buffer_static_power_mW,
-                                               reg_buffer_dynamic_power_mW)
+                                               dynamic_power_mW, unit_byte, reg_buffer_static_power_mW,
+                                               reg_buffer_dynamic_power_mW_per_unit)
 
 bool PimUnitConfig::checkValid() const {
     if (!check_positive(macro_total_cnt, macro_group_size)) {

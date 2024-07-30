@@ -36,14 +36,6 @@ void MacroGroupController::waitUntilFinishIfBusy() {
     controller_socket_.waitUntilFinishIfBusy();
 }
 
-EnergyReporter MacroGroupController::getEnergyReporter() {
-    EnergyReporter reporter;
-    if (config_.bit_sparse) {
-        reporter.addSubModule("meta buffer", EnergyReporter{meta_buffer_energy_counter_});
-    }
-    return std::move(reporter);
-}
-
 void MacroGroupController::waitAndStartNextSubmodule(
     const pimsim::MacroGroupSubmodulePayload &cur_payload,
     SubmoduleSocket<pimsim::MacroGroupSubmodulePayload> &next_submodule_socket) {
@@ -111,10 +103,6 @@ void MacroGroupController::processPostProcessSubmodule() {
         if (config_.bit_sparse && payload.sub_ins_info.bit_sparse) {
             LOG(fmt::format("{} start post process, ins pc: {}, sub ins num: {}, batch: {}", getName(),
                             pim_ins_info.ins_pc, pim_ins_info.sub_ins_num, payload.batch_info.batch_num));
-            if (payload.batch_info.first_batch) {
-                meta_buffer_energy_counter_.addDynamicEnergyPJ(period_ns_,
-                                                               config_.bit_sparse_config.reg_buffer_dynamic_power_mW);
-            }
 
             double latency = config_.bit_sparse_config.latency_cycle * period_ns_;
             wait(latency, SC_NS);

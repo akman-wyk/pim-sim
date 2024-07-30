@@ -42,7 +42,6 @@ EnergyReporter MacroGroup::getEnergyReporter() {
     for (auto *macro : macro_list_) {
         macro_group_reporter += macro->getEnergyReporter();
     }
-    macro_group_reporter += controller_.getEnergyReporter();
     return std::move(macro_group_reporter);
 }
 

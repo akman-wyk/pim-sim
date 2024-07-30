@@ -130,6 +130,33 @@ struct ScalarInsPayload {
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(ScalarInsPayload)
 };
 
+struct PimComputeInsPayload {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(PimComputeInsPayload)
+
+    InstructionPayload ins{};
+
+    // input info
+    int input_addr_byte{0}, input_len{0}, input_bit_width{0};
+
+    // group info
+    int activation_group_num{0};
+    int group_input_step_byte{0};
+
+    // macro info
+    int row{0};
+    int activation_element_col_num{0};
+
+    // bit sparse
+    bool bit_sparse{false};
+    int bit_sparse_meta_addr_byte{0};
+
+    // value sparse
+    bool value_sparse{false};
+    int value_sparse_mask_addr_byte{0};
+
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(PimComputeInsPayload)
+};
+
 struct RegUnitReadRequest {
     MAKE_SIGNAL_TYPE_TRACE_STREAM(RegUnitReadRequest)
 
