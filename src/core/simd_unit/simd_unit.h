@@ -58,6 +58,7 @@ public:
     [[noreturn]] void processExecuteSubmodule();
     [[noreturn]] void processWriteSubmodule();
     void finishInstruction();
+    void finishRun();
 
     void checkSIMDInst();
 
@@ -103,9 +104,12 @@ private:
     SubmoduleSocket<SIMDSubmodulePayload> execute_submodule_socket_{};
     SubmoduleSocket<SIMDSubmodulePayload> write_submodule_socket_{};
 
-    sc_core::sc_event finish_trigger_;
+    sc_core::sc_event finish_ins_trigger_;
     int finish_ins_pc_{-1};
     bool finish_ins_{false};
+
+    sc_core::sc_event finish_run_trigger_;
+    bool finish_run_{false};
 };
 
 }  // namespace pimsim

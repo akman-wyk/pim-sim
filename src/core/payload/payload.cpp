@@ -50,6 +50,27 @@ std::stringstream& operator<<(std::stringstream& out, const std::unordered_map<i
     return out;
 }
 
+void DataConflictPayload::addReadMemoryId(int memory_id) {
+    read_memory_id.insert(memory_id);
+    used_memory_id.insert(memory_id);
+}
+
+void DataConflictPayload::addReadMemoryId(const std::initializer_list<int>& memory_id_list) {
+    read_memory_id.insert(memory_id_list);
+    used_memory_id.insert(memory_id_list);
+}
+
+void DataConflictPayload::addWriteMemoryId(int memory_id) {
+    write_memory_id.insert(memory_id);
+    used_memory_id.insert(memory_id);
+}
+
+void DataConflictPayload::addReadWriteMemoryId(int memory_id) {
+    read_memory_id.insert(memory_id);
+    write_memory_id.insert(memory_id);
+    used_memory_id.insert(memory_id);
+}
+
 bool DataConflictPayload::checkMemoryConflict(const pimsim::DataConflictPayload& ins_conflict_payload,
                                               const pimsim::DataConflictPayload& unit_conflict_payload,
                                               bool has_unit_conflict) {
@@ -84,6 +105,12 @@ DEFINE_PIM_PAYLOAD_FUNCTIONS(ScalarInsPayload, ins, op, src1_value, src2_value, 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(PimComputeInsPayload, ins, input_addr_byte, input_len, input_bit_width,
                              activation_group_num, group_input_step_byte, row, activation_element_col_num, bit_sparse,
                              bit_sparse_meta_addr_byte, value_sparse, value_sparse_mask_addr_byte)
+
+DEFINE_PIM_PAYLOAD_FUNCTIONS(PimOutputInsPayload, ins, activation_group_num, output_type, output_addr_byte,
+                             output_cnt_per_group, output_bit_width, output_mask_addr_byte)
+
+DEFINE_PIM_PAYLOAD_FUNCTIONS(PimTransferInsPayload, ins, output_num, output_bit_width, output_mask_addr_byte,
+                             src_addr_byte, dst_addr_byte, buffer_addr_byte)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(RegUnitReadRequest, rs1_id, rs2_id, rs3_id, rs4_id, rd_id, rs1_read_double,
                              rs2_read_double, special_reg_ids)

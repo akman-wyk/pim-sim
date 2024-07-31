@@ -39,4 +39,8 @@ int MemorySocket::getMemoryDataWidthById(int memory_id, MemoryAccessType access_
     return local_memory_unit_->getMemoryDataWidthById(memory_id, access_type);
 }
 
+int MemorySocket::getMemorySizeById(int memory_id) const {
+    return local_memory_unit_->getMemorySizeById(memory_id);
+}
+
 }  // namespace pimsim

@@ -67,6 +67,11 @@ struct DataConflictPayload {
 
     DECLARE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload)
 
+    void addReadMemoryId(int memory_id);
+    void addReadMemoryId(const std::initializer_list<int>& memory_id_list);
+    void addWriteMemoryId(int memory_id);
+    void addReadWriteMemoryId(int memory_id);
+
     static bool checkMemoryConflict(const DataConflictPayload& ins_conflict_payload,
                                     const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict);
 
@@ -155,6 +160,34 @@ struct PimComputeInsPayload {
     int value_sparse_mask_addr_byte{0};
 
     DECLARE_PIM_PAYLOAD_FUNCTIONS(PimComputeInsPayload)
+};
+
+struct PimOutputInsPayload {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(PimOutputInsPayload)
+
+    InstructionPayload ins{};
+
+    // group info
+    int activation_group_num{0};
+
+    // output info
+    PimOutputType output_type{PimOutputType::only_output};
+    int output_addr_byte{0}, output_cnt_per_group{0}, output_bit_width{0};
+    int output_mask_addr_byte{0};
+
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(PimOutputInsPayload)
+};
+
+struct PimTransferInsPayload {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(PimTransferInsPayload)
+
+    InstructionPayload ins{};
+
+    // output info
+    int output_num{0}, output_bit_width{0}, output_mask_addr_byte{0};
+    int src_addr_byte{0}, dst_addr_byte{0}, buffer_addr_byte{0};
+
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(PimTransferInsPayload)
 };
 
 struct RegUnitReadRequest {

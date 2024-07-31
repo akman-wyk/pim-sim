@@ -27,6 +27,8 @@ public:
 
     int getMemoryDataWidthById(int memory_id, MemoryAccessType access_type) const;
 
+    int getMemorySizeById(int memory_id) const;
+
 private:
     LocalMemoryUnit* local_memory_unit_{nullptr};
     sc_core::sc_event finish_read_;

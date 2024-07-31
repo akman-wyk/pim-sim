@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "config/config.h"
+
 namespace pimsim {
 
 static constexpr double delta = 1e-8;
@@ -17,6 +19,10 @@ inline int IntDivCeil(int a, int b) {
 
 inline bool DoubleEqual(double a, double b) {
     return std::abs(a - b) < delta;
+}
+
+inline auto getMaskBit(const std::vector<unsigned char>& mask_byte_data, int index) {
+    return (mask_byte_data[index / BYTE_TO_BIT] & (1 << (index % BYTE_TO_BIT)));
 }
 
 template <class V>

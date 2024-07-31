@@ -37,6 +37,14 @@ int LocalMemory::getMemoryDataWidthByte(MemoryAccessType access_type) const {
     }
 }
 
+int LocalMemory::getMemorySizeByte() const {
+    if (config_.type == +LocalMemoryType::ram) {
+        return config_.ram_config.size_byte;
+    } else {
+        return config_.reg_buffer_config.size_byte;
+    }
+}
+
 EnergyReporter LocalMemory::getEnergyReporter() {
     if (config_.type == +LocalMemoryType::ram) {
         return ram.getEnergyReporter();

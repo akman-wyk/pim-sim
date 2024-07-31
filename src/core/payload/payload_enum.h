@@ -15,4 +15,7 @@ BETTER_ENUM(ScalarOperator, int,  // NOLINT(*-explicit-constructor)
             add, sub, mul, div, sll, srl, sra, mod, min, lui, load, store, assign)
 DECLARE_TYPE_FROM_TO_JSON_FUNCTION_NON_INTRUSIVE(ScalarOperator)
 
+BETTER_ENUM(PimOutputType, int,  // NOLINT(*-explicit-constructor, *-no-recursion)
+            only_output = 1, output_sum, output_sum_move)
+
 }  // namespace pimsim

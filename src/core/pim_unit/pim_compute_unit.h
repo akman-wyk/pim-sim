@@ -24,7 +24,7 @@ struct PimComputeReadDataPayload {
 
 struct PimComputeSubInsPayload {
     PimInsInfo pim_ins_info{};
-    const PimComputeInsPayload& ins_payload;
+    PimComputeInsPayload ins_payload;
     int activation_macro_cnt{};
 };
 
@@ -42,6 +42,7 @@ private:
     void checkPimComputeInst();
 
     [[noreturn]] void processIssue();
+    [[noreturn]] void processSubIns();
     void processSubInsReadData(const PimComputeSubInsPayload& sub_ins_payload);
     void processSubInsCompute(const PimComputeSubInsPayload& sub_ins_payload);
 
@@ -53,6 +54,8 @@ private:
 
     std::vector<std::vector<unsigned long long>> getMacroGroupInputs(int addr_byte, int size_byte,
                                                                      const PimComputeSubInsPayload& sub_ins_payload);
+
+    DataConflictPayload getDataConflictInfo(const PimComputeInsPayload& payload);
 
 public:
     sc_core::sc_in<PimComputeInsPayload> id_pim_compute_payload_port_;
@@ -71,6 +74,8 @@ private:
 
     std::vector<MacroGroup*> macro_group_list_;
 
+    sc_core::sc_event next_sub_ins_;
+    SubmoduleSocket<PimComputeSubInsPayload> process_sub_ins_socket_;
     SubmoduleSocket<PimComputeReadDataPayload> read_value_sparse_mask_socket_;
     SubmoduleSocket<PimComputeReadDataPayload> read_bit_sparse_meta_socket_;
 

@@ -21,9 +21,13 @@ ScalarUnit::ScalarUnit(const char *name, const pimsim::ScalarUnitConfig &config,
     sensitive << id_scalar_payload_port_;
 
     SC_METHOD(process)
+    SC_METHOD(executeInst)
 
     SC_METHOD(finishInstruction)
-    sensitive << finish_trigger_;
+    sensitive << finish_ins_trigger_;
+
+    SC_METHOD(finishRun)
+    sensitive << finish_run_trigger_;
 
     double scalar_functors_total_static_power_mW = config_.default_functor_static_power_mW;
     for (const auto &scalar_functor_config : config_.functor_list) {
@@ -61,12 +65,9 @@ void ScalarUnit::process() {
         energy_counter_.addDynamicEnergyPJ(period_ns_, dynamic_power_mW);
 
         // execute instruction
-        executeInst(payload);
-
-        // check if last pc
-        if (isEndPC(payload.ins.pc) && sim_mode_ == +SimMode::run_one_round) {
-            finish_run_port_.write(true);
-        }
+        execute_socket_.waitUntilFinishIfBusy();
+        execute_socket_.payload = payload;
+        execute_socket_.start_exec.notify();
 
         busy_port_.write(false);
         scalar_fsm_.finish_exec_.notify();
@@ -78,6 +79,10 @@ void ScalarUnit::finishInstruction() {
     finish_ins_pc_port_.write(finish_ins_pc_);
 }
 
+void ScalarUnit::finishRun() {
+    finish_run_port_.write(finish_run_);
+}
+
 void ScalarUnit::bindLocalMemoryUnit(pimsim::LocalMemoryUnit *local_memory_unit) {
     local_memory_socket_.bindLocalMemoryUnit(local_memory_unit);
 }
@@ -86,90 +91,113 @@ void ScalarUnit::bindRegUnit(pimsim::RegUnit *reg_unit) {
     reg_unit_socket_.bindRegUnit(reg_unit);
 }
 
-void ScalarUnit::executeInst(const pimsim::ScalarInsPayload &payload) {
-    if (payload.op == +ScalarOperator::store) {
-        finish_ins_ = true;
-        finish_ins_pc_ = payload.ins.pc;
-        finish_trigger_.notify(SC_ZERO_TIME);
+void ScalarUnit::executeInst() {
+    while (true) {
+        execute_socket_.waitUntilStart();
 
-        int address_byte = payload.src1_value + payload.offset;
-        int size_byte = WORD_BYTE_SIZE;
-        auto write_data = IntToBytes(payload.src2_value, true);
-        local_memory_socket_.writeData(payload.ins, address_byte, size_byte, std::move(write_data));
-    } else {
-        RegUnitWriteRequest reg_file_write_req{.reg_id = payload.dst_reg, .write_special_register = false};
-        switch (payload.op) {
-            case ScalarOperator::add: {
-                reg_file_write_req.reg_value = payload.src1_value + payload.src2_value;
-                break;
-            }
-            case ScalarOperator::sub: {
-                reg_file_write_req.reg_value = payload.src1_value - payload.src2_value;
-                break;
-            }
-            case ScalarOperator::mul: {
-                reg_file_write_req.reg_value = payload.src1_value * payload.src2_value;
-                break;
-            }
-            case ScalarOperator::div: {
-                reg_file_write_req.reg_value = payload.src1_value / payload.src2_value;
-                break;
-            }
-            case ScalarOperator::sll: {
-                reg_file_write_req.reg_value = (payload.src1_value << payload.src2_value);
-                break;
-            }
-            case ScalarOperator::srl: {
-                unsigned int result =
-                    (static_cast<unsigned int>(payload.src1_value) >> static_cast<unsigned int>(payload.src2_value));
-                reg_file_write_req.reg_value = static_cast<int>(result);
-                break;
-            }
-            case ScalarOperator::sra: {
-                reg_file_write_req.reg_value = (payload.src1_value >> payload.src2_value);
-                break;
-            }
-            case ScalarOperator::mod: {
-                reg_file_write_req.reg_value = payload.src1_value % payload.src2_value;
-                break;
-            }
-            case ScalarOperator::min: {
-                reg_file_write_req.reg_value = std::min(payload.src1_value, payload.src2_value);
-                break;
-            }
-            case ScalarOperator::lui: {
-                reg_file_write_req.reg_value = (payload.src2_value << 16);
-                break;
-            }
-            case ScalarOperator::load: {
-                int address_byte = payload.src1_value + payload.offset;
-                int size_byte = WORD_BYTE_SIZE;
-                auto read_result = local_memory_socket_.readData(payload.ins, address_byte, size_byte);
-                reg_file_write_req.reg_value = BytesToInt(read_result, true);
-                break;
-            }
-            case ScalarOperator::assign: {
-                reg_file_write_req.reg_value = payload.src1_value;
-                reg_file_write_req.write_special_register = payload.write_special_register;
-                if (payload.write_special_register) {
-                    int special_bound_general_id = reg_unit_socket_.getSpecialBoundGeneralId(reg_file_write_req.reg_id);
-                    if (special_bound_general_id != -1) {
-                        reg_file_write_req.reg_id = special_bound_general_id;
-                        reg_file_write_req.write_special_register = false;
-                    }
-                }
-                break;
-            }
-            default: {
-                break;
+        const auto &payload = execute_socket_.payload;
+        LOG(fmt::format("Scalar start execute, pc: {}", payload.ins.pc));
+
+        if (payload.op == +ScalarOperator::store) {
+            finish_ins_ = true;
+            finish_ins_pc_ = payload.ins.pc;
+            finish_ins_trigger_.notify(SC_ZERO_TIME);
+
+            int address_byte = payload.src1_value + payload.offset;
+            int size_byte = WORD_BYTE_SIZE;
+            auto write_data = IntToBytes(payload.src2_value, true);
+            local_memory_socket_.writeData(payload.ins, address_byte, size_byte, std::move(write_data));
+        } else {
+            reg_file_write_port_.write(executeAndWriteRegister(payload));
+
+            finish_ins_ = true;
+            finish_ins_pc_ = payload.ins.pc;
+            finish_ins_trigger_.notify(SC_ZERO_TIME);
+        }
+
+        // check if last pc
+        if (isEndPC(payload.ins.pc) && sim_mode_ == +SimMode::run_one_round) {
+            finish_run_ = true;
+            if (payload.op == +ScalarOperator::store) {
+                finish_run_trigger_.notify(SC_ZERO_TIME);
+            } else {
+                finish_run_trigger_.notify(period_ns_, SC_NS);
             }
         }
-        reg_file_write_port_.write(reg_file_write_req);
 
-        finish_ins_ = true;
-        finish_ins_pc_ = payload.ins.pc;
-        finish_trigger_.notify(SC_ZERO_TIME);
+        execute_socket_.finish();
     }
+}
+
+RegUnitWriteRequest ScalarUnit::executeAndWriteRegister(const pimsim::ScalarInsPayload &payload) {
+    RegUnitWriteRequest reg_file_write_req{.reg_id = payload.dst_reg, .write_special_register = false};
+    switch (payload.op) {
+        case ScalarOperator::add: {
+            reg_file_write_req.reg_value = payload.src1_value + payload.src2_value;
+            break;
+        }
+        case ScalarOperator::sub: {
+            reg_file_write_req.reg_value = payload.src1_value - payload.src2_value;
+            break;
+        }
+        case ScalarOperator::mul: {
+            reg_file_write_req.reg_value = payload.src1_value * payload.src2_value;
+            break;
+        }
+        case ScalarOperator::div: {
+            reg_file_write_req.reg_value = payload.src1_value / payload.src2_value;
+            break;
+        }
+        case ScalarOperator::sll: {
+            reg_file_write_req.reg_value = (payload.src1_value << payload.src2_value);
+            break;
+        }
+        case ScalarOperator::srl: {
+            unsigned int result =
+                (static_cast<unsigned int>(payload.src1_value) >> static_cast<unsigned int>(payload.src2_value));
+            reg_file_write_req.reg_value = static_cast<int>(result);
+            break;
+        }
+        case ScalarOperator::sra: {
+            reg_file_write_req.reg_value = (payload.src1_value >> payload.src2_value);
+            break;
+        }
+        case ScalarOperator::mod: {
+            reg_file_write_req.reg_value = payload.src1_value % payload.src2_value;
+            break;
+        }
+        case ScalarOperator::min: {
+            reg_file_write_req.reg_value = std::min(payload.src1_value, payload.src2_value);
+            break;
+        }
+        case ScalarOperator::lui: {
+            reg_file_write_req.reg_value = (payload.src2_value << 16);
+            break;
+        }
+        case ScalarOperator::load: {
+            int address_byte = payload.src1_value + payload.offset;
+            int size_byte = WORD_BYTE_SIZE;
+            auto read_result = local_memory_socket_.readData(payload.ins, address_byte, size_byte);
+            reg_file_write_req.reg_value = BytesToInt(read_result, true);
+            break;
+        }
+        case ScalarOperator::assign: {
+            reg_file_write_req.reg_value = payload.src1_value;
+            reg_file_write_req.write_special_register = payload.write_special_register;
+            if (payload.write_special_register) {
+                int special_bound_general_id = reg_unit_socket_.getSpecialBoundGeneralId(reg_file_write_req.reg_id);
+                if (special_bound_general_id != -1) {
+                    reg_file_write_req.reg_id = special_bound_general_id;
+                    reg_file_write_req.write_special_register = false;
+                }
+            }
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    return reg_file_write_req;
 }
 
 }  // namespace pimsim

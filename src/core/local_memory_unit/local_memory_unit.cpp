@@ -84,6 +84,10 @@ int LocalMemoryUnit::getMemoryDataWidthById(int memory_id, MemoryAccessType acce
     return local_memory_list_[memory_id]->getMemoryDataWidthByte(access_type);
 }
 
+int LocalMemoryUnit::getMemorySizeById(int memory_id) const {
+    return local_memory_list_[memory_id]->getMemorySizeByte();
+}
+
 LocalMemory *LocalMemoryUnit::getLocalMemoryByAddress(int address_byte) {
     for (auto *local_memory : local_memory_list_) {
         if (local_memory->getAddressSpaceBegin() <= address_byte && address_byte < local_memory->getAddressSpaceEnd()) {

@@ -24,6 +24,7 @@ PimComputeUnit::PimComputeUnit(const char *name, const pimsim::PimUnitConfig &co
     sensitive << id_pim_compute_payload_port_;
 
     SC_THREAD(processIssue)
+    SC_THREAD(processSubIns)
     SC_THREAD(readValueSparseMaskSubmodule)
     SC_THREAD(readBitSparseMetaSubmodule)
 
@@ -92,20 +93,45 @@ void PimComputeUnit::processIssue() {
 
         const auto &payload = fsm_out_.read();
         LOG(fmt::format("Pim compute start, pc: {}", payload.ins.pc));
+        data_conflict_port_.write(getDataConflictInfo(payload));
 
-        PimComputeSubInsPayload sub_ins_payload{
+        process_sub_ins_socket_.waitUntilFinishIfBusy();
+        process_sub_ins_socket_.payload = {
             .pim_ins_info = {.ins_pc = payload.ins.pc,
                              .sub_ins_num = 1,
-                             .last_ins = isEndPC(payload.ins.pc),
+                             .last_ins = isEndPC(payload.ins.pc) && sim_mode_ == +SimMode::run_one_round,
                              .last_sub_ins = true},
             .ins_payload = payload,
             .activation_macro_cnt =
                 IntDivCeil(payload.activation_element_col_num, macro_size_.element_cnt_per_compartment)};
-        processSubInsReadData(sub_ins_payload);
-        processSubInsCompute(sub_ins_payload);
+        process_sub_ins_socket_.start_exec.notify();
+
+        if (!process_sub_ins_socket_.payload.pim_ins_info.last_sub_ins) {
+            wait(next_sub_ins_);
+        }
 
         busy_port_.write(false);
         fsm_.finish_exec_.notify(SC_ZERO_TIME);
+    }
+}
+
+void PimComputeUnit::processSubIns() {
+    while (true) {
+        process_sub_ins_socket_.waitUntilStart();
+
+        const auto &sub_ins_payload = process_sub_ins_socket_.payload;
+        const auto &pim_ins_info = sub_ins_payload.pim_ins_info;
+        LOG(fmt::format("Pim compute sub ins start, pc: {}, sub ins: {}", pim_ins_info.ins_pc,
+                        pim_ins_info.sub_ins_num));
+
+        processSubInsReadData(sub_ins_payload);
+        processSubInsCompute(sub_ins_payload);
+
+        if (!pim_ins_info.last_sub_ins) {
+            next_sub_ins_.notify();
+        }
+
+        process_sub_ins_socket_.finish();
     }
 }
 
@@ -185,14 +211,11 @@ std::vector<std::vector<unsigned long long>> PimComputeUnit::getMacroGroupInputs
     std::vector<std::vector<unsigned long long>> macro_group_inputs;
     if (config_.value_sparse && payload.value_sparse) {
         const auto &mask_byte_data = read_value_sparse_mask_socket_.payload.data;
-        auto get_mask_bit = [&](int index) {
-            return (mask_byte_data[index / BYTE_TO_BIT] & (1 << (index % BYTE_TO_BIT)));
-        };
         for (int macro_id = 0; macro_id < sub_ins_payload.activation_macro_cnt; macro_id++) {
             std::vector<unsigned long long> macro_input;
             macro_input.reserve(macro_size_.compartment_cnt_per_macro);
             for (int i = 0; i < payload.input_len; i++) {
-                if (get_mask_bit(macro_id * payload.input_len + i) != 0) {
+                if (getMaskBit(mask_byte_data, macro_id * payload.input_len + i) != 0) {
                     macro_input.push_back(input_data[i]);
                 }
             }
@@ -238,6 +261,25 @@ void PimComputeUnit::finishInstruction() {
 
 void PimComputeUnit::finishRun() {
     finish_run_port_.write(finish_run_);
+}
+
+DataConflictPayload PimComputeUnit::getDataConflictInfo(const pimsim::PimComputeInsPayload &payload) {
+    DataConflictPayload conflict_payload{.pc = payload.ins.pc};
+
+    int input_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(payload.input_addr_byte);
+    conflict_payload.addReadMemoryId(input_memory_id);
+
+    if (config_.value_sparse && payload.value_sparse) {
+        int mask_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(payload.value_sparse_mask_addr_byte);
+        conflict_payload.addReadMemoryId(mask_memory_id);
+    }
+
+    if (config_.bit_sparse && payload.bit_sparse) {
+        int meta_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(payload.bit_sparse_meta_addr_byte);
+        conflict_payload.addReadMemoryId(meta_memory_id);
+    }
+
+    return std::move(conflict_payload);
 }
 
 }  // namespace pimsim

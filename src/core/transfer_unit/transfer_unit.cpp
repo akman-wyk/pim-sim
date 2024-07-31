@@ -26,7 +26,10 @@ TransferUnit::TransferUnit(const char* name, const TransferUnitConfig& config, c
     SC_THREAD(processWriteSubmodule)
 
     SC_METHOD(finishInstruction)
-    sensitive << finish_trigger_;
+    sensitive << finish_ins_trigger_;
+
+    SC_METHOD(finishRun)
+    sensitive << finish_run_trigger_;
 }
 
 void TransferUnit::checkTransferInst() {
@@ -102,7 +105,7 @@ void TransferUnit::processWriteSubmodule() {
         if (payload.batch_info.last_batch) {
             finish_ins_ = true;
             finish_ins_pc_ = payload.ins_info.ins.pc;
-            finish_trigger_.notify(SC_ZERO_TIME);
+            finish_ins_trigger_.notify(SC_ZERO_TIME);
         }
 
         int address_byte =
@@ -120,7 +123,8 @@ void TransferUnit::processWriteSubmodule() {
         write_submodule_socket_.finish();
 
         if (payload.batch_info.last_batch && isEndPC(payload.ins_info.ins.pc) && sim_mode_ == +SimMode::run_one_round) {
-            finish_run_port_.write(true);
+            finish_run_ = true;
+            finish_run_trigger_.notify(SC_ZERO_TIME);
         }
     }
 }
@@ -128,6 +132,10 @@ void TransferUnit::processWriteSubmodule() {
 void TransferUnit::finishInstruction() {
     finish_ins_port_.write(finish_ins_);
     finish_ins_pc_port_.write(finish_ins_pc_);
+}
+
+void TransferUnit::finishRun() {
+    finish_run_port_.write(finish_run_);
 }
 
 void TransferUnit::bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit) {
