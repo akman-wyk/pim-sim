@@ -77,6 +77,17 @@ EnergyReporter PimComputeUnit::getEnergyReporter() {
     return std::move(pim_compute_reporter);
 }
 
+void PimComputeUnit::setMacroGroupActivationElementColumn(const std::vector<unsigned char> &mask, bool group_broadcast,
+                                                          int group_id) {
+    if (group_broadcast) {
+        for (auto *macro_group : macro_group_list_) {
+            macro_group->setMacrosActivationElementColumn(mask);
+        }
+    } else if (0 <= group_id && group_id < macro_group_list_.size()) {
+        macro_group_list_[group_id]->setMacrosActivationElementColumn(mask);
+    }
+}
+
 void PimComputeUnit::checkPimComputeInst() {
     if (const auto &payload = id_pim_compute_payload_port_.read(); payload.ins.valid()) {
         fsm_in_.write({payload, true});
@@ -267,6 +278,7 @@ void PimComputeUnit::finishRun() {
 
 DataConflictPayload PimComputeUnit::getDataConflictInfo(const pimsim::PimComputeInsPayload &payload) {
     DataConflictPayload conflict_payload{.pc = payload.ins.pc};
+    conflict_payload.use_pim_unit = true;
 
     int input_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(payload.input_addr_byte);
     conflict_payload.addReadMemoryId(input_memory_id);

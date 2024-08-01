@@ -63,7 +63,7 @@ void PimTransferUnit::processIssue() {
         execute_socket_.payload = payload;
         execute_socket_.start_exec.notify();
 
-        busy_port_.write(true);
+        busy_port_.write(false);
         fsm_.finish_exec_.notify(SC_ZERO_TIME);
     }
 }

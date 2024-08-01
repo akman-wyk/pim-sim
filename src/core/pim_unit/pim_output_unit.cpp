@@ -58,6 +58,7 @@ void PimOutputUnit::processIssue() {
         LOG(fmt::format("Pim output start, pc: {}", payload.ins.pc));
 
         DataConflictPayload conflict_payload{.pc = payload.ins.pc};
+        conflict_payload.use_pim_unit = true;
         conflict_payload.addWriteMemoryId(local_memory_socket_.getLocalMemoryIdByAddress(payload.output_addr_byte));
         if (payload.output_type == +PimOutputType::output_sum) {
             conflict_payload.addWriteMemoryId(
@@ -69,7 +70,7 @@ void PimOutputUnit::processIssue() {
         execute_socket_.payload = payload;
         execute_socket_.start_exec.notify();
 
-        busy_port_.write(true);
+        busy_port_.write(false);
         fsm_.finish_exec_.notify(SC_ZERO_TIME);
     }
 }

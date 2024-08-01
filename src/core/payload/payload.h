@@ -65,6 +65,8 @@ struct DataConflictPayload {
     std::unordered_set<int> read_reg_id;
     int write_reg_id{-1};
 
+    bool use_pim_unit{false};
+
     DECLARE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload)
 
     void addReadMemoryId(int memory_id);
@@ -77,6 +79,9 @@ struct DataConflictPayload {
 
     static bool checkRegisterConflict(const DataConflictPayload& ins_conflict_payload,
                                       const DataConflictPayload& unit_conflict_payload);
+
+    static bool checkPimUnitConflict(const DataConflictPayload& ins_conflict_payload,
+                                     const DataConflictPayload& unit_conflict_payload);
 
     static bool checkDataConflict(const DataConflictPayload& ins_conflict_payload,
                                   const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict);
@@ -159,6 +164,21 @@ struct PimComputeInsPayload {
     int value_sparse_mask_addr_byte{0};
 
     DECLARE_PIM_PAYLOAD_FUNCTIONS(PimComputeInsPayload)
+};
+
+struct PimSetInsPayload {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(PimSetInsPayload)
+
+    InstructionPayload ins{};
+
+    // group info
+    bool group_broadcast{false};
+    int group_id{0};
+
+    // mask info
+    int mask_addr_byte{0};
+
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(PimSetInsPayload);
 };
 
 struct PimOutputInsPayload {

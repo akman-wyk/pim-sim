@@ -87,10 +87,16 @@ bool DataConflictPayload::checkRegisterConflict(const pimsim::DataConflictPayloa
            ins_conflict_payload.read_reg_id.end();
 }
 
+bool DataConflictPayload::checkPimUnitConflict(const pimsim::DataConflictPayload& ins_conflict_payload,
+                                               const pimsim::DataConflictPayload& unit_conflict_payload) {
+    return ins_conflict_payload.use_pim_unit && unit_conflict_payload.use_pim_unit;
+}
+
 bool DataConflictPayload::checkDataConflict(const DataConflictPayload& ins_conflict_payload,
                                             const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict) {
     return checkMemoryConflict(ins_conflict_payload, unit_conflict_payload, has_unit_conflict) ||
-           checkRegisterConflict(ins_conflict_payload, unit_conflict_payload);
+           checkRegisterConflict(ins_conflict_payload, unit_conflict_payload) ||
+           checkPimUnitConflict(ins_conflict_payload, unit_conflict_payload);
 }
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload, pc, read_memory_id, write_memory_id, used_memory_id)
@@ -105,6 +111,8 @@ DEFINE_PIM_PAYLOAD_FUNCTIONS(ScalarInsPayload, ins, op, src1_value, src2_value, 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(PimComputeInsPayload, ins, input_addr_byte, input_len, input_bit_width,
                              activation_group_num, group_input_step_byte, row, bit_sparse, bit_sparse_meta_addr_byte,
                              value_sparse, value_sparse_mask_addr_byte)
+
+DEFINE_PIM_PAYLOAD_FUNCTIONS(PimSetInsPayload, ins, group_broadcast, group_id, mask_addr_byte)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(PimOutputInsPayload, ins, activation_group_num, output_type, output_addr_byte,
                              output_cnt_per_group, output_bit_width, output_mask_addr_byte)

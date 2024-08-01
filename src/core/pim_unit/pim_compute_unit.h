@@ -38,6 +38,9 @@ public:
 
     EnergyReporter getEnergyReporter() override;
 
+    void setMacroGroupActivationElementColumn(const std::vector<unsigned char>& mask, bool group_broadcast,
+                                              int group_id);
+
 private:
     void checkPimComputeInst();
 

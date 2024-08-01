@@ -74,6 +74,8 @@ add_library(pim-simulator STATIC ""
         src/core/pim_unit/pim_output_unit.h
         src/core/pim_unit/pim_transfer_unit.cpp
         src/core/pim_unit/pim_transfer_unit.h
+        src/core/pim_unit/pim_set_unit.cpp
+        src/core/pim_unit/pim_set_unit.h
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE
