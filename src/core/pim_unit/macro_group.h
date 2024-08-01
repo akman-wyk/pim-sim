@@ -26,6 +26,9 @@ public:
     void setFinishInsFunc(std::function<void(int ins_pc)> finish_ins_func);
     void setFinishRunFunc(std::function<void()> finish_run_func);
 
+    void setMacrosActivationElementColumn(const std::vector<unsigned char>& macros_activation_element_col_mask);
+    int getActivationMacroCount() const;
+
 private:
     [[noreturn]] void processIssue();
     [[noreturn]] void processResultAdderSubmodule();
@@ -36,6 +39,7 @@ private:
 
     MacroGroupController controller_;
     std::vector<Macro*> macro_list_;
+    int activation_macro_cnt_{0};
 
     SubmoduleSocket<MacroGroupPayload> macro_group_socket_{};
     SubmoduleSocket<MacroGroupSubmodulePayload> result_adder_socket_{};

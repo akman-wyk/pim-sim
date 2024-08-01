@@ -149,7 +149,6 @@ struct PimComputeInsPayload {
 
     // macro info
     int row{0};
-    int activation_element_col_num{0};
 
     // bit sparse
     bool bit_sparse{false};

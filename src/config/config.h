@@ -24,6 +24,7 @@ static constexpr int SIMD_MAX_OPCODE = 255;
 static constexpr int SIMD_INSTRUCTION_OPCODE_BIT_LENGTH = 8;
 
 static constexpr int BYTE_TO_BIT = 8;
+static constexpr unsigned char BYTE_MAX_VALUE = 0xff;
 
 struct ControlUnitConfig {
     double controller_static_power_mW{0.0};   // mW
@@ -203,7 +204,7 @@ struct PimBitSparseConfig {
 
     // reg buffer
     int unit_byte{1};
-    double reg_buffer_static_power_mW{1.0};   // mW
+    double reg_buffer_static_power_mW{1.0};            // mW
     double reg_buffer_dynamic_power_mW_per_unit{1.0};  // mW
 
     [[nodiscard]] bool checkValid() const;

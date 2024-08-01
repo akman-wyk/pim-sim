@@ -15,8 +15,8 @@ MacroGroup::MacroGroup(const char *name, const pimsim::PimUnitConfig &config, co
     : BaseModule(name, sim_config, core, clk)
     , config_(config)
     , macro_size_(config.macro_size)
-    , controller_(std::string(name) + "_controller", config, sim_config, core, clk, next_sub_ins_,
-                  result_adder_socket_) {
+    , controller_(std::string(name) + "_controller", config, sim_config, core, clk, next_sub_ins_, result_adder_socket_)
+    , activation_macro_cnt_(config.macro_group_size) {
     SC_THREAD(processIssue)
     SC_THREAD(processResultAdderSubmodule)
 
@@ -53,6 +53,22 @@ void MacroGroup::setFinishRunFunc(std::function<void()> finish_run_func) {
     finish_run_func_ = std::move(finish_run_func);
 }
 
+void MacroGroup::setMacrosActivationElementColumn(
+    const std::vector<unsigned char> &macros_activation_element_col_mask) {
+    for (int i = 0; i < macro_list_.size(); i++) {
+        int start_index = i * macro_size_.element_cnt_per_compartment;
+        macro_list_[i]->setActivationElementColumn(macros_activation_element_col_mask, start_index);
+    }
+
+    activation_macro_cnt_ = std::transform_reduce(
+        macro_list_.begin(), macro_list_.end(), 0, [](int a, int b) { return a + b; },
+        [](const Macro *macro) { return (macro->getActivationElementColumnCount() > 0) ? 1 : 0; });
+}
+
+int MacroGroup::getActivationMacroCount() const {
+    return activation_macro_cnt_;
+}
+
 void MacroGroup::processIssue() {
     while (true) {
         macro_group_socket_.waitUntilStart();
@@ -62,19 +78,10 @@ void MacroGroup::processIssue() {
         LOG(fmt::format("{} start, ins pc: {}, sub ins num: {}", getName(), pim_ins_info.ins_pc,
                         pim_ins_info.sub_ins_num));
 
-        int activation_element_col_num = std::min(payload.activation_element_col_num,
-                                                  macro_size_.element_cnt_per_compartment * config_.macro_group_size);
-        int activation_macro_num = IntDivCeil(activation_element_col_num, macro_size_.element_cnt_per_compartment);
-        for (int macro_id = 0; macro_id < activation_macro_num; macro_id++) {
-            int macro_activation_element_col_num =
-                (macro_id < activation_macro_num - 1)
-                    ? macro_size_.element_cnt_per_compartment
-                    : activation_element_col_num - macro_id * macro_size_.element_cnt_per_compartment;
-
+        for (int macro_id = 0; macro_id < macro_list_.size(); macro_id++) {
             MacroPayload macro_payload{.pim_ins_info = pim_ins_info,
                                        .row = payload.row,
                                        .input_bit_width = payload.input_bit_width,
-                                       .activation_element_col_num = macro_activation_element_col_num,
                                        .bit_sparse = payload.bit_sparse};
             if (macro_id < payload.macro_inputs.size()) {
                 macro_payload.inputs.swap(payload.macro_inputs[macro_id]);

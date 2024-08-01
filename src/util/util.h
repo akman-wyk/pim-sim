@@ -22,6 +22,9 @@ inline bool DoubleEqual(double a, double b) {
 }
 
 inline auto getMaskBit(const std::vector<unsigned char>& mask_byte_data, int index) {
+    if (index / BYTE_TO_BIT >= mask_byte_data.size()) {
+        return 0;
+    }
     return (mask_byte_data[index / BYTE_TO_BIT] & (1 << (index % BYTE_TO_BIT)));
 }
 

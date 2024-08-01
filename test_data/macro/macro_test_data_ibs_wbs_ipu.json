@@ -1,88 +1,100 @@
 {
   "code": [
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 1,
-        "last_ins": true,
-        "last_sub_ins": false
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 1,
+          "last_ins": true,
+          "last_sub_ins": false
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "bit_sparse": true,
+        "inputs": [1, 2, 4, 8, 16, 32, 64, 128, 255, 254, 3, 24, 65, 33, 127, 192],
+        "comments": "8 batch, 16 non-zero"
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 16,
-      "bit_sparse": true,
-      "inputs": [1, 2, 4, 8, 16, 32, 64, 128, 255, 254, 3, 24, 65, 33, 127, 192],
-      "comments": "8 batch"
+      "activation_element_col_mask": [255, 255]
     },
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 2,
-        "last_ins": true,
-        "last_sub_ins": false
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 2,
+          "last_ins": true,
+          "last_sub_ins": false
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "bit_sparse": true,
+        "inputs": [1, 2, 0, 4, 8, 16, 0, 64, 128, 0, 78, 203],
+        "comments": "7 batch, 9 non-zero"
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 16,
-      "bit_sparse": true,
-      "inputs": [1, 2, 0, 4, 8, 16, 0, 64, 128, 0, 78, 203],
-      "comments": "7 batch"
+      "activation_element_col_mask": [255, 255]
     },
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 3,
-        "last_ins": true,
-        "last_sub_ins": false
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 3,
+          "last_ins": true,
+          "last_sub_ins": false
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "bit_sparse": true,
+        "inputs": [1, 4, 16, 64, 128, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "comments": "5 batch, 16 non-zero"
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 8,
-      "bit_sparse": true,
-      "inputs": [1, 4, 16, 64, 128, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      "comments": "5 batch"
+      "activation_element_col_mask": [255]
     },
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 4,
-        "last_ins": true,
-        "last_sub_ins": false
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 4,
+          "last_ins": true,
+          "last_sub_ins": false
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "bit_sparse": true,
+        "inputs": [0, 1, 64, 0, 0, 128, 192, 0, 193, 0],
+        "comments": "3 batch, 5 non-zero"
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 12,
-      "bit_sparse": true,
-      "inputs": [0, 1, 64, 0, 0, 128, 192, 0, 193, 0],
-      "comments": "3 batch"
+      "activation_element_col_mask": [255, 15]
     },
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 5,
-        "last_ins": true,
-        "last_sub_ins": false
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 5,
+          "last_ins": true,
+          "last_sub_ins": false
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "bit_sparse": true,
+        "inputs": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+        "comments": "0 batch, 0 non-zero"
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 16,
-      "bit_sparse": true,
-      "inputs": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
-      "comments": "0 batch"
+      "activation_element_col_mask": [255, 255]
     },
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 6,
-        "last_ins": true,
-        "last_sub_ins": true
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 6,
+          "last_ins": true,
+          "last_sub_ins": true
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "bit_sparse": true,
+        "inputs": [16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16],
+        "comments": "1 batch, 16 non-zero"
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 16,
-      "bit_sparse": true,
-      "inputs": [16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16],
-      "comments": "1 batch"
+      "activation_element_col_mask": [255, 255]
     }
   ],
   "config": {

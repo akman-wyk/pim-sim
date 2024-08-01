@@ -103,8 +103,8 @@ DEFINE_PIM_PAYLOAD_FUNCTIONS(TransferInsPayload, ins, src_address_byte, dst_addr
 DEFINE_PIM_PAYLOAD_FUNCTIONS(ScalarInsPayload, ins, op, src1_value, src2_value, offset, dst_reg, write_special_register)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(PimComputeInsPayload, ins, input_addr_byte, input_len, input_bit_width,
-                             activation_group_num, group_input_step_byte, row, activation_element_col_num, bit_sparse,
-                             bit_sparse_meta_addr_byte, value_sparse, value_sparse_mask_addr_byte)
+                             activation_group_num, group_input_step_byte, row, bit_sparse, bit_sparse_meta_addr_byte,
+                             value_sparse, value_sparse_mask_addr_byte)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(PimOutputInsPayload, ins, activation_group_num, output_type, output_addr_byte,
                              output_cnt_per_group, output_bit_width, output_mask_addr_byte)

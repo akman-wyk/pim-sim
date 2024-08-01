@@ -19,8 +19,13 @@ struct MacroGroupExpectedInfo {
     double energy_pj{0.0};
 };
 
+struct MacroGroupTestInstruction {
+    MacroGroupPayload payload;
+    std::vector<unsigned char> macros_activation_element_col_mask;
+};
+
 struct MacroGroupTestInfo {
-    std::vector<MacroGroupPayload> code{};
+    std::vector<MacroGroupTestInstruction> code{};
     MacroGroupExpectedInfo expected{};
 };
 
@@ -28,7 +33,8 @@ class MacroGroupTestModule : public BaseModule {
 public:
     SC_HAS_PROCESS(MacroGroupTestModule);
 
-    MacroGroupTestModule(const char* name, const Config& config, Clock* clk, std::vector<MacroGroupPayload> codes)
+    MacroGroupTestModule(const char* name, const Config& config, Clock* clk,
+                         std::vector<MacroGroupTestInstruction> codes)
         : BaseModule(name, config.sim_config, nullptr, clk)
         , macro_group_("MacroGroup_0", config.chip_config.core_config.pim_unit_config, config.sim_config, nullptr,
                        clk) {
@@ -59,13 +65,14 @@ private:
         wait(10, SC_NS);
         for (auto& macro_group_ins : macro_group_ins_list_) {
             macro_group_.waitUntilFinishIfBusy();
-            macro_group_.startExecute(std::move(macro_group_ins));
+            macro_group_.setMacrosActivationElementColumn(macro_group_ins.macros_activation_element_col_mask);
+            macro_group_.startExecute(std::move(macro_group_ins.payload));
             wait(SC_ZERO_TIME);
         }
     }
 
 private:
-    std::vector<MacroGroupPayload> macro_group_ins_list_;
+    std::vector<MacroGroupTestInstruction> macro_group_ins_list_;
 
     MacroGroup macro_group_;
 
@@ -75,9 +82,11 @@ private:
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimInsInfo, ins_pc, sub_ins_num, last_ins, last_sub_ins)
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroGroupPayload, pim_ins_info, last_group, row, input_bit_width,
-                                               activation_element_col_num, bit_sparse, macro_inputs)
+                                               bit_sparse, macro_inputs)
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroGroupExpectedInfo, time_ns, energy_pj)
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroGroupTestInstruction, payload, macros_activation_element_col_mask)
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroGroupTestInfo, code, expected)
 

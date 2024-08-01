@@ -21,8 +21,13 @@ struct MacroExpectedInfo {
     double energy_pj{0.0};
 };
 
+struct MacroTestInstruction {
+    MacroPayload payload;
+    std::vector<unsigned char> activation_element_col_mask;
+};
+
 struct MacroTestInfo {
-    std::vector<MacroPayload> code{};
+    std::vector<MacroTestInstruction> code{};
     MacroTestConfig config{};
     MacroExpectedInfo expected{};
 };
@@ -31,7 +36,7 @@ class MacroTestModule : public BaseModule {
 public:
     SC_HAS_PROCESS(MacroTestModule);
 
-    MacroTestModule(const char* name, const Config& config, Clock* clk, std::vector<MacroPayload> codes,
+    MacroTestModule(const char* name, const Config& config, Clock* clk, std::vector<MacroTestInstruction> codes,
                     const MacroTestConfig& test_config)
         : BaseModule(name, config.sim_config, nullptr, clk)
         , macro_("macro", config.chip_config.core_config.pim_unit_config, config.sim_config, nullptr, clk,
@@ -64,15 +69,16 @@ private:
 
         for (const auto& macro_ins : macro_ins_list_) {
             macro_.waitUntilFinishIfBusy();
-            macro_.startExecute(macro_ins);
-            double latency = macro_ins.input_bit_width * period_ns_;
+            macro_.setActivationElementColumn(macro_ins.activation_element_col_mask);
+            macro_.startExecute(macro_ins.payload);
+            double latency = macro_ins.payload.input_bit_width * period_ns_;
             wait(latency, SC_NS);
         }
     }
 
 private:
     // instruction list
-    std::vector<MacroPayload> macro_ins_list_;
+    std::vector<MacroTestInstruction> macro_ins_list_;
 
     // modules
     Macro macro_;
@@ -82,12 +88,13 @@ private:
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimInsInfo, ins_pc, sub_ins_num, last_ins, last_sub_ins)
 
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroPayload, pim_ins_info, row, input_bit_width,
-                                               activation_element_col_num, bit_sparse, inputs)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroPayload, pim_ins_info, row, input_bit_width, bit_sparse, inputs)
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroTestConfig, independent_ipu)
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroExpectedInfo, time_ns, energy_pj)
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroTestInstruction, payload, activation_element_col_mask)
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(MacroTestInfo, code, config, expected)
 

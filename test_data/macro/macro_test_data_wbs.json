@@ -1,82 +1,100 @@
 {
   "code": [
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 1,
-        "last_ins": true,
-        "last_sub_ins": false
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 1,
+          "last_ins": true,
+          "last_sub_ins": false
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "activation_element_col_num": 16,
+        "bit_sparse": true,
+        "inputs": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 16,
-      "bit_sparse": true,
-      "inputs": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      "activation_element_col_mask": [255, 255]
     },
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 2,
-        "last_ins": true,
-        "last_sub_ins": false
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 2,
+          "last_ins": true,
+          "last_sub_ins": false
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "activation_element_col_num": 16,
+        "bit_sparse": true,
+        "inputs": [1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1]
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 16,
-      "bit_sparse": true,
-      "inputs": [1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1]
+      "activation_element_col_mask": [255, 255]
     },
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 3,
-        "last_ins": true,
-        "last_sub_ins": false
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 3,
+          "last_ins": true,
+          "last_sub_ins": false
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "activation_element_col_num": 8,
+        "bit_sparse": true,
+        "inputs": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 8,
-      "bit_sparse": true,
-      "inputs": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      "activation_element_col_mask": [255]
     },
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 4,
-        "last_ins": true,
-        "last_sub_ins": false
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 4,
+          "last_ins": true,
+          "last_sub_ins": false
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "activation_element_col_num": 12,
+        "bit_sparse": true,
+        "inputs": [0, 1, 1, 0, 0, 1, 1, 0, 1, 0]
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 12,
-      "bit_sparse": true,
-      "inputs": [0, 1, 1, 0, 0, 1, 1, 0, 1, 0]
+      "activation_element_col_mask": [255, 15]
     },
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 5,
-        "last_ins": true,
-        "last_sub_ins": false
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 5,
+          "last_ins": true,
+          "last_sub_ins": false
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "activation_element_col_num": 16,
+        "bit_sparse": true,
+        "inputs": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 16,
-      "bit_sparse": true,
-      "inputs": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
+      "activation_element_col_mask": [255, 255]
     },
     {
-      "pim_ins_info": {
-        "ins_pc": 1,
-        "sub_ins_num": 6,
-        "last_ins": true,
-        "last_sub_ins": true
+      "payload": {
+        "pim_ins_info": {
+          "ins_pc": 1,
+          "sub_ins_num": 6,
+          "last_ins": true,
+          "last_sub_ins": true
+        },
+        "row": 0,
+        "input_bit_width": 8,
+        "activation_element_col_num": 16,
+        "bit_sparse": true,
+        "inputs": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
       },
-      "row": 0,
-      "input_bit_width": 8,
-      "activation_element_col_num": 16,
-      "bit_sparse": true,
-      "inputs": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      "activation_element_col_mask": [255, 255]
     }
   ],
   "config": {

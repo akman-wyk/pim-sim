@@ -19,7 +19,12 @@ Macro::Macro(const char *name, const pimsim::PimUnitConfig &config, const pimsim
     , config_(config)
     , macro_size_(config.macro_size)
     , independent_ipu_(independent_ipu)
+    , activation_element_col_cnt_(config.macro_size.element_cnt_per_compartment)
     , result_adder_socket_ptr_(result_adder_socket_ptr) {
+    for (int i = 0; i < IntDivCeil(macro_size_.element_cnt_per_compartment, BYTE_TO_BIT); i++) {
+        activation_element_col_mask_.push_back(BYTE_MAX_VALUE);
+    }
+
     SC_THREAD(processIPUAndIssue)
     SC_THREAD(processSRAMSubmodule)
     SC_THREAD(processPostProcessSubmodule)
@@ -84,34 +89,54 @@ void Macro::setFinishRunFunction(std::function<void()> finish_func) {
     finish_run_func_ = std::move(finish_func);
 }
 
+void Macro::setActivationElementColumn(const std::vector<unsigned char> &macros_activation_element_col_mask,
+                                       int start_index) {
+    activation_element_col_cnt_ = 0;
+    for (int i = 0; i < macro_size_.element_cnt_per_compartment; i++) {
+        if (getMaskBit(macros_activation_element_col_mask, i + start_index) != 0) {
+            activation_element_col_cnt_++;
+            activation_element_col_mask_[i / BYTE_TO_BIT] |= (1 << (i % BYTE_TO_BIT));
+        } else {
+            activation_element_col_mask_[i / BYTE_TO_BIT] &= (~(1 << (i % BYTE_TO_BIT)));
+        }
+    }
+}
+
+int Macro::getActivationElementColumnCount() const {
+    return activation_element_col_cnt_;
+}
+
 void Macro::processIPUAndIssue() {
     while (true) {
         macro_socket_.waitUntilStart();
 
-        const auto &payload = macro_socket_.payload;
-        const auto &pim_ins_info = payload.pim_ins_info;
-        LOG(fmt::format("{} start, ins pc: {}, sub ins num: {}", getName(), pim_ins_info.ins_pc,
-                        pim_ins_info.sub_ins_num));
+        if (activation_element_col_cnt_ > 0) {
+            const auto &payload = macro_socket_.payload;
+            const auto &pim_ins_info = payload.pim_ins_info;
+            LOG(fmt::format("{} start, ins pc: {}, sub ins num: {}", getName(), pim_ins_info.ins_pc,
+                            pim_ins_info.sub_ins_num));
 
-        auto [batch_cnt, activation_compartment_num] = getBatchCountAndActivationCompartmentCount(payload);
-        MacroSubInsInfo sub_ins_info{.pim_ins_info = pim_ins_info,
-                                     .compartment_num = activation_compartment_num,
-                                     .element_col_num = payload.activation_element_col_num,
-                                     .bit_sparse = payload.bit_sparse};
-        MacroSubmodulePayload submodule_payload{.sub_ins_info = sub_ins_info};
+            auto [batch_cnt, activation_compartment_num] = getBatchCountAndActivationCompartmentCount(payload);
+            MacroSubInsInfo sub_ins_info{.pim_ins_info = pim_ins_info,
+                                         .compartment_num = activation_compartment_num,
+                                         .bit_sparse = payload.bit_sparse,
+                                         .activation_element_col_cnt = activation_element_col_cnt_,
+                                         .activation_element_col_mask = activation_element_col_mask_};
+            MacroSubmodulePayload submodule_payload{.sub_ins_info = sub_ins_info};
 
-        for (int batch = 0; batch < batch_cnt; batch++) {
-            submodule_payload.batch_info = {
-                .batch_num = batch, .first_batch = (batch == 0), .last_batch = (batch == batch_cnt - 1)};
-            LOG(fmt::format("{} start ipu and issue, ins pc: {}, sub ins num: {}, batch: {}", getName(),
-                            pim_ins_info.ins_pc, pim_ins_info.sub_ins_num, submodule_payload.batch_info.batch_num));
+            for (int batch = 0; batch < batch_cnt; batch++) {
+                submodule_payload.batch_info = {
+                    .batch_num = batch, .first_batch = (batch == 0), .last_batch = (batch == batch_cnt - 1)};
+                LOG(fmt::format("{} start ipu and issue, ins pc: {}, sub ins num: {}, batch: {}", getName(),
+                                pim_ins_info.ins_pc, pim_ins_info.sub_ins_num, submodule_payload.batch_info.batch_num));
 
-            double dynamic_power_mW = config_.ipu.dynamic_power_mW;
-            double latency = config_.ipu.latency_cycle * period_ns_;
-            ipu_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
-            wait(latency, SC_NS);
+                double dynamic_power_mW = config_.ipu.dynamic_power_mW;
+                double latency = config_.ipu.latency_cycle * period_ns_;
+                ipu_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
+                wait(latency, SC_NS);
 
-            waitAndStartNextSubmodule(submodule_payload, sram_socket_);
+                waitAndStartNextSubmodule(submodule_payload, sram_socket_);
+            }
         }
 
         macro_socket_.finish();
@@ -159,7 +184,8 @@ void Macro::processPostProcessSubmodule() {
             }
 
             double dynamic_power_mW = config_.bit_sparse_config.dynamic_power_mW *
-                                      payload.sub_ins_info.element_col_num * payload.sub_ins_info.compartment_num;
+                                      payload.sub_ins_info.activation_element_col_cnt *
+                                      payload.sub_ins_info.compartment_num;
             double latency = config_.bit_sparse_config.latency_cycle * period_ns_;
             post_process_energy_counter_.addDynamicEnergyPJ(latency == 0.0 ? period_ns_ : latency, dynamic_power_mW);
             wait(latency, SC_NS);
@@ -182,8 +208,10 @@ void Macro::processAdderTreeSubmodule1() {
 
         double dynamic_power_mW = config_.adder_tree.dynamic_power_mW;
         double latency = period_ns_;
-        for (int i = 0; i < payload.sub_ins_info.element_col_num; i++) {
-            adder_tree_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW, sc_core::sc_time_stamp(), i);
+        for (int i = 0; i < macro_size_.element_cnt_per_compartment; i++) {
+            if (getMaskBit(payload.sub_ins_info.activation_element_col_mask, i) != 0) {
+                adder_tree_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW, sc_core::sc_time_stamp(), i);
+            }
         }
         wait(latency, SC_NS);
 
@@ -204,8 +232,10 @@ void Macro::processAdderTreeSubmodule2() {
 
         double dynamic_power_mW = config_.adder_tree.dynamic_power_mW;
         double latency = period_ns_;
-        for (int i = 0; i < payload.sub_ins_info.element_col_num; i++) {
-            adder_tree_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW, sc_core::sc_time_stamp(), i);
+        for (int i = 0; i < macro_size_.element_cnt_per_compartment; i++) {
+            if (getMaskBit(payload.sub_ins_info.activation_element_col_mask, i) != 0) {
+                adder_tree_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW, sc_core::sc_time_stamp(), i);
+            }
         }
         wait(latency, SC_NS);
 
@@ -224,7 +254,8 @@ void Macro::processShiftAdderSubmodule() {
         LOG(fmt::format("{} start shift adder, ins pc: {}, sub ins num: {}, batch: {}", getName(), pim_ins_info.ins_pc,
                         pim_ins_info.sub_ins_num, payload.batch_info.batch_num));
 
-        double dynamic_power_mW = config_.shift_adder.dynamic_power_mW * payload.sub_ins_info.element_col_num;
+        double dynamic_power_mW =
+            config_.shift_adder.dynamic_power_mW * payload.sub_ins_info.activation_element_col_cnt;
         double latency = config_.shift_adder.latency_cycle * period_ns_;
         shift_adder_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
         wait(latency, SC_NS);
@@ -233,7 +264,7 @@ void Macro::processShiftAdderSubmodule() {
             if (result_adder_socket_ptr_ != nullptr) {
                 result_adder_socket_ptr_->waitUntilFinishIfBusy();
             }
-            dynamic_power_mW = config_.result_adder.dynamic_power_mW * payload.sub_ins_info.element_col_num;
+            dynamic_power_mW = config_.result_adder.dynamic_power_mW * payload.sub_ins_info.activation_element_col_cnt;
             latency = config_.result_adder.latency_cycle * period_ns_;
             result_adder_energy_counter_.addDynamicEnergyPJ(latency, dynamic_power_mW);
         }

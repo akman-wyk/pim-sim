@@ -30,6 +30,10 @@ public:
 
     void setFinishRunFunction(std::function<void()> finish_func);
 
+    void setActivationElementColumn(const std::vector<unsigned char>& macros_activation_element_col_mask,
+                                    int start_index = 0);
+    int getActivationElementColumnCount() const;
+
 private:
     [[noreturn]] void processIPUAndIssue();
     [[noreturn]] void processSRAMSubmodule();
@@ -44,6 +48,8 @@ private:
     const PimUnitConfig& config_;
     const PimMacroSizeConfig& macro_size_;
     bool independent_ipu_;
+    int activation_element_col_cnt_;
+    std::vector<unsigned char> activation_element_col_mask_{};
 
     SubmoduleSocket<MacroPayload> macro_socket_{};
 

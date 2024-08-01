@@ -25,7 +25,7 @@ struct PimComputeReadDataPayload {
 struct PimComputeSubInsPayload {
     PimInsInfo pim_ins_info{};
     PimComputeInsPayload ins_payload;
-    int activation_macro_cnt{};
+    int group_max_activation_macro_cnt{};
 };
 
 class PimComputeUnit : public BaseModule {
@@ -52,7 +52,7 @@ private:
     void finishInstruction();
     void finishRun();
 
-    std::vector<std::vector<unsigned long long>> getMacroGroupInputs(int addr_byte, int size_byte,
+    std::vector<std::vector<unsigned long long>> getMacroGroupInputs(int group_id, int addr_byte, int size_byte,
                                                                      const PimComputeSubInsPayload& sub_ins_payload);
 
     DataConflictPayload getDataConflictInfo(const PimComputeInsPayload& payload);

@@ -20,7 +20,6 @@ struct MacroPayload {
 
     int row{0};
     int input_bit_width{0};
-    int activation_element_col_num{0};
     bool bit_sparse{false};
 
     std::vector<unsigned long long> inputs{};
@@ -28,8 +27,11 @@ struct MacroPayload {
 
 struct MacroSubInsInfo {
     PimInsInfo pim_ins_info{};
-    int compartment_num{0}, element_col_num{0};
+    int compartment_num{0};
     bool bit_sparse{false};
+
+    int activation_element_col_cnt{0};
+    std::vector<unsigned char> activation_element_col_mask{};
 };
 
 struct MacroBatchInfo {
@@ -52,7 +54,6 @@ struct MacroGroupPayload {
     // macro compute info
     int row{0};
     int input_bit_width{0};
-    int activation_element_col_num{0};
     bool bit_sparse{false};
 
     // inputs
