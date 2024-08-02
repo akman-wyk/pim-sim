@@ -1,0 +1,20 @@
+{
+  "code": [
+    {
+      "payload": {
+        "ins": {
+          "pc": 1
+        },
+        "group_broadcast": true,
+        "group_id": 0,
+        "mask_addr_byte": 2080
+      }
+    }
+  ],
+  "expected": {
+    "time_ns": 15,
+    "energy_pj": 20,
+    "groups_activation_macro_cnt": [9, 9, 9, 9],
+    "groups_activation_element_col_cnt": [135, 135, 135, 135]
+  }
+}

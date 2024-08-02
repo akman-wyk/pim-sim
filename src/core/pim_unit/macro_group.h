@@ -28,6 +28,7 @@ public:
 
     void setMacrosActivationElementColumn(const std::vector<unsigned char>& macros_activation_element_col_mask);
     int getActivationMacroCount() const;
+    int getActivationElementColumnCount() const;
 
 private:
     [[noreturn]] void processIssue();

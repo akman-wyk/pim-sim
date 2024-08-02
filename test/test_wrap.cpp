@@ -49,7 +49,7 @@ void unit_test(const std::string& root_dir, const UnitTestConfig& unit_test_conf
 
     for (int i = 0; i < unit_test_config.test_cases.size(); i++) {
         const auto& test_case_config = unit_test_config.test_cases[i];
-        std::cout << fmt::format("\t\tStart test case {}: {}\n\t\t\t", i, test_case_config.comments);
+        std::cout << fmt::format("\t\tStart test case {}: {}\n\t\t\t", i + 1, test_case_config.comments);
 
         auto config_file = fmt::format("{}/{}", root_dir, test_case_config.config_file);
         auto instruction_file = fmt::format("{}/{}", root_dir, test_case_config.instruction_file);

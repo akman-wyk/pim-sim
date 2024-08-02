@@ -69,6 +69,12 @@ int MacroGroup::getActivationMacroCount() const {
     return activation_macro_cnt_;
 }
 
+int MacroGroup::getActivationElementColumnCount() const {
+    return std::transform_reduce(
+        macro_list_.begin(), macro_list_.end(), 0, [](int a, int b) { return a + b; },
+        [](const Macro *macro) { return macro->getActivationElementColumnCount(); });
+}
+
 void MacroGroup::processIssue() {
     while (true) {
         macro_group_socket_.waitUntilStart();

@@ -63,17 +63,17 @@ public:
     }
 
     Reporter getReporter() {
-        EnergyCounter::setRunningTimeNS(running_time);
-        return Reporter{running_time.to_seconds() * 1000, "SIMD_test_module", getEnergyReporter(), 0};
+        EnergyCounter::setRunningTimeNS(running_time_);
+        return Reporter{running_time_.to_seconds() * 1000, "SIMD_test_module", getEnergyReporter(), 0};
     }
 
 private:
     void issue() {
         wait(8, SC_NS);
 
-        while (ins_index < simd_ins_list_.size()) {
-            decode_simd_payload_.write(simd_ins_list_[ins_index]);
-            ins_index++;
+        while (ins_index_ < simd_ins_list_.size()) {
+            decode_simd_payload_.write(simd_ins_list_[ins_index_]);
+            ins_index_++;
             wait(next_ins_);
         }
         SIMDInsPayload simd_nop{};
@@ -82,7 +82,7 @@ private:
 
     void processStall() {
         const auto& simd_conflict_payload = simd_data_conflict_.read();
-        auto ins_conflict_payload = getInsPayloadConflictInfos(simd_ins_list_[ins_index]);
+        auto ins_conflict_payload = getInsPayloadConflictInfos(simd_ins_list_[ins_index_]);
 
         bool simd_busy = simd_busy_.read();
         bool simd_finish = simd_finish_ins_.read();
@@ -109,7 +109,7 @@ private:
 
     void processFinishRun() {
         if (simd_finish_run_.read()) {
-            running_time = sc_core::sc_time_stamp();
+            running_time_ = sc_core::sc_time_stamp();
             sc_stop();
         }
     }
@@ -131,7 +131,7 @@ private:
 private:
     // instruction list
     std::vector<SIMDInsPayload> simd_ins_list_;
-    int ins_index{0};
+    int ins_index_{0};
 
     // modules
     LocalMemoryUnit local_memory_unit_;
@@ -150,7 +150,7 @@ private:
     sc_core::sc_signal<bool> simd_finish_run_;
 
     sc_core::sc_event next_ins_;
-    sc_core::sc_time running_time;
+    sc_core::sc_time running_time_;
 };
 
 struct ExpectedInfo {

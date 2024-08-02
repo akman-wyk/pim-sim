@@ -81,7 +81,7 @@ struct DataConflictPayload {
                                       const DataConflictPayload& unit_conflict_payload);
 
     static bool checkPimUnitConflict(const DataConflictPayload& ins_conflict_payload,
-                                     const DataConflictPayload& unit_conflict_payload);
+                                     const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict);
 
     static bool checkDataConflict(const DataConflictPayload& ins_conflict_payload,
                                   const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict);

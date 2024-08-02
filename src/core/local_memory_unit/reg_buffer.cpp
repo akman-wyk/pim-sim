@@ -34,7 +34,7 @@ sc_core::sc_time RegBuffer::accessAndGetDelay(pimsim::MemoryAccessPayload &paylo
         read_energy_counter_.addDynamicEnergyPJ(period_ns_, read_dynamic_power_mW);
 
         if (data_mode_ == +DataMode::real_data) {
-            payload.data.reserve(payload.size_byte);
+            payload.data.resize(payload.size_byte);
             std::copy_n(data_.begin() + payload.address_byte, payload.size_byte, payload.data.begin());
         }
 

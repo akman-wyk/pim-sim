@@ -41,6 +41,9 @@ public:
     void setMacroGroupActivationElementColumn(const std::vector<unsigned char>& mask, bool group_broadcast,
                                               int group_id);
 
+    int getMacroGroupActivationElementColumnCount(int group_id) const;
+    int getMacroGroupActivationMacroCount(int group_id) const;
+
 private:
     void checkPimComputeInst();
 

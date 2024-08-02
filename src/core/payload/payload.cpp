@@ -88,15 +88,16 @@ bool DataConflictPayload::checkRegisterConflict(const pimsim::DataConflictPayloa
 }
 
 bool DataConflictPayload::checkPimUnitConflict(const pimsim::DataConflictPayload& ins_conflict_payload,
-                                               const pimsim::DataConflictPayload& unit_conflict_payload) {
-    return ins_conflict_payload.use_pim_unit && unit_conflict_payload.use_pim_unit;
+                                               const pimsim::DataConflictPayload& unit_conflict_payload,
+                                               bool has_unit_conflict) {
+    return !has_unit_conflict && ins_conflict_payload.use_pim_unit && unit_conflict_payload.use_pim_unit;
 }
 
 bool DataConflictPayload::checkDataConflict(const DataConflictPayload& ins_conflict_payload,
                                             const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict) {
     return checkMemoryConflict(ins_conflict_payload, unit_conflict_payload, has_unit_conflict) ||
            checkRegisterConflict(ins_conflict_payload, unit_conflict_payload) ||
-           checkPimUnitConflict(ins_conflict_payload, unit_conflict_payload);
+           checkPimUnitConflict(ins_conflict_payload, unit_conflict_payload, has_unit_conflict);
 }
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload, pc, read_memory_id, write_memory_id, used_memory_id)

@@ -102,6 +102,41 @@
           "report_file": "report/MacroGroup_test_report.txt"
         }
       ]
+    },
+    {
+      "name": "PimSetUnitTest",
+      "test_cases": [
+        {
+          "config_file": "config/test/pim_set_unit_test_config.json",
+          "instruction_file": "test_data/pim_set/pim_set_unit_test_data_1.json",
+          "report_file": "report/PimSetUnit_test_report.txt"
+        },
+        {
+          "config_file": "config/test/pim_set_unit_test_config.json",
+          "instruction_file": "test_data/pim_set/pim_set_unit_test_data_2.json",
+          "report_file": "report/PimSetUnit_test_report.txt"
+        },
+        {
+          "config_file": "config/test/pim_set_unit_test_config.json",
+          "instruction_file": "test_data/pim_set/pim_set_unit_test_data_3.json",
+          "report_file": "report/PimSetUnit_test_report.txt"
+        },
+        {
+          "config_file": "config/test/pim_set_unit_test_config.json",
+          "instruction_file": "test_data/pim_set/pim_set_unit_test_data_4.json",
+          "report_file": "report/PimSetUnit_test_report.txt"
+        },
+        {
+          "config_file": "config/test/pim_set_unit_test_config.json",
+          "instruction_file": "test_data/pim_set/pim_set_unit_test_data_5.json",
+          "report_file": "report/PimSetUnit_test_report.txt"
+        },
+        {
+          "config_file": "config/test/pim_set_unit_test_config.json",
+          "instruction_file": "test_data/pim_set/pim_set_unit_test_data_6.json",
+          "report_file": "report/PimSetUnit_test_report.txt"
+        }
+      ]
     }
   ]
 }

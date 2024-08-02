@@ -88,6 +88,20 @@ void PimComputeUnit::setMacroGroupActivationElementColumn(const std::vector<unsi
     }
 }
 
+int PimComputeUnit::getMacroGroupActivationElementColumnCount(int group_id) const {
+    if (group_id < 0 || group_id >= macro_group_list_.size()) {
+        return 0;
+    }
+    return macro_group_list_[group_id]->getActivationElementColumnCount();
+}
+
+int PimComputeUnit::getMacroGroupActivationMacroCount(int group_id) const {
+    if (group_id < 0 || group_id >= macro_group_list_.size()) {
+        return 0;
+    }
+    return macro_group_list_[group_id]->getActivationMacroCount();
+}
+
 void PimComputeUnit::checkPimComputeInst() {
     if (const auto &payload = id_pim_compute_payload_port_.read(); payload.ins.valid()) {
         fsm_in_.write({payload, true});

@@ -20,8 +20,8 @@ ScalarUnit::ScalarUnit(const char *name, const pimsim::ScalarUnitConfig &config,
     SC_METHOD(checkScalarInst)
     sensitive << id_scalar_payload_port_;
 
-    SC_METHOD(process)
-    SC_METHOD(executeInst)
+    SC_THREAD(process)
+    SC_THREAD(executeInst)
 
     SC_METHOD(finishInstruction)
     sensitive << finish_ins_trigger_;

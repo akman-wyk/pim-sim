@@ -1,0 +1,50 @@
+{
+  "code": [
+    {
+      "payload": {
+        "ins": {
+          "pc": 1
+        },
+        "group_broadcast": false,
+        "group_id": 0,
+        "mask_addr_byte": 2144
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 2
+        },
+        "group_broadcast": false,
+        "group_id": 3,
+        "mask_addr_byte": 2144
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 3
+        },
+        "group_broadcast": false,
+        "group_id": 2,
+        "mask_addr_byte": 2176
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 4
+        },
+        "group_broadcast": false,
+        "group_id": 1,
+        "mask_addr_byte": 2176
+      }
+    }
+  ],
+  "expected": {
+    "time_ns": 30,
+    "energy_pj": 50,
+    "groups_activation_macro_cnt": [9, 13, 13, 9],
+    "groups_activation_element_col_cnt": [120, 107, 107, 120]
+  }
+}

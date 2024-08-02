@@ -66,9 +66,9 @@ private:
     void issue() {
         wait(8, SC_NS);
 
-        while (ins_index < transfer_ins_list_.size()) {
-            decode_transfer_payload_.write(transfer_ins_list_[ins_index]);
-            ins_index++;
+        while (ins_index_ < transfer_ins_list_.size()) {
+            decode_transfer_payload_.write(transfer_ins_list_[ins_index_]);
+            ins_index_++;
             wait(next_ins_);
         }
         TransferInsPayload transfer_nop{};
@@ -77,7 +77,7 @@ private:
 
     void processStall() {
         const auto& transfer_conflict_payload = transfer_data_conflict_.read();
-        auto ins_conflict_payload = getInsPayloadConflictPayload(transfer_ins_list_[ins_index]);
+        auto ins_conflict_payload = getInsPayloadConflictPayload(transfer_ins_list_[ins_index_]);
 
         auto transfer_busy = transfer_busy_.read();
         auto transfer_finish = transfer_finish_ins_.read();
@@ -126,7 +126,7 @@ private:
 private:
     // instruction list
     std::vector<TransferInsPayload> transfer_ins_list_;
-    int ins_index{0};
+    int ins_index_{0};
 
     // modules
     LocalMemoryUnit local_memory_unit_;

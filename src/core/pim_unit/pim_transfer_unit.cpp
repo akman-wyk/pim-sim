@@ -23,7 +23,7 @@ PimTransferUnit::PimTransferUnit(const char *name, const pimsim::PimUnitConfig &
     SC_THREAD(processIssue)
     SC_THREAD(processExecute)
 
-    SC_THREAD(finishInstruction)
+    SC_METHOD(finishInstruction)
     sensitive << finish_ins_trigger_;
 
     SC_METHOD(finishRun)

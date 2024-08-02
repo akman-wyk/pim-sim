@@ -137,6 +137,34 @@ add_dependencies(MacroGroupTest pim-simulator)
 target_link_libraries(MacroGroupTest PRIVATE pim-simulator)
 target_include_directories(MacroGroupTest PRIVATE src)
 
+#add_executable(PimComputeUnitTest "" test/pim_compute_unit_test.cpp
+#        test/test_payload.cpp
+#        test/test_payload.h)
+#add_dependencies(PimComputeUnitTest pim-simulator)
+#target_link_libraries(PimComputeUnitTest PRIVATE pim-simulator)
+#target_include_directories(PimComputeUnitTest PRIVATE src)
+#
+#add_executable(PimOutputUnitTest "" test/pim_output_unit_test.cpp
+#        test/test_payload.cpp
+#        test/test_payload.h)
+#add_dependencies(PimOutputUnitTest pim-simulator)
+#target_link_libraries(PimOutputUnitTest PRIVATE pim-simulator)
+#target_include_directories(PimOutputUnitTest PRIVATE src)
+
+add_executable(PimSetUnitTest "" test/pim_set_unit_test.cpp
+        test/test_payload.cpp
+        test/test_payload.h)
+add_dependencies(PimSetUnitTest pim-simulator)
+target_link_libraries(PimSetUnitTest PRIVATE pim-simulator)
+target_include_directories(PimSetUnitTest PRIVATE src)
+
+#add_executable(PimTransferUnitTest "" test/pim_transfer_unit_test.cpp
+#        test/test_payload.cpp
+#        test/test_payload.h)
+#add_dependencies(PimTransferUnitTest pim-simulator)
+#target_link_libraries(PimTransferUnitTest PRIVATE pim-simulator)
+#target_include_directories(PimTransferUnitTest PRIVATE src)
+
 add_executable(TestWrap "" test/test_wrap.cpp)
 add_dependencies(TestWrap nlohmann_json fmt)
 target_link_libraries(TestWrap PUBLIC nlohmann_json fmt)
