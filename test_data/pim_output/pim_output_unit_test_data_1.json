@@ -1,0 +1,86 @@
+{
+  "code": [
+    {
+      "payload": {
+        "ins": {
+          "pc": 1
+        },
+        "activation_group_num": 4,
+        "output_type": "only_output",
+        "output_addr_byte": 3072,
+        "output_cnt_per_group": 256,
+        "output_bit_width": 32,
+        "output_mask_addr_byte": 0
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 2
+        },
+        "activation_group_num": 3,
+        "output_type": "only_output",
+        "output_addr_byte": 3072,
+        "output_cnt_per_group": 192,
+        "output_bit_width": 32,
+        "output_mask_addr_byte": 0
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 3
+        },
+        "activation_group_num": 4,
+        "output_type": "output_sum",
+        "output_addr_byte": 3072,
+        "output_cnt_per_group": 256,
+        "output_bit_width": 32,
+        "output_mask_addr_byte": 2048
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 4
+        },
+        "activation_group_num": 2,
+        "output_type": "output_sum",
+        "output_addr_byte": 3072,
+        "output_cnt_per_group": 256,
+        "output_bit_width": 32,
+        "output_mask_addr_byte": 2080
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 5
+        },
+        "activation_group_num": 4,
+        "output_type": "output_sum_move",
+        "output_addr_byte": 3072,
+        "output_cnt_per_group": 128,
+        "output_bit_width": 32,
+        "output_mask_addr_byte": 0
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 6
+        },
+        "activation_group_num": 1,
+        "output_type": "output_sum_move",
+        "output_addr_byte": 3072,
+        "output_cnt_per_group": 107,
+        "output_bit_width": 32,
+        "output_mask_addr_byte": 0
+      }
+    }
+  ],
+  "expected": {
+    "time_ns": 50,
+    "energy_pj": 6162.5
+  }
+}

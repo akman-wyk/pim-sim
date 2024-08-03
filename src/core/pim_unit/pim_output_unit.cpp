@@ -61,7 +61,7 @@ void PimOutputUnit::processIssue() {
         conflict_payload.use_pim_unit = true;
         conflict_payload.addWriteMemoryId(local_memory_socket_.getLocalMemoryIdByAddress(payload.output_addr_byte));
         if (payload.output_type == +PimOutputType::output_sum) {
-            conflict_payload.addWriteMemoryId(
+            conflict_payload.addReadMemoryId(
                 local_memory_socket_.getLocalMemoryIdByAddress(payload.output_mask_addr_byte));
         }
         ports_.data_conflict_port_.write(conflict_payload);

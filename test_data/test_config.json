@@ -137,6 +137,16 @@
           "report_file": "report/PimSetUnit_test_report.txt"
         }
       ]
+    },
+    {
+      "name": "PimOutputUnitTest",
+      "test_cases": [
+        {
+          "config_file": "config/test/pim_output_unit_test_config.json",
+          "instruction_file": "test_data/pim_output/pim_output_unit_test_data_1.json",
+          "report_file": "report/PimOutputUnit_test_report.txt"
+        }
+      ]
     }
   ]
 }

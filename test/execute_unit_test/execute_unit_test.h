@@ -67,33 +67,35 @@ public:
     }
 
 private:
-    void issue() {
+    [[noreturn]] void issue() {
         wait(8, SC_NS);
 
-        while (ins_index_ < ins_list_.size()) {
-            signals_.id_ex_payload_.write(ins_list_[ins_index_].payload);
-            ins_index_++;
-            wait(next_ins_);
+        while (true) {
+            if (!id_stall_.read()) {
+                if (ins_index_ < ins_list_.size()) {
+                    signals_.id_ex_payload_.write(ins_list_[ins_index_].payload);
+                    ins_index_++;
+                } else {
+                    InsPayload nop{};
+                    signals_.id_ex_payload_.write(nop);
+                }
+            }
+            wait(period_ns_, SC_NS);
         }
-        InsPayload nop{};
-        signals_.id_ex_payload_.write(nop);
     }
 
     void processStall() {
         const auto& pim_set_conflict_payload = signals_.data_conflict_.read();
         auto ins_conflict_payload = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
 
-        bool pim_set_busy = signals_.busy_.read();
-        bool pim_set_finish = signals_.finish_ins_.read();
-        int pim_set_finish_pc = signals_.finish_ins_pc_.read();
+        bool busy = signals_.busy_.read();
+        bool finish = signals_.finish_ins_.read();
+        int finish_pc = signals_.finish_ins_pc_.read();
 
         bool stall = DataConflictPayload::checkDataConflict(ins_conflict_payload, pim_set_conflict_payload, true)
-                         ? (!pim_set_finish || pim_set_finish_pc != pim_set_conflict_payload.pc)
-                         : pim_set_busy;
+                         ? (!finish || finish_pc != pim_set_conflict_payload.pc)
+                         : busy;
         id_stall_.write(stall);
-        if (!stall) {
-            next_ins_.notify();
-        }
     }
 
     void processIdExEnable() {
@@ -130,7 +132,6 @@ protected:
     // id ex signals
     ExecuteUnitSignalPorts<InsPayload> signals_;
 
-    sc_core::sc_event next_ins_;
     sc_core::sc_time running_time_;
 };
 
