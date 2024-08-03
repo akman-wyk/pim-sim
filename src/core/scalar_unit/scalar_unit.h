@@ -13,6 +13,7 @@
 #include "base_component/submodule_socket.h"
 #include "config/config.h"
 #include "core/local_memory_unit/local_memory_unit.h"
+#include "core/payload/execute_unit_payload.h"
 #include "core/payload/payload.h"
 
 namespace pimsim {
@@ -37,15 +38,8 @@ private:
     void checkScalarInst();
 
 public:
-    sc_core::sc_in<ScalarInsPayload> id_scalar_payload_port_;
-    sc_core::sc_in<bool> id_ex_enable_port_;
+    ExecuteUnitResponseIOPorts<ScalarInsPayload> ports_;
     sc_core::sc_out<RegUnitWriteRequest> reg_file_write_port_;
-
-    sc_core::sc_out<bool> busy_port_;
-    sc_core::sc_out<DataConflictPayload> data_conflict_port_;
-    sc_core::sc_out<bool> finish_ins_port_;
-    sc_core::sc_out<int> finish_ins_pc_port_;
-    sc_core::sc_out<bool> finish_run_port_;
 
 private:
     const ScalarUnitConfig& config_;

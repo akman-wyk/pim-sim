@@ -7,9 +7,10 @@
 #include "base_component/base_module.h"
 #include "base_component/fsm.h"
 #include "base_component/memory_socket.h"
-#include "config/config.h"
-#include "core/payload/payload.h"
 #include "base_component/submodule_socket.h"
+#include "config/config.h"
+#include "core/payload/execute_unit_payload.h"
+#include "core/payload/payload.h"
 
 namespace pimsim {
 
@@ -36,15 +37,7 @@ private:
     void finishRun();
 
 public:
-    sc_core::sc_in<PimOutputInsPayload> id_pim_output_payload_port_;
-    sc_core::sc_in<bool> id_ex_enable_port_;
-    sc_core::sc_out<bool> busy_port_;
-    sc_core::sc_out<DataConflictPayload> data_conflict_port_;
-
-    sc_core::sc_out<bool> finish_ins_port_;
-    sc_core::sc_out<int> finish_ins_pc_port_;
-
-    sc_core::sc_out<bool> finish_run_port_;
+    ExecuteUnitResponseIOPorts<PimOutputInsPayload> ports_;
 
 private:
     const PimUnitConfig& config_;

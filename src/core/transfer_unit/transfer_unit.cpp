@@ -15,11 +15,11 @@ TransferUnit::TransferUnit(const char* name, const TransferUnitConfig& config, c
                            Clock* clk)
     : BaseModule(name, sim_config, core, clk), config_(config), transfer_fsm_("TransferUnitFSM", clk) {
     transfer_fsm_.input_.bind(transfer_fsm_in_);
-    transfer_fsm_.enable_.bind(id_ex_enable_port_);
+    transfer_fsm_.enable_.bind(ports_.id_ex_enable_port_);
     transfer_fsm_.output_.bind(transfer_fsm_out_);
 
     SC_METHOD(checkTransferInst)
-    sensitive << id_transfer_payload_port_;
+    sensitive << ports_.id_ex_payload_port_;
 
     SC_THREAD(processIssue)
     SC_THREAD(processReadSubmodule)
@@ -33,7 +33,7 @@ TransferUnit::TransferUnit(const char* name, const TransferUnitConfig& config, c
 }
 
 void TransferUnit::checkTransferInst() {
-    if (const auto& payload = id_transfer_payload_port_.read(); payload.ins.valid()) {
+    if (const auto& payload = ports_.id_ex_payload_port_.read(); payload.ins.valid()) {
         transfer_fsm_in_.write({payload, true});
     } else {
         transfer_fsm_in_.write({{}, false});
@@ -43,11 +43,11 @@ void TransferUnit::checkTransferInst() {
 void TransferUnit::processIssue() {
     while (true) {
         wait(transfer_fsm_.start_exec_);
-        busy_port_.write(true);
+        ports_.busy_port_.write(true);
 
         const auto& payload = transfer_fsm_out_.read();
         const auto& [ins_info, conflict_payload] = decodeAndGetInfo(payload);
-        data_conflict_port_.write(conflict_payload);
+        ports_.data_conflict_port_.write(conflict_payload);
 
         int process_times = IntDivCeil(payload.size_byte, ins_info.data_width_byte);
         TransferSubmodulePayload submodule_payload{.ins_info = ins_info};
@@ -66,7 +66,7 @@ void TransferUnit::processIssue() {
             }
         }
 
-        busy_port_.write(false);
+        ports_.busy_port_.write(false);
         transfer_fsm_.finish_exec_.notify(SC_ZERO_TIME);
     }
 }
@@ -130,12 +130,12 @@ void TransferUnit::processWriteSubmodule() {
 }
 
 void TransferUnit::finishInstruction() {
-    finish_ins_port_.write(finish_ins_);
-    finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_port_.write(finish_ins_);
+    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
 }
 
 void TransferUnit::finishRun() {
-    finish_run_port_.write(finish_run_);
+    ports_.finish_run_port_.write(finish_run_);
 }
 
 void TransferUnit::bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit) {

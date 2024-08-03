@@ -2,11 +2,11 @@
 // Created by wyk on 2024/7/21.
 //
 
+#include "../base/test_macro.h"
 #include "base_component/base_module.h"
 #include "config/config.h"
 #include "core/pim_unit/macro.h"
 #include "core/pim_unit/pim_payload.h"
-#include "test_macro.h"
 #include "util/macro_scope.h"
 #include "util/util.h"
 

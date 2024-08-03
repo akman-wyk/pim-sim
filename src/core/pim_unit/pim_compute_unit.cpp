@@ -17,11 +17,11 @@ PimComputeUnit::PimComputeUnit(const char *name, const pimsim::PimUnitConfig &co
     , macro_size_(config.macro_size)
     , fsm_("PimComputeFSM", clk) {
     fsm_.input_.bind(fsm_in_);
-    fsm_.enable_.bind(id_ex_enable_port_);
+    fsm_.enable_.bind(ports_.id_ex_enable_port_);
     fsm_.output_.bind(fsm_out_);
 
     SC_METHOD(checkPimComputeInst)
-    sensitive << id_pim_compute_payload_port_;
+    sensitive << ports_.id_ex_payload_port_;
 
     SC_THREAD(processIssue)
     SC_THREAD(processSubIns)
@@ -103,7 +103,7 @@ int PimComputeUnit::getMacroGroupActivationMacroCount(int group_id) const {
 }
 
 void PimComputeUnit::checkPimComputeInst() {
-    if (const auto &payload = id_pim_compute_payload_port_.read(); payload.ins.valid()) {
+    if (const auto &payload = ports_.id_ex_payload_port_.read(); payload.ins.valid()) {
         fsm_in_.write({payload, true});
     } else {
         fsm_in_.write({{}, false});
@@ -114,11 +114,11 @@ void PimComputeUnit::processIssue() {
     while (true) {
         wait(fsm_.start_exec_);
 
-        busy_port_.write(true);
+        ports_.busy_port_.write(true);
 
         const auto &payload = fsm_out_.read();
         LOG(fmt::format("Pim compute start, pc: {}", payload.ins.pc));
-        data_conflict_port_.write(getDataConflictInfo(payload));
+        ports_.data_conflict_port_.write(getDataConflictInfo(payload));
 
         process_sub_ins_socket_.waitUntilFinishIfBusy();
         process_sub_ins_socket_.payload = {
@@ -136,7 +136,7 @@ void PimComputeUnit::processIssue() {
             wait(next_sub_ins_);
         }
 
-        busy_port_.write(false);
+        ports_.busy_port_.write(false);
         fsm_.finish_exec_.notify(SC_ZERO_TIME);
     }
 }
@@ -282,12 +282,12 @@ void PimComputeUnit::readBitSparseMetaSubmodule() {
 }
 
 void PimComputeUnit::finishInstruction() {
-    finish_ins_port_.write(finish_ins_);
-    finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_port_.write(finish_ins_);
+    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
 }
 
 void PimComputeUnit::finishRun() {
-    finish_run_port_.write(finish_run_);
+    ports_.finish_run_port_.write(finish_run_);
 }
 
 DataConflictPayload PimComputeUnit::getDataConflictInfo(const pimsim::PimComputeInsPayload &payload) {

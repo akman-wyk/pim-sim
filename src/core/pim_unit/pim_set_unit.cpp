@@ -15,11 +15,11 @@ PimSetUnit::PimSetUnit(const char *name, const pimsim::PimUnitConfig &config, co
                        pimsim::Core *core, pimsim::Clock *clk)
     : BaseModule(name, sim_config, core, clk), config_(config), macro_size_(config.macro_size), fsm_("PimSetFSM", clk) {
     fsm_.input_.bind(fsm_in_);
-    fsm_.enable_.bind(id_ex_enable_port_);
+    fsm_.enable_.bind(ports_.id_ex_enable_port_);
     fsm_.output_.bind(fsm_out_);
 
     SC_METHOD(checkPimSetInst)
-    sensitive << id_pim_set_payload_port_;
+    sensitive << ports_.id_ex_payload_port_;
 
     SC_THREAD(processIssue)
     SC_THREAD(processExecute)
@@ -40,7 +40,7 @@ void PimSetUnit::bindPimComputeUnit(pimsim::PimComputeUnit *pim_compute_unit) {
 }
 
 void PimSetUnit::checkPimSetInst() {
-    if (const auto &payload = id_pim_set_payload_port_.read(); payload.ins.valid()) {
+    if (const auto &payload = ports_.id_ex_payload_port_.read(); payload.ins.valid()) {
         fsm_in_.write({payload, true});
     } else {
         fsm_in_.write({{}, false});
@@ -51,7 +51,7 @@ void PimSetUnit::processIssue() {
     while (true) {
         wait(fsm_.start_exec_);
 
-        busy_port_.write(true);
+        ports_.busy_port_.write(true);
 
         const auto &payload = fsm_out_.read();
         LOG(fmt::format("Pim set start, pc: {}", payload.ins.pc));
@@ -59,13 +59,13 @@ void PimSetUnit::processIssue() {
         DataConflictPayload conflict_payload{.pc = payload.ins.pc};
         conflict_payload.use_pim_unit = true;
         conflict_payload.addReadMemoryId(local_memory_socket_.getLocalMemoryIdByAddress(payload.mask_addr_byte));
-        data_conflict_port_.write(conflict_payload);
+        ports_.data_conflict_port_.write(conflict_payload);
 
         execute_socket_.waitUntilFinishIfBusy();
         execute_socket_.payload = payload;
         execute_socket_.start_exec.notify();
 
-        busy_port_.write(false);
+        ports_.busy_port_.write(false);
         fsm_.finish_exec_.notify(SC_ZERO_TIME);
     }
 }
@@ -101,12 +101,12 @@ void PimSetUnit::processExecute() {
 }
 
 void PimSetUnit::finishInstruction() {
-    finish_ins_port_.write(finish_ins_);
-    finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_port_.write(finish_ins_);
+    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
 }
 
 void PimSetUnit::finishRun() {
-    finish_run_port_.write(finish_run_);
+    ports_.finish_run_port_.write(finish_run_);
 }
 
 }  // namespace pimsim

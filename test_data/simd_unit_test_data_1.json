@@ -1,202 +1,131 @@
 {
   "code": [
     {
-      "ins": {
-        "pc": 1
-      },
-      "input_cnt": 1,
-      "opcode": 0,
-      "inputs_bit_width": [
-        8,
-        0,
-        0,
-        0
-      ],
-      "output_bit_width": 8,
-      "inputs_address_byte": [
-        1024,
-        0,
-        0,
-        0
-      ],
-      "output_address_byte": 2048,
-      "len": 64
+      "payload": {
+        "ins": {
+          "pc": 1
+        },
+        "input_cnt": 1,
+        "opcode": 0,
+        "inputs_bit_width": [8, 0, 0, 0],
+        "output_bit_width": 8,
+        "inputs_address_byte": [1024, 0, 0, 0],
+        "output_address_byte": 2048,
+        "len": 64
+      }
     },
     {
-      "ins": {
-        "pc": 2
-      },
-      "input_cnt": 1,
-      "opcode": 0,
-      "inputs_bit_width": [
-        8,
-        0,
-        0,
-        0
-      ],
-      "output_bit_width": 8,
-      "inputs_address_byte": [
-        2048,
-        0,
-        0,
-        0
-      ],
-      "output_address_byte": 2560,
-      "len": 64
+      "payload": {
+        "ins": {
+          "pc": 2
+        },
+        "input_cnt": 1,
+        "opcode": 0,
+        "inputs_bit_width": [8, 0, 0, 0],
+        "output_bit_width": 8,
+        "inputs_address_byte": [2048, 0, 0, 0
+        ],
+        "output_address_byte": 2560,
+        "len": 64
+      }
     },
     {
-      "ins": {
-        "pc": 3
-      },
-      "input_cnt": 1,
-      "opcode": 0,
-      "inputs_bit_width": [
-        8,
-        0,
-        0,
-        0
-      ],
-      "output_bit_width": 8,
-      "inputs_address_byte": [
-        1024,
-        0,
-        0,
-        0
-      ],
-      "output_address_byte": 1536,
-      "len": 64
+      "payload": {
+        "ins": {
+          "pc": 3
+        },
+        "input_cnt": 1,
+        "opcode": 0,
+        "inputs_bit_width": [8, 0, 0, 0],
+        "output_bit_width": 8,
+        "inputs_address_byte": [1024, 0, 0, 0],
+        "output_address_byte": 1536,
+        "len": 64
+      }
     },
     {
-      "ins": {
-        "pc": 4
-      },
-      "input_cnt": 1,
-      "opcode": 0,
-      "inputs_bit_width": [
-        8,
-        0,
-        0,
-        0
-      ],
-      "output_bit_width": 8,
-      "inputs_address_byte": [
-        1024,
-        0,
-        0,
-        0
-      ],
-      "output_address_byte": 1536,
-      "len": 64
+      "payload": {
+        "ins": {
+          "pc": 4
+        },
+        "input_cnt": 1,
+        "opcode": 0,
+        "inputs_bit_width": [8, 0, 0, 0],
+        "output_bit_width": 8,
+        "inputs_address_byte": [1024, 0, 0, 0],
+        "output_address_byte": 1536,
+        "len": 64
+      }
     },
     {
-      "ins": {
-        "pc": 5
-      },
-      "input_cnt": 1,
-      "opcode": 0,
-      "inputs_bit_width": [
-        8,
-        0,
-        0,
-        0
-      ],
-      "output_bit_width": 8,
-      "inputs_address_byte": [
-        2048,
-        0,
-        0,
-        0
-      ],
-      "output_address_byte": 1024,
-      "len": 64
+      "payload": {
+        "ins": {
+          "pc": 5
+        },
+        "input_cnt": 1,
+        "opcode": 0,
+        "inputs_bit_width": [8, 0, 0, 0],
+        "output_bit_width": 8,
+        "inputs_address_byte": [2048, 0, 0, 0],
+        "output_address_byte": 1024,
+        "len": 64
+      }
     },
     {
-      "ins": {
-        "pc": 6
-      },
-      "input_cnt": 1,
-      "opcode": 0,
-      "inputs_bit_width": [
-        8,
-        0,
-        0,
-        0
-      ],
-      "output_bit_width": 8,
-      "inputs_address_byte": [
-        2048,
-        0,
-        0,
-        0
-      ],
-      "output_address_byte": 1024,
-      "len": 64
+      "payload": {
+        "ins": {
+          "pc": 6
+        },
+        "input_cnt": 1,
+        "opcode": 0,
+        "inputs_bit_width": [8, 0, 0, 0],
+        "output_bit_width": 8,
+        "inputs_address_byte": [2048, 0, 0, 0],
+        "output_address_byte": 1024,
+        "len": 64
+      }
     },
     {
-      "ins": {
-        "pc": 7
-      },
-      "input_cnt": 1,
-      "opcode": 0,
-      "inputs_bit_width": [
-        8,
-        0,
-        0,
-        0
-      ],
-      "output_bit_width": 8,
-      "inputs_address_byte": [
-        2048,
-        0,
-        0,
-        0
-      ],
-      "output_address_byte": 2560,
-      "len": 64
+      "payload": {
+        "ins": {
+          "pc": 7
+        },
+        "input_cnt": 1,
+        "opcode": 0,
+        "inputs_bit_width": [8, 0, 0, 0],
+        "output_bit_width": 8,
+        "inputs_address_byte": [2048, 0, 0, 0],
+        "output_address_byte": 2560,
+        "len": 64
+      }
     },
     {
-      "ins": {
-        "pc": 8
-      },
-      "input_cnt": 1,
-      "opcode": 0,
-      "inputs_bit_width": [
-        8,
-        0,
-        0,
-        0
-      ],
-      "output_bit_width": 8,
-      "inputs_address_byte": [
-        2048,
-        0,
-        0,
-        0
-      ],
-      "output_address_byte": 1024,
-      "len": 64
+      "payload": {
+        "ins": {
+          "pc": 8
+        },
+        "input_cnt": 1,
+        "opcode": 0,
+        "inputs_bit_width": [8, 0, 0, 0],
+        "output_bit_width": 8,
+        "inputs_address_byte": [2048, 0, 0, 0],
+        "output_address_byte": 1024,
+        "len": 64
+      }
     },
     {
-      "ins": {
-        "pc": 9
-      },
-      "input_cnt": 1,
-      "opcode": 0,
-      "inputs_bit_width": [
-        8,
-        0,
-        0,
-        0
-      ],
-      "output_bit_width": 8,
-      "inputs_address_byte": [
-        1024,
-        0,
-        0,
-        0
-      ],
-      "output_address_byte": 2048,
-      "len": 64
+      "payload": {
+        "ins": {
+          "pc": 9
+        },
+        "input_cnt": 1,
+        "opcode": 0,
+        "inputs_bit_width": [8, 0, 0, 0],
+        "output_bit_width": 8,
+        "inputs_address_byte": [1024, 0, 0, 0],
+        "output_address_byte": 2048,
+        "len": 64
+      }
     }
   ],
   "expected": {

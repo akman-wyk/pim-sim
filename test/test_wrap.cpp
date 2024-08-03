@@ -7,9 +7,9 @@
 #include <string>
 #include <vector>
 
+#include "base/test_macro.h"
 #include "fmt/format.h"
 #include "nlohmann/json.hpp"
-#include "test_macro.h"
 
 #if defined(WIN32)
 #define WEXITSTATUS(status) (((status) & 0xff00) >> 8)

@@ -12,6 +12,7 @@
 #include "config/config.h"
 #include "core/payload/payload.h"
 #include "macro_group.h"
+#include "core/payload/execute_unit_payload.h"
 
 namespace pimsim {
 
@@ -64,15 +65,7 @@ private:
     DataConflictPayload getDataConflictInfo(const PimComputeInsPayload& payload);
 
 public:
-    sc_core::sc_in<PimComputeInsPayload> id_pim_compute_payload_port_;
-    sc_core::sc_in<bool> id_ex_enable_port_;
-    sc_core::sc_out<bool> busy_port_;
-    sc_core::sc_out<DataConflictPayload> data_conflict_port_;
-
-    sc_core::sc_out<bool> finish_ins_port_;
-    sc_core::sc_out<int> finish_ins_pc_port_;
-
-    sc_core::sc_out<bool> finish_run_port_;
+    ExecuteUnitResponseIOPorts<PimComputeInsPayload> ports_;
 
 private:
     const PimUnitConfig& config_;

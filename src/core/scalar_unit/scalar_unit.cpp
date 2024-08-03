@@ -14,11 +14,11 @@ ScalarUnit::ScalarUnit(const char *name, const pimsim::ScalarUnitConfig &config,
                        pimsim::Core *core, pimsim::Clock *clk)
     : BaseModule(name, sim_config, core, clk), config_(config), scalar_fsm_("ScalarUnitFSM", clk) {
     scalar_fsm_.input_.bind(scalar_fsm_in_);
-    scalar_fsm_.enable_.bind(id_ex_enable_port_);
+    scalar_fsm_.enable_.bind(ports_.id_ex_enable_port_);
     scalar_fsm_.output_.bind(scalar_fsm_out_);
 
     SC_METHOD(checkScalarInst)
-    sensitive << id_scalar_payload_port_;
+    sensitive << ports_.id_ex_payload_port_;
 
     SC_THREAD(process)
     SC_THREAD(executeInst)
@@ -38,7 +38,7 @@ ScalarUnit::ScalarUnit(const char *name, const pimsim::ScalarUnitConfig &config,
 }
 
 void ScalarUnit::checkScalarInst() {
-    if (const auto &payload = id_scalar_payload_port_.read(); payload.ins.valid()) {
+    if (const auto &payload = ports_.id_ex_payload_port_.read(); payload.ins.valid()) {
         scalar_fsm_in_.write({payload, true});
     } else {
         scalar_fsm_in_.write({{}, false});
@@ -49,12 +49,12 @@ void ScalarUnit::process() {
     while (true) {
         wait(scalar_fsm_.start_exec_);
 
-        busy_port_.write(true);
+        ports_.busy_port_.write(true);
 
         const auto &payload = scalar_fsm_out_.read();
         DataConflictPayload conflict_payload{
             .pc = payload.ins.pc, .write_reg_id = (payload.op == +ScalarOperator::load ? payload.dst_reg : -1)};
-        data_conflict_port_.write(conflict_payload);
+        ports_.data_conflict_port_.write(conflict_payload);
 
         LOG(fmt::format("scalar {} start, pc: {}", payload.op._to_string(), payload.ins.pc));
 
@@ -69,18 +69,18 @@ void ScalarUnit::process() {
         execute_socket_.payload = payload;
         execute_socket_.start_exec.notify();
 
-        busy_port_.write(false);
+        ports_.busy_port_.write(false);
         scalar_fsm_.finish_exec_.notify();
     }
 }
 
 void ScalarUnit::finishInstruction() {
-    finish_ins_port_.write(finish_ins_);
-    finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_port_.write(finish_ins_);
+    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
 }
 
 void ScalarUnit::finishRun() {
-    finish_run_port_.write(finish_run_);
+    ports_.finish_run_port_.write(finish_run_);
 }
 
 void ScalarUnit::bindLocalMemoryUnit(pimsim::LocalMemoryUnit *local_memory_unit) {

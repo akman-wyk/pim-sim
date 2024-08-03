@@ -13,11 +13,11 @@ namespace pimsim {
 SIMDUnit::SIMDUnit(const char* name, const SIMDUnitConfig& config, const SimConfig& sim_config, Core* core, Clock* clk)
     : BaseModule(name, sim_config, core, clk), config_(config), simd_fsm_("SIMD_UNIT_FSM", clk) {
     simd_fsm_.input_.bind(simd_fsm_in_);
-    simd_fsm_.enable_.bind(id_ex_enable_port_);
+    simd_fsm_.enable_.bind(ports_.id_ex_enable_port_);
     simd_fsm_.output_.bind(simd_fsm_out_);
 
     SC_METHOD(checkSIMDInst)
-    sensitive << id_simd_payload_port_;
+    sensitive << ports_.id_ex_payload_port_;
 
     SC_THREAD(processIssue)
     SC_THREAD(processReadSubmodule)
@@ -45,7 +45,7 @@ SIMDUnit::SIMDUnit(const char* name, const SIMDUnitConfig& config, const SimConf
 }
 
 void SIMDUnit::checkSIMDInst() {
-    if (const auto& payload = id_simd_payload_port_.read(); payload.ins.valid()) {
+    if (const auto& payload = ports_.id_ex_payload_port_.read(); payload.ins.valid()) {
         simd_fsm_in_.write({payload, true});
     } else {
         simd_fsm_in_.write({{}, false});
@@ -56,7 +56,7 @@ void SIMDUnit::processIssue() {
     while (true) {
         wait(simd_fsm_.start_exec_);
 
-        busy_port_.write(true);
+        ports_.busy_port_.write(true);
 
         // Find instruction and functor
         const auto& payload = simd_fsm_out_.read();
@@ -67,7 +67,7 @@ void SIMDUnit::processIssue() {
 
         // Decode instruction
         const auto& [ins_info, conflict_payload] = decodeAndGetInfo(instruction, functor, payload);
-        data_conflict_port_.write(conflict_payload);
+        ports_.data_conflict_port_.write(conflict_payload);
 
         int vector_total_len = ins_info.vector_inputs.empty() ? 1 : payload.len;
         int process_times = IntDivCeil(vector_total_len, functor->functor_cnt);
@@ -86,7 +86,7 @@ void SIMDUnit::processIssue() {
             }
         }
 
-        busy_port_.write(false);
+        ports_.busy_port_.write(false);
         simd_fsm_.finish_exec_.notify(SC_ZERO_TIME);
     }
 }
@@ -178,12 +178,12 @@ void SIMDUnit::processWriteSubmodule() {
 }
 
 void SIMDUnit::finishInstruction() {
-    finish_ins_port_.write(finish_ins_);
-    finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_port_.write(finish_ins_);
+    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
 }
 
 void SIMDUnit::finishRun() {
-    finish_run_port_.write(finish_run_);
+    ports_.finish_run_port_.write(finish_run_);
 }
 
 void SIMDUnit::bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit) {

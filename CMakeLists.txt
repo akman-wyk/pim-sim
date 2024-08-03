@@ -101,7 +101,7 @@ add_dependencies(ChipTest pim-simulator)
 target_link_libraries(ChipTest PRIVATE pim-simulator)
 target_include_directories(ChipTest PRIVATE src)
 
-add_executable(ConfigTest test/config_test.cpp
+add_executable(ConfigTest test/other_test/config_test.cpp
         src/config/config.h
         src/config/config.cpp
         src/config/config_enum.h
@@ -112,27 +112,33 @@ target_link_libraries(ConfigTest PUBLIC nlohmann_json fmt)
 target_include_directories(ConfigTest PRIVATE src)
 target_include_directories(ConfigTest PUBLIC packages/header-only)
 
-add_executable(LocalMemoryUnitTest "" test/local_memory_unit_test.cpp)
+add_executable(LocalMemoryUnitTest "" test/other_test/local_memory_unit_test.cpp)
 add_dependencies(LocalMemoryUnitTest pim-simulator)
 target_link_libraries(LocalMemoryUnitTest PRIVATE pim-simulator)
 target_include_directories(LocalMemoryUnitTest PRIVATE src)
 
-add_executable(SIMDUnitTest "" test/simd_unit_test.cpp)
+add_executable(SIMDUnitTest "" test/execute_unit_test/simd_unit_test.cpp
+        test/base/test_payload.cpp
+        test/base/test_payload.h
+        test/execute_unit_test/execute_unit_test.h)
 add_dependencies(SIMDUnitTest pim-simulator)
 target_link_libraries(SIMDUnitTest PRIVATE pim-simulator)
 target_include_directories(SIMDUnitTest PRIVATE src)
 
-add_executable(TransferUnitTest "" test/transfer_unit_test.cpp)
+add_executable(TransferUnitTest "" test/execute_unit_test/transfer_unit_test.cpp
+        test/base/test_payload.cpp
+        test/base/test_payload.h
+        test/execute_unit_test/execute_unit_test.h)
 add_dependencies(TransferUnitTest pim-simulator)
 target_link_libraries(TransferUnitTest PRIVATE pim-simulator)
 target_include_directories(TransferUnitTest PRIVATE src)
 
-add_executable(MacroTest "" test/macro_test.cpp)
+add_executable(MacroTest "" test/other_test/macro_test.cpp)
 add_dependencies(MacroTest pim-simulator)
 target_link_libraries(MacroTest PRIVATE pim-simulator)
 target_include_directories(MacroTest PRIVATE src)
 
-add_executable(MacroGroupTest "" test/macro_group_test.cpp)
+add_executable(MacroGroupTest "" test/other_test/macro_group_test.cpp)
 add_dependencies(MacroGroupTest pim-simulator)
 target_link_libraries(MacroGroupTest PRIVATE pim-simulator)
 target_include_directories(MacroGroupTest PRIVATE src)
@@ -151,9 +157,11 @@ target_include_directories(MacroGroupTest PRIVATE src)
 #target_link_libraries(PimOutputUnitTest PRIVATE pim-simulator)
 #target_include_directories(PimOutputUnitTest PRIVATE src)
 
-add_executable(PimSetUnitTest "" test/pim_set_unit_test.cpp
-        test/test_payload.cpp
-        test/test_payload.h)
+add_executable(PimSetUnitTest "" test/execute_unit_test/pim_set_unit_test.cpp
+        test/base/test_payload.cpp
+        test/base/test_payload.h
+        test/execute_unit_test/execute_unit_test.h
+)
 add_dependencies(PimSetUnitTest pim-simulator)
 target_link_libraries(PimSetUnitTest PRIVATE pim-simulator)
 target_include_directories(PimSetUnitTest PRIVATE src)

@@ -4,11 +4,11 @@
 
 #include <vector>
 
+#include "../base/test_macro.h"
 #include "base_component/base_module.h"
 #include "core/pim_unit/macro_group.h"
 #include "core/pim_unit/pim_payload.h"
 #include "nlohmann/json.hpp"
-#include "test_macro.h"
 #include "util/macro_scope.h"
 #include "util/util.h"
 
