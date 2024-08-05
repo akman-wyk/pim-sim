@@ -167,12 +167,13 @@ add_dependencies(PimSetUnitTest pim-simulator)
 target_link_libraries(PimSetUnitTest PRIVATE pim-simulator)
 target_include_directories(PimSetUnitTest PRIVATE src)
 
-#add_executable(PimTransferUnitTest "" test/pim_transfer_unit_test.cpp
-#        test/test_payload.cpp
-#        test/test_payload.h)
-#add_dependencies(PimTransferUnitTest pim-simulator)
-#target_link_libraries(PimTransferUnitTest PRIVATE pim-simulator)
-#target_include_directories(PimTransferUnitTest PRIVATE src)
+add_executable(PimTransferUnitTest "" test/execute_unit_test/pim_transfer_unit_test.cpp
+        test/base/test_payload.cpp
+        test/base/test_payload.h
+        test/execute_unit_test/execute_unit_test.h)
+add_dependencies(PimTransferUnitTest pim-simulator)
+target_link_libraries(PimTransferUnitTest PRIVATE pim-simulator)
+target_include_directories(PimTransferUnitTest PRIVATE src)
 
 add_executable(TestWrap "" test/test_wrap.cpp)
 add_dependencies(TestWrap nlohmann_json fmt)

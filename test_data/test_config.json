@@ -147,6 +147,16 @@
           "report_file": "report/PimOutputUnit_test_report.txt"
         }
       ]
+    },
+    {
+      "name": "PimTransferUnitTest",
+      "test_cases": [
+        {
+          "config_file": "config/test/pim_transfer_unit_test_config.json",
+          "instruction_file": "test_data/pim_transfer/pim_transfer_unit_test_data_1.json",
+          "report_file": "report/PimTransferUnit_test_report.txt"
+        }
+      ]
     }
   ]
 }

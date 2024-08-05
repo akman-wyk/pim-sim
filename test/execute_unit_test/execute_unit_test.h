@@ -68,15 +68,19 @@ public:
 
 private:
     [[noreturn]] void issue() {
+        InsPayload nop{};
         wait(8, SC_NS);
 
         while (true) {
+            if (ins_index_ + 1 != cur_ins_conflict_info_.pc) {
+                cur_ins_conflict_info_ = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
+            }
+
             if (!id_stall_.read()) {
                 if (ins_index_ < ins_list_.size()) {
                     signals_.id_ex_payload_.write(ins_list_[ins_index_].payload);
                     ins_index_++;
                 } else {
-                    InsPayload nop{};
                     signals_.id_ex_payload_.write(nop);
                 }
             }
@@ -86,13 +90,12 @@ private:
 
     void processStall() {
         const auto& pim_set_conflict_payload = signals_.data_conflict_.read();
-        auto ins_conflict_payload = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
 
         bool busy = signals_.busy_.read();
         bool finish = signals_.finish_ins_.read();
         int finish_pc = signals_.finish_ins_pc_.read();
 
-        bool stall = DataConflictPayload::checkDataConflict(ins_conflict_payload, pim_set_conflict_payload, true)
+        bool stall = DataConflictPayload::checkDataConflict(cur_ins_conflict_info_, pim_set_conflict_payload, true)
                          ? (!finish || finish_pc != pim_set_conflict_payload.pc)
                          : busy;
         id_stall_.write(stall);
@@ -121,6 +124,7 @@ protected:
     // instruction list
     std::vector<TestInstruction> ins_list_;
     int ins_index_{0};
+    DataConflictPayload cur_ins_conflict_info_;
 
     // modules
     LocalMemoryUnit local_memory_unit_;
