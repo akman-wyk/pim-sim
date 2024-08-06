@@ -231,6 +231,7 @@ std::vector<std::vector<unsigned long long>> PimComputeUnit::getMacroGroupInputs
     auto read_data = local_memory_socket_.readData(payload.ins, addr_byte, size_byte);
     std::vector<unsigned long long> input_data;
     if (payload.input_bit_width == BYTE_TO_BIT) {
+        input_data.resize(read_data.size());
         std::transform(read_data.begin(), read_data.end(), input_data.begin(),
                        [](unsigned char data) { return static_cast<unsigned long long>(data); });
     }
@@ -244,6 +245,9 @@ std::vector<std::vector<unsigned long long>> PimComputeUnit::getMacroGroupInputs
             for (int i = 0; i < payload.input_len; i++) {
                 if (getMaskBit(mask_byte_data, macro_id * payload.input_len + i) != 0) {
                     macro_input.push_back(input_data[i]);
+                }
+                if (macro_input.size() == macro_size_.compartment_cnt_per_macro) {
+                    break;
                 }
             }
             macro_group_inputs.push_back(std::move(macro_input));
@@ -278,6 +282,8 @@ void PimComputeUnit::readBitSparseMetaSubmodule() {
         double dynamic_power_mW = config_.bit_sparse_config.reg_buffer_dynamic_power_mW_per_unit *
                                   IntDivCeil(payload.size_byte, config_.bit_sparse_config.unit_byte);
         meta_buffer_energy_counter_.addDynamicEnergyPJ(period_ns_, dynamic_power_mW);
+
+        read_bit_sparse_meta_socket_.finish();
     }
 }
 

@@ -38,6 +38,96 @@ pim_transfer_unit_test_local_memory = \
      0xf8, 0x58, 0x75, 0xe2, 0xb6, 0x6f, 0x86, 0x9a, 0x5c, 0x5f, 0xad, 0x46, 0xc4, 0x10, 0x22, 0xa8,  # mask 4: 28Byte
      0x73, 0x07, 0x3d, 0x8c, 0x47, 0xbe, 0x8f, 0x7c, 0xb9, 0xe3, 0xdd, 0x20]
 
+pim_compute_base_input_g1_g3 = \
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  # ins 1
+     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # ins 2
+     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  # ins 3
+     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  # ins 4
+     ]
+
+pim_compute_base_input_g2_g4 = \
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # ins 1
+     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  # ins 2
+     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # ins 3
+     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  # ins 4
+     ]
+
+pim_compute_bs_input_g1_g3 = \
+    [1, 2, 4, 8, 16, 32, 64, 128, 255, 254, 3, 24, 65, 33, 127, 192,  # 8 batch, 16 non-zero, 24 col
+     1, 2, 0, 4, 8, 16, 0, 64, 128, 0, 78, 203, 0, 0, 0, 0,  # 7 batch, 9 non-zero, 24 col
+     1, 4, 16, 64, 128, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  # 5 batch, 16 non-zero, 24 col
+     0, 1, 64, 0, 0, 128, 192, 0, 193, 0, 0, 0, 0, 0, 0, 0  # 3 batch, 5 non-zero, 24 col
+     ]
+
+pim_compute_bs_input_g2_g4 = \
+    [1, 4, 16, 64, 128, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  # 5 batch, 16 non-zero, 24 col
+     0, 1, 64, 0, 0, 128, 192, 0, 193, 0, 0, 0, 0, 0, 0, 0,  # 3 batch, 5 non-zero, 24 col
+     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # 0 batch, 0 non-zero, 24 col
+     16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16  # 1 batch, 16 non-zero, 24 col
+     ]
+
+pim_compute_vs_input_m1 = \
+    [1, 2, 4, 8, 16, 32, 64, 128, 255, 254, 3, 24, 65, 33, 127, 192,  # ins 1: 8 batch, 16 non-zero, 24 col
+     1, 2, 0, 4, 8, 16, 0, 64, 128, 0, 78, 203, 0, 0, 0, 0,  # ins 2: 7 batch, 9 non-zero, 24 col
+     1, 4, 16, 64, 128, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  # ins 3: 5 batch, 16 non-zero, 24 col
+     0, 1, 64, 0, 0, 128, 192, 0, 193, 0, 0, 0, 0, 0, 0, 0  # ins 4: 3 batch, 5 non-zero, 24 col
+     ]
+
+pim_compute_vs_input_m2 = \
+    [1, 4, 16, 64, 128, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  # ins 1: 5 batch, 16 non-zero, 24 col
+     0, 1, 64, 0, 0, 128, 192, 0, 193, 0, 0, 0, 0, 0, 0, 0,  # ins 2: 3 batch, 5 non-zero, 24 col
+     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # ins 3: 0 batch, 0 non-zero, 24 col
+     16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16  # ins 4: 1 batch, 16 non-zero, 24 col
+     ]
+
+
+def get_pim_compute_base_input_byte_list():
+    input_byte_list = [0 for _ in range(512)]
+    for i in range(16 * 4):
+        input_byte_list[i] = pim_compute_base_input_g1_g3[i]
+        input_byte_list[128 + i] = pim_compute_base_input_g2_g4[i]
+        input_byte_list[256 + i] = pim_compute_base_input_g1_g3[i]
+        input_byte_list[384 + i] = pim_compute_base_input_g2_g4[i]
+    return input_byte_list
+
+
+def get_pim_compute_bs_input_byte_list():
+    input_byte_list = [0 for _ in range(512)]
+    for i in range(16 * 4):
+        input_byte_list[i] = pim_compute_bs_input_g1_g3[i]
+        input_byte_list[128 + i] = pim_compute_bs_input_g2_g4[i]
+        input_byte_list[256 + i] = pim_compute_bs_input_g1_g3[i]
+        input_byte_list[384 + i] = pim_compute_bs_input_g2_g4[i]
+    return input_byte_list
+
+
+def get_pim_compute_vs_input_byte_list():
+    input_byte_list = []
+    for i in range(64):
+        input_byte_list.append(pim_compute_vs_input_m1[i])
+        input_byte_list.append(pim_compute_vs_input_m2[i])
+    for i in range(3):
+        for j in range(128):
+            input_byte_list.append(input_byte_list[j])
+    return input_byte_list
+
+
+def get_pim_compute_vs_mask_byte_list():
+    mask_byte_list = \
+        [0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,  # ins 1, m1
+         0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,  # ins 1, m2
+
+         0x00, 0x00, 0x00, 0x00, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,  # ins 2, m1
+         0x00, 0x00, 0x00, 0x00, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,  # ins 2, m2
+
+         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,  # ins 3, m1
+         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,  # ins 3, m2
+
+         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x55, 0x55, 0x55, 0x55,  # ins 4, m1
+         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xaa, 0xaa, 0xaa, 0xaa,  # ins 4, m2
+         ]
+    return mask_byte_list
+
 
 def write_bin(file, byte_list):
     with open(file, 'wb') as fw:
@@ -125,5 +215,19 @@ def write_pim_transfer_unit_test_local_memory():
     write_bin(file, pim_transfer_unit_test_local_memory)
 
 
+def write_pim_compute_unit_test_input_buffer():
+    # file = r'D:\Dropbox\Dropbox\Workspace\code\pim-sim\test_data\pim_compute\base_input_buffer_image.bin'
+    # write_bin(file, get_pim_compute_base_input_byte_list())
+
+    # file = r'D:\Dropbox\Dropbox\Workspace\code\pim-sim\test_data\pim_compute\bs_input_buffer_image.bin'
+    # write_bin(file, get_pim_compute_bs_input_byte_list())
+
+    file = r'D:\Dropbox\Dropbox\Workspace\code\pim-sim\test_data\pim_compute\vs_input_buffer_image.bin'
+    write_bin(file, get_pim_compute_vs_input_byte_list())
+
+    file = r'D:\Dropbox\Dropbox\Workspace\code\pim-sim\test_data\pim_compute\vs_mask_buffer_image.bin'
+    write_bin(file, get_pim_compute_vs_mask_byte_list())
+
+
 if __name__ == '__main__':
-    write_pim_transfer_unit_test_local_memory()
+    write_pim_compute_unit_test_input_buffer()

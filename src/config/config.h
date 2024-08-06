@@ -279,6 +279,9 @@ struct RegBufferConfig {
     double static_power_mW{1.0};               // mW
     double rw_dynamic_power_per_unit_mW{1.0};  // mW
 
+    bool has_image{false};     // whether RAM memory has an image file
+    std::string image_file{};  // RAM memory image file path
+
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(RegBufferConfig)
 };

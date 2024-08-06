@@ -143,13 +143,14 @@ add_dependencies(MacroGroupTest pim-simulator)
 target_link_libraries(MacroGroupTest PRIVATE pim-simulator)
 target_include_directories(MacroGroupTest PRIVATE src)
 
-#add_executable(PimComputeUnitTest "" test/pim_compute_unit_test.cpp
-#        test/test_payload.cpp
-#        test/test_payload.h)
-#add_dependencies(PimComputeUnitTest pim-simulator)
-#target_link_libraries(PimComputeUnitTest PRIVATE pim-simulator)
-#target_include_directories(PimComputeUnitTest PRIVATE src)
-#
+add_executable(PimComputeUnitTest "" test/execute_unit_test/pim_compute_unit_test.cpp
+        test/base/test_payload.cpp
+        test/base/test_payload.h
+        test/execute_unit_test/execute_unit_test.h)
+add_dependencies(PimComputeUnitTest pim-simulator)
+target_link_libraries(PimComputeUnitTest PRIVATE pim-simulator)
+target_include_directories(PimComputeUnitTest PRIVATE src)
+
 add_executable(PimOutputUnitTest "" test/execute_unit_test/pim_output_unit_test.cpp
         test/base/test_payload.cpp
         test/base/test_payload.h

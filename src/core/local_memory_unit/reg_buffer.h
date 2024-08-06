@@ -19,6 +19,9 @@ public:
     EnergyReporter getEnergyReporter() override;
 
 private:
+    void initialData();
+
+private:
     const RegBufferConfig& config_;
 
     std::vector<uint8_t> data_;

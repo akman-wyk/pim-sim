@@ -1,0 +1,77 @@
+{
+  "code": [
+    {
+      "payload": {
+        "ins": {
+          "pc": 1
+        },
+        "input_addr_byte": 1024,
+        "input_len": 128,
+        "input_bit_width": 8,
+        "activation_group_num": 4,
+        "group_input_step_byte": 128,
+        "row": 0,
+        "bit_sparse": false,
+        "bit_sparse_meta_addr_byte": 0,
+        "value_sparse": true,
+        "value_sparse_mask_addr_byte": 3072
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 2
+        },
+        "input_addr_byte": 1024,
+        "input_len": 128,
+        "input_bit_width": 8,
+        "activation_group_num": 3,
+        "group_input_step_byte": 128,
+        "row": 0,
+        "bit_sparse": false,
+        "bit_sparse_meta_addr_byte": 0,
+        "value_sparse": true,
+        "value_sparse_mask_addr_byte": 3104
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 3
+        },
+        "input_addr_byte": 1024,
+        "input_len": 128,
+        "input_bit_width": 8,
+        "activation_group_num": 2,
+        "group_input_step_byte": 128,
+        "row": 0,
+        "bit_sparse": false,
+        "bit_sparse_meta_addr_byte": 0,
+        "value_sparse": true,
+        "value_sparse_mask_addr_byte": 3136
+      }
+    },
+    {
+      "payload": {
+        "ins": {
+          "pc": 4
+        },
+        "input_addr_byte": 1024,
+        "input_len": 128,
+        "input_bit_width": 8,
+        "activation_group_num": 4,
+        "group_input_step_byte": 128,
+        "row": 0,
+        "bit_sparse": false,
+        "bit_sparse_meta_addr_byte": 0,
+        "value_sparse": true,
+        "value_sparse_mask_addr_byte": 3168
+      }
+    }
+  ],
+  "groups_activation_element_col_mask_": [255, 255, 255, 255],
+  "expected": {
+    "time_ns": 210,
+    "energy_pj": 365280
+  }
+}

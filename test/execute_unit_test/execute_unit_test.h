@@ -33,6 +33,7 @@ public:
     ExecuteUnitTestModule(const char* name, const char* test_unit_name, const TestUnitConfig& test_unit_config,
                           const Config& config, Clock* clk, std::vector<TestInstruction> codes)
         : BaseModule(name, config.sim_config, nullptr, clk)
+        , test_unit_config_(test_unit_config)
         , local_memory_unit_("LocalMemoryUnit", config.chip_config.core_config.local_memory_unit_config,
                              config.sim_config, nullptr, clk)
         , test_unit_(test_unit_name, test_unit_config, config.sim_config, nullptr, clk) {
@@ -121,6 +122,9 @@ private:
     virtual DataConflictPayload getInsPayloadConflictInfos(const InsPayload& ins_payload) = 0;
 
 protected:
+    // config
+    const TestUnitConfig& test_unit_config_;
+
     // instruction list
     std::vector<TestInstruction> ins_list_;
     int ins_index_{0};

@@ -544,11 +544,17 @@ bool RegBufferConfig::checkValid() const {
                   << std::endl;
         return false;
     }
+    if (has_image && image_file.empty()) {
+        std::cerr << "RegBufferConfig not valid, 'image_file' must be non-empty when RegBuffer has a image file."
+                  << std::endl;
+        return false;
+    }
     return true;
 }
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(RegBufferConfig, size_byte, read_max_width_byte, write_max_width_byte,
-                                               rw_min_unit_byte, static_power_mW, rw_dynamic_power_per_unit_mW)
+                                               rw_min_unit_byte, static_power_mW, rw_dynamic_power_per_unit_mW,
+                                               has_image, image_file)
 
 int AddressSpaceConfig::end() const {
     return offset_byte + size_byte;

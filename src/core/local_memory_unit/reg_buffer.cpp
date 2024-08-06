@@ -13,7 +13,7 @@ RegBuffer::RegBuffer(const char *name, const pimsim::RegBufferConfig &config, co
                      pimsim::Core *core, pimsim::Clock *clk)
     : BaseModule(name, sim_config, core, clk), config_(config) {
     if (data_mode_ == +DataMode::real_data) {
-        data_ = std::vector<uint8_t>(config_.size_byte, 0);
+        initialData();
     }
 
     static_energy_counter_.setStaticPowerMW(config_.static_power_mW);
@@ -59,6 +59,16 @@ EnergyReporter RegBuffer::getEnergyReporter() {
     mem_energy_reporter.addSubModule("read", EnergyReporter{read_energy_counter_});
     mem_energy_reporter.addSubModule("write", EnergyReporter{write_energy_counter_});
     return std::move(mem_energy_reporter);
+}
+
+void RegBuffer::initialData() {
+    data_ = std::vector<uint8_t>(config_.size_byte, 0);
+    if (config_.has_image) {
+        std::ifstream ifs;
+        ifs.open(config_.image_file, std::ios::in | std::ios::binary);
+        ifs.read(reinterpret_cast<char *>(data_.data()), config_.size_byte);
+        ifs.close();
+    }
 }
 
 }  // namespace pimsim

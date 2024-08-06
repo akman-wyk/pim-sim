@@ -157,6 +157,35 @@
           "report_file": "report/PimTransferUnit_test_report.txt"
         }
       ]
+    },
+    {
+      "name": "PimComputeUnitTest",
+      "test_cases": [
+        {
+          "comments": "Test for comfig without any sparsity",
+          "config_file": "config/test/pim_compute_unit_test_config_base.json",
+          "instruction_file": "test_data/pim_compute/pim_compute_unit_test_data_base.json",
+          "report_file": "report/PimComputeUnit_test_report.txt"
+        },
+        {
+          "comments": "Test for comfig with input bit sparsity and weight bit sparsity",
+          "config_file": "config/test/pim_compute_unit_test_config_bs.json",
+          "instruction_file": "test_data/pim_compute/pim_compute_unit_test_data_bs.json",
+          "report_file": "report/PimComputeUnit_test_report.txt"
+        },
+        {
+          "comments": "Test for comfig with weight value sparsity",
+          "config_file": "config/test/pim_compute_unit_test_config_vs.json",
+          "instruction_file": "test_data/pim_compute/pim_compute_unit_test_data_vs.json",
+          "report_file": "report/PimComputeUnit_test_report.txt"
+        },
+        {
+          "comments": "Test for comfig with input bit sparsity, weight bit sparsity and weight value sparsity",
+          "config_file": "config/test/pim_compute_unit_test_config_bs_vs.json",
+          "instruction_file": "test_data/pim_compute/pim_compute_unit_test_data_bs_vs.json",
+          "report_file": "report/PimComputeUnit_test_report.txt"
+        }
+      ]
     }
   ]
 }
