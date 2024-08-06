@@ -56,7 +56,7 @@ void PimSetUnit::processIssue() {
         const auto &payload = fsm_out_.read();
         LOG(fmt::format("Pim set start, pc: {}", payload.ins.pc));
 
-        DataConflictPayload conflict_payload{.pc = payload.ins.pc};
+        DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::pim_set};
         conflict_payload.use_pim_unit = true;
         conflict_payload.addReadMemoryId(local_memory_socket_.getLocalMemoryIdByAddress(payload.mask_addr_byte));
         ports_.data_conflict_port_.write(conflict_payload);

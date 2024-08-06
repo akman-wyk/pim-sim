@@ -57,6 +57,7 @@ struct DataConflictPayload {
     MAKE_SIGNAL_TYPE_TRACE_STREAM(DataConflictPayload)
 
     int pc{-1};
+    ExecuteUnitType unit_type{};
 
     std::unordered_set<int> read_memory_id;
     std::unordered_set<int> write_memory_id;
@@ -84,7 +85,7 @@ struct DataConflictPayload {
                                      const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict);
 
     static bool checkDataConflict(const DataConflictPayload& ins_conflict_payload,
-                                  const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict);
+                                  const DataConflictPayload& unit_conflict_payload);
 };
 
 struct SIMDInsPayload {

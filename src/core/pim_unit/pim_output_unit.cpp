@@ -57,7 +57,7 @@ void PimOutputUnit::processIssue() {
         const auto &payload = fsm_out_.read();
         LOG(fmt::format("Pim output start, pc: {}", payload.ins.pc));
 
-        DataConflictPayload conflict_payload{.pc = payload.ins.pc};
+        DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::pim_output};
         conflict_payload.use_pim_unit = true;
         conflict_payload.addWriteMemoryId(local_memory_socket_.getLocalMemoryIdByAddress(payload.output_addr_byte));
         if (payload.output_type == +PimOutputType::output_sum) {

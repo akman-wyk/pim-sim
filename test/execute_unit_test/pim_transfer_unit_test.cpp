@@ -39,7 +39,7 @@ public:
 
 private:
     DataConflictPayload getInsPayloadConflictInfos(const pimsim::PimTransferInsPayload& ins_payload) override {
-        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc};
+        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc, .unit_type = ExecuteUnitType::pim_transfer};
         conflict_payload.addReadMemoryId(
             {local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.src_addr_byte),
              local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.output_mask_addr_byte)});

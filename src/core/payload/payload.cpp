@@ -94,7 +94,8 @@ bool DataConflictPayload::checkPimUnitConflict(const pimsim::DataConflictPayload
 }
 
 bool DataConflictPayload::checkDataConflict(const DataConflictPayload& ins_conflict_payload,
-                                            const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict) {
+                                            const DataConflictPayload& unit_conflict_payload) {
+    bool has_unit_conflict = ins_conflict_payload.unit_type == unit_conflict_payload.unit_type;
     return checkMemoryConflict(ins_conflict_payload, unit_conflict_payload, has_unit_conflict) ||
            checkRegisterConflict(ins_conflict_payload, unit_conflict_payload) ||
            checkPimUnitConflict(ins_conflict_payload, unit_conflict_payload, has_unit_conflict);

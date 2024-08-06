@@ -53,7 +53,9 @@ void ScalarUnit::process() {
 
         const auto &payload = scalar_fsm_out_.read();
         DataConflictPayload conflict_payload{
-            .pc = payload.ins.pc, .write_reg_id = (payload.op == +ScalarOperator::load ? payload.dst_reg : -1)};
+            .pc = payload.ins.pc,
+            .unit_type = ExecuteUnitType::scalar,
+            .write_reg_id = (payload.op == +ScalarOperator::load ? payload.dst_reg : -1)};
         ports_.data_conflict_port_.write(conflict_payload);
 
         LOG(fmt::format("scalar {} start, pc: {}", payload.op._to_string(), payload.ins.pc));

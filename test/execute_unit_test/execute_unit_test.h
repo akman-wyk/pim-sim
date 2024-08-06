@@ -96,7 +96,7 @@ private:
         bool finish = signals_.finish_ins_.read();
         int finish_pc = signals_.finish_ins_pc_.read();
 
-        bool stall = DataConflictPayload::checkDataConflict(cur_ins_conflict_info_, pim_set_conflict_payload, true)
+        bool stall = DataConflictPayload::checkDataConflict(cur_ins_conflict_info_, pim_set_conflict_payload)
                          ? (!finish || finish_pc != pim_set_conflict_payload.pc)
                          : busy;
         id_stall_.write(stall);

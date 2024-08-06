@@ -166,7 +166,7 @@ std::pair<TransferInstructionInfo, DataConflictPayload> TransferUnit::decodeAndG
                                      .dst_start_address_byte = payload.dst_address_byte,
                                      .data_width_byte = data_width_byte,
                                      .use_pipeline = use_pipeline};
-    DataConflictPayload conflict_payload{.pc = payload.ins.pc};
+    DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::transfer};
     conflict_payload.read_memory_id.insert(src_memory_id);
     conflict_payload.write_memory_id.insert(dst_memory_id);
     conflict_payload.used_memory_id.insert({src_memory_id, dst_memory_id});

@@ -36,7 +36,7 @@ public:
     }
 
     DataConflictPayload getInsPayloadConflictInfos(const pimsim::TransferInsPayload& ins_payload) override {
-        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc};
+        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc, .unit_type = ExecuteUnitType::transfer};
 
         int src_memory_id = local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.src_address_byte);
         int dst_memory_id = local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.dst_address_byte);

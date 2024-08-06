@@ -297,7 +297,7 @@ void PimComputeUnit::finishRun() {
 }
 
 DataConflictPayload PimComputeUnit::getDataConflictInfo(const pimsim::PimComputeInsPayload &payload) {
-    DataConflictPayload conflict_payload{.pc = payload.ins.pc};
+    DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::pim_compute};
     conflict_payload.use_pim_unit = true;
 
     int input_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(payload.input_addr_byte);

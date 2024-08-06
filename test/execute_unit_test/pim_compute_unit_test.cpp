@@ -46,7 +46,7 @@ public:
 
 private:
     DataConflictPayload getInsPayloadConflictInfos(const pimsim::PimComputeInsPayload& ins_payload) override {
-        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc};
+        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc, .unit_type = ExecuteUnitType::pim_compute};
         conflict_payload.use_pim_unit = true;
 
         int input_memory_id = local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.input_addr_byte);

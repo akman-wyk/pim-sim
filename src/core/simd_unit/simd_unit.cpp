@@ -245,7 +245,7 @@ std::pair<SIMDInstructionInfo, DataConflictPayload> SIMDUnit::decodeAndGetInfo(c
         }
     }
 
-    DataConflictPayload conflict_payload{.pc = payload.ins.pc};
+    DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::simd};
     for (const auto& vector_input : vector_inputs) {
         int read_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(vector_input.start_address_byte);
         conflict_payload.read_memory_id.insert(read_memory_id);

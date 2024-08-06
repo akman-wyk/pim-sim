@@ -51,7 +51,7 @@ void PimTransferUnit::processIssue() {
         const auto &payload = fsm_out_.read();
         LOG(fmt::format("Pim transfer start, pc: {}", payload.ins.pc));
 
-        DataConflictPayload conflict_payload{.pc = payload.ins.pc};
+        DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::pim_transfer};
         conflict_payload.addReadMemoryId(
             {local_memory_socket_.getLocalMemoryIdByAddress(payload.src_addr_byte),
              local_memory_socket_.getLocalMemoryIdByAddress(payload.output_mask_addr_byte)});
