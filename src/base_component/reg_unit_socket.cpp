@@ -16,4 +16,8 @@ int RegUnitSocket::getSpecialBoundGeneralId(int special_id) {
     return reg_unit_->getSpecialBoundGeneralId(special_id);
 }
 
+void RegUnitSocket::writeRegister(const pimsim::RegUnitWriteRequest &write_req) {
+    reg_unit_->writeRegister(write_req);
+}
+
 }  // namespace pimsim

@@ -110,7 +110,7 @@ void ScalarUnit::executeInst() {
             auto write_data = IntToBytes(payload.src2_value, true);
             local_memory_socket_.writeData(payload.ins, address_byte, size_byte, std::move(write_data));
         } else {
-            reg_file_write_port_.write(executeAndWriteRegister(payload));
+            reg_unit_socket_.writeRegister(executeAndWriteRegister(payload));
 
             finish_ins_ = true;
             finish_ins_pc_ = payload.ins.pc;

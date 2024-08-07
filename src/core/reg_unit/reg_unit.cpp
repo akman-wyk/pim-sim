@@ -36,6 +36,26 @@ int RegUnit::getSpecialBoundGeneralId(int special_id) const {
     return found->second;
 }
 
+void RegUnit::writeRegister(const pimsim::RegUnitWriteRequest &write_req) {
+    if (write_req.write_special_register) {
+        special_regs_[write_req.reg_id] = write_req.reg_value;
+    } else {
+        general_regs_[write_req.reg_id] = write_req.reg_value;
+    }
+}
+
+int RegUnit::readRegister(int id, bool special) {
+    if (!special) {
+        return general_regs_[id];
+    }
+
+    int special_bound_general_id = getSpecialBoundGeneralId(id);
+    if (special_bound_general_id != -1) {
+        return general_regs_[special_bound_general_id];
+    }
+    return special_regs_[id];
+}
+
 void RegUnit::readValue() {
     const auto &read_req = read_req_port_.read();
     const auto &cur_write_req = write_req_port_.read();

@@ -22,6 +22,10 @@ public:
 
     int getSpecialBoundGeneralId(int special_id) const;
 
+    void writeRegister(const RegUnitWriteRequest& write_req);
+
+    int readRegister(int id, bool special = false);
+
 private:
     void readValue();
     void writeValue();

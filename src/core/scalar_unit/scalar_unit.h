@@ -39,7 +39,6 @@ private:
 
 public:
     ExecuteUnitResponseIOPorts<ScalarInsPayload> ports_;
-    sc_core::sc_out<RegUnitWriteRequest> reg_file_write_port_;
 
 private:
     const ScalarUnitConfig& config_;

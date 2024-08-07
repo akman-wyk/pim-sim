@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "core/payload/payload.h"
 
 namespace pimsim {
 
@@ -15,6 +16,8 @@ public:
     void bindRegUnit(RegUnit* reg_unit);
 
     int getSpecialBoundGeneralId(int special_id);
+
+    void writeRegister(const RegUnitWriteRequest& write_req);
 
 private:
     RegUnit* reg_unit_{nullptr};
