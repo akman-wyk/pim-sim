@@ -186,6 +186,16 @@
           "report_file": "report/PimComputeUnit_test_report.txt"
         }
       ]
+    },
+    {
+      "name": "PimLoadUnitTest",
+      "test_cases": [
+        {
+          "config_file": "config/test/pim_load_unit_test_config.json",
+          "instruction_file": "test_data/pim_load_unit_test_data_1.json",
+          "report_file": "report/PimLoadUnit_test_report.txt"
+        }
+      ]
     }
   ]
 }

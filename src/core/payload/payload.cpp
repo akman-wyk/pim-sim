@@ -114,6 +114,8 @@ DEFINE_PIM_PAYLOAD_FUNCTIONS(PimComputeInsPayload, ins, input_addr_byte, input_l
                              activation_group_num, group_input_step_byte, row, bit_sparse, bit_sparse_meta_addr_byte,
                              value_sparse, value_sparse_mask_addr_byte)
 
+DEFINE_PIM_PAYLOAD_FUNCTIONS(PimLoadInsPayload, ins, src_address_byte, size_byte)
+
 DEFINE_PIM_PAYLOAD_FUNCTIONS(PimSetInsPayload, ins, group_broadcast, group_id, mask_addr_byte)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(PimOutputInsPayload, ins, activation_group_num, output_type, output_addr_byte,

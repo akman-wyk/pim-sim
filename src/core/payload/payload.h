@@ -167,6 +167,17 @@ struct PimComputeInsPayload {
     DECLARE_PIM_PAYLOAD_FUNCTIONS(PimComputeInsPayload)
 };
 
+struct PimLoadInsPayload {
+    MAKE_SIGNAL_TYPE_TRACE_STREAM(PimLoadInsPayload)
+
+    InstructionPayload ins{};
+
+    int src_address_byte{0};
+    int size_byte{0};
+
+    DECLARE_PIM_PAYLOAD_FUNCTIONS(PimLoadInsPayload)
+};
+
 struct PimSetInsPayload {
     MAKE_SIGNAL_TYPE_TRACE_STREAM(PimSetInsPayload)
 

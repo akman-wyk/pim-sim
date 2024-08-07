@@ -379,8 +379,9 @@ bool PimSRAMConfig::checkValid() const {
     return true;
 }
 
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimSRAMConfig, write_latency_cycle, read_latency_cycle, static_power_mW,
-                                               write_dynamic_power_per_bit_mW, read_dynamic_power_per_bit_mW)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(PimSRAMConfig, as_mode, write_latency_cycle, read_latency_cycle,
+                                               static_power_mW, write_dynamic_power_per_bit_mW,
+                                               read_dynamic_power_per_bit_mW)
 
 bool PimValueSparseConfig::checkValid() const {
     if (!check_positive(mask_bit_width, output_macro_group_cnt)) {

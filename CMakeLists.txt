@@ -76,6 +76,8 @@ add_library(pim-simulator STATIC ""
         src/core/pim_unit/pim_transfer_unit.h
         src/core/pim_unit/pim_set_unit.cpp
         src/core/pim_unit/pim_set_unit.h
+        src/core/pim_unit/pim_load_unit.cpp
+        src/core/pim_unit/pim_load_unit.h
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE
@@ -175,6 +177,14 @@ add_executable(PimTransferUnitTest "" test/execute_unit_test/pim_transfer_unit_t
 add_dependencies(PimTransferUnitTest pim-simulator)
 target_link_libraries(PimTransferUnitTest PRIVATE pim-simulator)
 target_include_directories(PimTransferUnitTest PRIVATE src)
+
+add_executable(PimLoadUnitTest "" test/execute_unit_test/pim_load_unit_test.cpp
+        test/base/test_payload.cpp
+        test/base/test_payload.h
+        test/execute_unit_test/execute_unit_test.h)
+add_dependencies(PimLoadUnitTest pim-simulator)
+target_link_libraries(PimLoadUnitTest PRIVATE pim-simulator)
+target_include_directories(PimLoadUnitTest PRIVATE src)
 
 add_executable(TestWrap "" test/test_wrap.cpp)
 add_dependencies(TestWrap nlohmann_json fmt)
