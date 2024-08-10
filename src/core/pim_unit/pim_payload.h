@@ -13,6 +13,7 @@ namespace pimsim {
 struct PimInsInfo {
     int ins_pc{-1}, sub_ins_num{-1};
     bool last_ins{false}, last_sub_ins{false};
+    int ins_id{-1};
 };
 
 struct MacroPayload {

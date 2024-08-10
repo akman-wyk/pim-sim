@@ -11,7 +11,7 @@ StallHandler::StallHandler() : sc_core::sc_module("StallHandler") {
     sensitive << data_conflict_;
 
     SC_METHOD(processDeleteUnitDataConflict)
-    sensitive << finish_ins_ << finish_ins_pc_;
+    sensitive << finish_ins_ << finish_ins_id_;
 
     SC_METHOD(processUnitDataConflict)
     sensitive << trigger_ << busy_;
@@ -19,10 +19,10 @@ StallHandler::StallHandler() : sc_core::sc_module("StallHandler") {
 
 void StallHandler::processAddUnitDataConflict() {
     const auto& unit_conflict_payload = data_conflict_.read();
-    if (unit_conflict_payload.pc != -1) {
-        auto found = ins_data_conflict_info_map_.find(unit_conflict_payload.pc);
+    if (unit_conflict_payload.ins_id != -1) {
+        auto found = ins_data_conflict_info_map_.find(unit_conflict_payload.ins_id);
         if (found == ins_data_conflict_info_map_.end()) {
-            ins_data_conflict_info_map_.emplace(unit_conflict_payload.pc, unit_conflict_payload);
+            ins_data_conflict_info_map_.emplace(unit_conflict_payload.ins_id, unit_conflict_payload);
             trigger_.notify(SC_ZERO_TIME);
         }
     }
@@ -30,7 +30,7 @@ void StallHandler::processAddUnitDataConflict() {
 
 void StallHandler::processDeleteUnitDataConflict() {
     bool finish = finish_ins_.read();
-    int finish_pc = finish_ins_pc_.read();
+    int finish_pc = finish_ins_id_.read();
 
     if (finish) {
         auto found = ins_data_conflict_info_map_.find(finish_pc);

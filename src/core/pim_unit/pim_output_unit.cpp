@@ -57,7 +57,7 @@ void PimOutputUnit::processIssue() {
         const auto &payload = fsm_out_.read();
         LOG(fmt::format("Pim output start, pc: {}", payload.ins.pc));
 
-        DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::pim_output};
+        DataConflictPayload conflict_payload{.ins_id = payload.ins.ins_id, .unit_type = ExecuteUnitType::pim_output};
         conflict_payload.use_pim_unit = true;
         conflict_payload.addWriteMemoryId(local_memory_socket_.getLocalMemoryIdByAddress(payload.output_addr_byte));
         if (payload.output_type == +PimOutputType::output_sum) {
@@ -102,7 +102,7 @@ void PimOutputUnit::processExecute() {
 
 void PimOutputUnit::processOnlyOutput(const pimsim::PimOutputInsPayload &payload) {
     finish_ins_ = true;
-    finish_ins_pc_ = payload.ins.pc;
+    finish_ins_id_ = payload.ins.ins_id;
     finish_ins_trigger_.notify(SC_ZERO_TIME);
 
     int size_byte =
@@ -132,7 +132,7 @@ void PimOutputUnit::processOutputSum(const pimsim::PimOutputInsPayload &payload)
     wait(sum_stall_ns, SC_NS);
 
     finish_ins_ = true;
-    finish_ins_pc_ = payload.ins.pc;
+    finish_ins_id_ = payload.ins.ins_id;
     finish_ins_trigger_.notify(SC_ZERO_TIME);
 
     // write to memory
@@ -155,7 +155,7 @@ void PimOutputUnit::processOutputSumMove(const pimsim::PimOutputInsPayload &payl
     wait(sum_stall_ns, SC_NS);
 
     finish_ins_ = true;
-    finish_ins_pc_ = payload.ins.pc;
+    finish_ins_id_ = payload.ins.ins_id;
     finish_ins_trigger_.notify(SC_ZERO_TIME);
 
     // write to memory
@@ -167,7 +167,7 @@ void PimOutputUnit::processOutputSumMove(const pimsim::PimOutputInsPayload &payl
 
 void PimOutputUnit::finishInstruction() {
     ports_.finish_ins_port_.write(finish_ins_);
-    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_id_port_.write(finish_ins_id_);
 }
 
 void PimOutputUnit::finishRun() {

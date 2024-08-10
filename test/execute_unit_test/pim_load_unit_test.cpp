@@ -39,7 +39,7 @@ public:
 
 private:
     DataConflictPayload getInsPayloadConflictInfos(const pimsim::PimLoadInsPayload& ins_payload) override {
-        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc, .unit_type = ExecuteUnitType::pim_load};
+        DataConflictPayload conflict_payload{.ins_id = ins_payload.ins.ins_id, .unit_type = ExecuteUnitType::pim_load};
         conflict_payload.use_pim_unit = true;
         conflict_payload.addReadMemoryId(local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.src_address_byte));
         return std::move(conflict_payload);

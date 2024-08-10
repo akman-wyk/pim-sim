@@ -53,7 +53,7 @@ void ScalarUnit::process() {
 
         const auto &payload = scalar_fsm_out_.read();
         DataConflictPayload conflict_payload{
-            .pc = payload.ins.pc,
+            .ins_id = payload.ins.ins_id,
             .unit_type = ExecuteUnitType::scalar,
             .write_reg_id = (payload.op == +ScalarOperator::load ? payload.dst_reg : -1)};
         ports_.data_conflict_port_.write(conflict_payload);
@@ -78,7 +78,7 @@ void ScalarUnit::process() {
 
 void ScalarUnit::finishInstruction() {
     ports_.finish_ins_port_.write(finish_ins_);
-    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_id_port_.write(finish_ins_id_);
 }
 
 void ScalarUnit::finishRun() {
@@ -102,7 +102,7 @@ void ScalarUnit::executeInst() {
 
         if (payload.op == +ScalarOperator::store) {
             finish_ins_ = true;
-            finish_ins_pc_ = payload.ins.pc;
+            finish_ins_id_ = payload.ins.ins_id;
             finish_ins_trigger_.notify(SC_ZERO_TIME);
 
             int address_byte = payload.src1_value + payload.offset;
@@ -113,7 +113,7 @@ void ScalarUnit::executeInst() {
             reg_unit_socket_.writeRegister(executeAndWriteRegister(payload));
 
             finish_ins_ = true;
-            finish_ins_pc_ = payload.ins.pc;
+            finish_ins_id_ = payload.ins.ins_id;
             finish_ins_trigger_.notify(SC_ZERO_TIME);
         }
 

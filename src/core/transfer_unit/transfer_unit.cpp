@@ -104,7 +104,7 @@ void TransferUnit::processWriteSubmodule() {
 
         if (payload.batch_info.last_batch) {
             finish_ins_ = true;
-            finish_ins_pc_ = payload.ins_info.ins.pc;
+            finish_ins_id_ = payload.ins_info.ins.ins_id;
             finish_ins_trigger_.notify(SC_ZERO_TIME);
         }
 
@@ -131,7 +131,7 @@ void TransferUnit::processWriteSubmodule() {
 
 void TransferUnit::finishInstruction() {
     ports_.finish_ins_port_.write(finish_ins_);
-    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_id_port_.write(finish_ins_id_);
 }
 
 void TransferUnit::finishRun() {
@@ -166,7 +166,7 @@ std::pair<TransferInstructionInfo, DataConflictPayload> TransferUnit::decodeAndG
                                      .dst_start_address_byte = payload.dst_address_byte,
                                      .data_width_byte = data_width_byte,
                                      .use_pipeline = use_pipeline};
-    DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::transfer};
+    DataConflictPayload conflict_payload{.ins_id = payload.ins.ins_id, .unit_type = ExecuteUnitType::transfer};
     conflict_payload.read_memory_id.insert(src_memory_id);
     conflict_payload.write_memory_id.insert(dst_memory_id);
     conflict_payload.used_memory_id.insert({src_memory_id, dst_memory_id});

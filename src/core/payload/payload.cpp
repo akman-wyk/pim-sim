@@ -110,7 +110,8 @@ DataConflictPayload& DataConflictPayload::operator+=(const pimsim::DataConflictP
     return *this;
 }
 
-DEFINE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload, pc, read_memory_id, write_memory_id, used_memory_id)
+DEFINE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload, ins_id, unit_type, read_memory_id, write_memory_id, used_memory_id,
+                             read_reg_id, write_reg_id, use_pim_unit)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_width, output_bit_width,
                              inputs_address_byte, output_address_byte, len)
@@ -141,7 +142,7 @@ DEFINE_PIM_PAYLOAD_FUNCTIONS(RegUnitReadResponse, rs1_value, rs2_value, rs3_valu
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(RegUnitWriteRequest, reg_id, reg_value, write_special_register)
 
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(InstructionPayload, pc)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(InstructionPayload, pc, ins_id)
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_width,
                                                output_bit_width, inputs_address_byte, output_address_byte, len)

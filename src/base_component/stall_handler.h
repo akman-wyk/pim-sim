@@ -23,7 +23,7 @@ public:
         busy_.bind(signals.busy_);
         data_conflict_.bind(signals.data_conflict_);
         finish_ins_.bind(signals.finish_ins_);
-        finish_ins_pc_.bind(signals.finish_ins_pc_);
+        finish_ins_id_.bind(signals.finish_ins_id_);
         conflict_.bind(conflict_signal);
 
         this->cur_ins_conflict_info_ = cur_ins_conflict_info;
@@ -38,7 +38,7 @@ public:
     sc_core::sc_in<bool> busy_;
     sc_core::sc_in<DataConflictPayload> data_conflict_;
     sc_core::sc_in<bool> finish_ins_;
-    sc_core::sc_in<int> finish_ins_pc_;
+    sc_core::sc_in<int> finish_ins_id_;
 
     sc_core::sc_out<bool> conflict_;
 

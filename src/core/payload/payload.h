@@ -28,6 +28,7 @@ std::stringstream& operator<<(std::stringstream& out, const std::unordered_map<i
 
 struct InstructionPayload {
     int pc{-1};
+    int ins_id{0};
 
     [[nodiscard]] bool valid() const;
 
@@ -37,7 +38,7 @@ struct InstructionPayload {
     }
 
     bool operator==(const InstructionPayload& another) const {
-        return pc == another.pc;
+        return pc == another.pc && ins_id == another.ins_id;
     }
 
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(InstructionPayload)
@@ -56,7 +57,7 @@ struct MemoryAccessPayload {
 struct DataConflictPayload {
     MAKE_SIGNAL_TYPE_TRACE_STREAM(DataConflictPayload)
 
-    int pc{-1};
+    int ins_id{-1};
     ExecuteUnitType unit_type{ExecuteUnitType::none};
 
     std::unordered_set<int> read_memory_id;

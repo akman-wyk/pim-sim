@@ -119,7 +119,7 @@ void MacroGroup::processResultAdderSubmodule() {
                         pim_ins_info.sub_ins_num));
 
         if (sub_ins_info.last_group && pim_ins_info.last_sub_ins && finish_ins_func_) {
-            finish_ins_func_(pim_ins_info.ins_pc);
+            finish_ins_func_(pim_ins_info.ins_id);
         }
 
         double latency = config_.result_adder.latency_cycle * period_ns_;

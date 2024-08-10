@@ -38,9 +38,9 @@ PimComputeUnit::PimComputeUnit(const char *name, const pimsim::PimUnitConfig &co
     for (int group_id = 0; group_id < group_cnt; group_id++) {
         auto macro_name = fmt::format("MacroGroup_{}", group_id);
         auto macro_group = new MacroGroup{macro_name.c_str(), config_, sim_config, core, clk};
-        macro_group->setFinishInsFunc([this](int ins_pc) {
+        macro_group->setFinishInsFunc([this](int ins_id) {
             finish_ins_ = true;
-            finish_ins_pc_ = ins_pc;
+            finish_ins_id_ = ins_id;
             finish_ins_trigger_.notify(SC_ZERO_TIME);
         });
         macro_group->setFinishRunFunc([this]() {
@@ -125,7 +125,8 @@ void PimComputeUnit::processIssue() {
             .pim_ins_info = {.ins_pc = payload.ins.pc,
                              .sub_ins_num = 1,
                              .last_ins = isEndPC(payload.ins.pc) && sim_mode_ == +SimMode::run_one_round,
-                             .last_sub_ins = true},
+                             .last_sub_ins = true,
+                             .ins_id = payload.ins.ins_id},
             .ins_payload = payload,
             .group_max_activation_macro_cnt = std::transform_reduce(
                 macro_group_list_.begin(), macro_group_list_.end(), 0, [](int a, int b) { return std::max(a, b); },
@@ -289,7 +290,7 @@ void PimComputeUnit::readBitSparseMetaSubmodule() {
 
 void PimComputeUnit::finishInstruction() {
     ports_.finish_ins_port_.write(finish_ins_);
-    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_id_port_.write(finish_ins_id_);
 }
 
 void PimComputeUnit::finishRun() {
@@ -297,7 +298,7 @@ void PimComputeUnit::finishRun() {
 }
 
 DataConflictPayload PimComputeUnit::getDataConflictInfo(const pimsim::PimComputeInsPayload &payload) {
-    DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::pim_compute};
+    DataConflictPayload conflict_payload{.ins_id = payload.ins.ins_id, .unit_type = ExecuteUnitType::pim_compute};
     conflict_payload.use_pim_unit = true;
 
     int input_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(payload.input_addr_byte);

@@ -50,7 +50,7 @@ public:
         sensitive << id_stall_;
 
         SC_METHOD(processFinishIns)
-        sensitive << signals_.finish_ins_ << signals_.finish_ins_pc_;
+        sensitive << signals_.finish_ins_ << signals_.finish_ins_id_;
 
         SC_METHOD(processFinishRun)
         sensitive << signals_.finish_run_;
@@ -76,6 +76,7 @@ private:
 
         cur_ins_conflict_info_.unit_type = ExecuteUnitType::none;
         if (ins_index_ < ins_list_.size()) {
+            ins_list_[ins_index_].payload.ins.ins_id = ins_id++;
             cur_ins_conflict_info_ = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
         }
 
@@ -86,6 +87,7 @@ private:
 
                 cur_ins_conflict_info_.unit_type = ExecuteUnitType::none;
                 if (ins_index_ < ins_list_.size()) {
+                    ins_list_[ins_index_].payload.ins.ins_id = ins_id++;
                     cur_ins_conflict_info_ = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
                 }
             } else {
@@ -106,7 +108,7 @@ private:
 
     void processFinishIns() {
         if (signals_.finish_ins_.read()) {
-            LOG(fmt::format("pim set ins finish, pc: {}", signals_.finish_ins_pc_.read()));
+            LOG(fmt::format("pim set ins finish, pc: {}", signals_.finish_ins_id_.read()));
         }
     }
 
@@ -126,6 +128,7 @@ protected:
     // instruction list
     std::vector<TestInstruction> ins_list_;
     int ins_index_{0};
+    int ins_id{0};
     DataConflictPayload cur_ins_conflict_info_;
 
     // modules

@@ -50,7 +50,7 @@ public:
 
 private:
     DataConflictPayload getInsPayloadConflictInfos(const pimsim::PimOutputInsPayload& ins_payload) override {
-        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc, .unit_type = ExecuteUnitType::pim_output};
+        DataConflictPayload conflict_payload{.ins_id = ins_payload.ins.ins_id, .unit_type = ExecuteUnitType::pim_output};
         conflict_payload.use_pim_unit = true;
         conflict_payload.addWriteMemoryId(local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.output_addr_byte));
         if (ins_payload.output_type == +PimOutputType::output_sum) {

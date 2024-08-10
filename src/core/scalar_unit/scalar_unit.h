@@ -54,7 +54,7 @@ private:
     RegUnitSocket reg_unit_socket_;
 
     sc_core::sc_event finish_ins_trigger_;
-    int finish_ins_pc_{-1};
+    int finish_ins_id_{-1};
     bool finish_ins_{false};
 
     sc_core::sc_event finish_run_trigger_;

@@ -152,7 +152,7 @@ void SIMDUnit::processWriteSubmodule() {
 
         if (payload.batch_info.last_batch) {
             finish_ins_ = true;
-            finish_ins_pc_ = payload.ins_info.ins.pc;
+            finish_ins_id_ = payload.ins_info.ins.ins_id;
             finish_ins_trigger_.notify(SC_ZERO_TIME);
         }
 
@@ -179,7 +179,7 @@ void SIMDUnit::processWriteSubmodule() {
 
 void SIMDUnit::finishInstruction() {
     ports_.finish_ins_port_.write(finish_ins_);
-    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_id_port_.write(finish_ins_id_);
 }
 
 void SIMDUnit::finishRun() {
@@ -245,7 +245,7 @@ std::pair<SIMDInstructionInfo, DataConflictPayload> SIMDUnit::decodeAndGetInfo(c
         }
     }
 
-    DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::simd};
+    DataConflictPayload conflict_payload{.ins_id = payload.ins.ins_id, .unit_type = ExecuteUnitType::simd};
     for (const auto& vector_input : vector_inputs) {
         int read_memory_id = local_memory_socket_.getLocalMemoryIdByAddress(vector_input.start_address_byte);
         conflict_payload.read_memory_id.insert(read_memory_id);

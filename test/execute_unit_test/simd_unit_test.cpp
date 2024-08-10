@@ -36,7 +36,7 @@ public:
 
 private:
     DataConflictPayload getInsPayloadConflictInfos(const pimsim::SIMDInsPayload& ins_payload) override {
-        DataConflictPayload conflict_payload{.pc = ins_payload.ins.pc, .unit_type = ExecuteUnitType::simd};
+        DataConflictPayload conflict_payload{.ins_id = ins_payload.ins.ins_id, .unit_type = ExecuteUnitType::simd};
         for (unsigned int i = 0; i < ins_payload.input_cnt; i++) {
             int read_memory_id = local_memory_unit_.getLocalMemoryIdByAddress(ins_payload.inputs_address_byte[i]);
             conflict_payload.read_memory_id.insert(read_memory_id);

@@ -17,7 +17,7 @@ struct ExecuteUnitSignalPorts {
     sc_core::sc_signal<DataConflictPayload> data_conflict_;
 
     sc_core::sc_signal<bool> finish_ins_;
-    sc_core::sc_signal<int> finish_ins_pc_;
+    sc_core::sc_signal<int> finish_ins_id_;
 
     sc_core::sc_signal<bool> finish_run_;
 };
@@ -30,7 +30,7 @@ struct ExecuteUnitRequestIOPorts {
     sc_core::sc_in<DataConflictPayload> data_conflict_port_;
 
     sc_core::sc_in<bool> finish_ins_port_;
-    sc_core::sc_in<int> finish_ins_pc_port_;
+    sc_core::sc_in<int> finish_ins_id_port_;
 
     sc_core::sc_in<bool> finish_run_port_;
 };
@@ -43,7 +43,7 @@ struct ExecuteUnitResponseIOPorts {
     sc_core::sc_out<DataConflictPayload> data_conflict_port_;
 
     sc_core::sc_out<bool> finish_ins_port_;
-    sc_core::sc_out<int> finish_ins_pc_port_;
+    sc_core::sc_out<int> finish_ins_id_port_;
 
     sc_core::sc_out<bool> finish_run_port_;
 
@@ -53,7 +53,7 @@ struct ExecuteUnitResponseIOPorts {
         busy_port_.bind(signals.busy_);
         data_conflict_port_.bind(signals.data_conflict_);
         finish_ins_port_.bind(signals.finish_ins_);
-        finish_ins_pc_port_.bind(signals.finish_ins_pc_);
+        finish_ins_id_port_.bind(signals.finish_ins_id_);
         finish_run_port_.bind(signals.finish_run_);
     }
 };

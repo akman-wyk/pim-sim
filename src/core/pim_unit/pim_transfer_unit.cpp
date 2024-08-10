@@ -51,7 +51,7 @@ void PimTransferUnit::processIssue() {
         const auto &payload = fsm_out_.read();
         LOG(fmt::format("Pim transfer start, pc: {}", payload.ins.pc));
 
-        DataConflictPayload conflict_payload{.pc = payload.ins.pc, .unit_type = ExecuteUnitType::pim_transfer};
+        DataConflictPayload conflict_payload{.ins_id = payload.ins.ins_id, .unit_type = ExecuteUnitType::pim_transfer};
         conflict_payload.addReadMemoryId(
             {local_memory_socket_.getLocalMemoryIdByAddress(payload.src_addr_byte),
              local_memory_socket_.getLocalMemoryIdByAddress(payload.output_mask_addr_byte)});
@@ -113,7 +113,7 @@ void PimTransferUnit::processExecute() {
 
                 if (dst_write_times == dst_max_write_times - 1) {
                     finish_ins_ = true;
-                    finish_ins_pc_ = payload.ins.pc;
+                    finish_ins_id_ = payload.ins.ins_id;
                     finish_ins_trigger_.notify(SC_ZERO_TIME);
                 }
 
@@ -137,7 +137,7 @@ void PimTransferUnit::processExecute() {
 
 void PimTransferUnit::finishInstruction() {
     ports_.finish_ins_port_.write(finish_ins_);
-    ports_.finish_ins_pc_port_.write(finish_ins_pc_);
+    ports_.finish_ins_id_port_.write(finish_ins_id_);
 }
 
 void PimTransferUnit::finishRun() {
