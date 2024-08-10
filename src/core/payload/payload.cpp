@@ -101,6 +101,15 @@ bool DataConflictPayload::checkDataConflict(const DataConflictPayload& ins_confl
            checkPimUnitConflict(ins_conflict_payload, unit_conflict_payload, has_unit_conflict);
 }
 
+DataConflictPayload& DataConflictPayload::operator+=(const pimsim::DataConflictPayload& other) {
+    this->read_memory_id.insert(other.read_memory_id.begin(), other.read_memory_id.end());
+    this->write_memory_id.insert(other.write_memory_id.begin(), other.write_memory_id.end());
+    this->used_memory_id.insert(other.used_memory_id.begin(), other.used_memory_id.end());
+    this->use_pim_unit = (this->use_pim_unit || other.use_pim_unit);
+    this->unit_type = other.unit_type;
+    return *this;
+}
+
 DEFINE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload, pc, read_memory_id, write_memory_id, used_memory_id)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_width, output_bit_width,

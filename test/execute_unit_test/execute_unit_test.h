@@ -9,6 +9,7 @@
 
 #include "../base/test_macro.h"
 #include "base_component/base_module.h"
+#include "base_component/stall_handler.h"
 #include "config/config.h"
 #include "core/local_memory_unit/local_memory_unit.h"
 #include "core/payload/execute_unit_payload.h"
@@ -38,11 +39,12 @@ public:
                              config.sim_config, nullptr, clk)
         , test_unit_(test_unit_name, test_unit_config, config.sim_config, nullptr, clk) {
         test_unit_.ports_.bind(signals_);
+        unit_stall_handler_.bind(signals_, unit_conflict_, &cur_ins_conflict_info_);
 
         SC_THREAD(issue)
 
         SC_METHOD(processStall)
-        sensitive << signals_.data_conflict_ << signals_.busy_ << signals_.finish_ins_ << signals_.finish_ins_pc_;
+        sensitive << unit_conflict_;
 
         SC_METHOD(processIdExEnable)
         sensitive << id_stall_;
@@ -72,33 +74,29 @@ private:
         InsPayload nop{};
         wait(8, SC_NS);
 
-        while (true) {
-            if (ins_index_ + 1 != cur_ins_conflict_info_.pc) {
-                cur_ins_conflict_info_ = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
-            }
+        cur_ins_conflict_info_.unit_type = ExecuteUnitType::none;
+        if (ins_index_ < ins_list_.size()) {
+            cur_ins_conflict_info_ = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
+        }
 
-            if (!id_stall_.read()) {
+        while (true) {
+            if (!id_stall_.read() && cur_ins_conflict_info_.unit_type != +ExecuteUnitType::none) {
+                signals_.id_ex_payload_.write(ins_list_[ins_index_].payload);
+                ins_index_++;
+
+                cur_ins_conflict_info_.unit_type = ExecuteUnitType::none;
                 if (ins_index_ < ins_list_.size()) {
-                    signals_.id_ex_payload_.write(ins_list_[ins_index_].payload);
-                    ins_index_++;
-                } else {
-                    signals_.id_ex_payload_.write(nop);
+                    cur_ins_conflict_info_ = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
                 }
+            } else {
+                signals_.id_ex_payload_.write(nop);
             }
             wait(period_ns_, SC_NS);
         }
     }
 
     void processStall() {
-        const auto& pim_set_conflict_payload = signals_.data_conflict_.read();
-
-        bool busy = signals_.busy_.read();
-        bool finish = signals_.finish_ins_.read();
-        int finish_pc = signals_.finish_ins_pc_.read();
-
-        bool stall = DataConflictPayload::checkDataConflict(cur_ins_conflict_info_, pim_set_conflict_payload)
-                         ? (!finish || finish_pc != pim_set_conflict_payload.pc)
-                         : busy;
+        bool stall = unit_conflict_.read();
         id_stall_.write(stall);
     }
 
@@ -135,6 +133,8 @@ protected:
     TestUnit test_unit_;
 
     // stall
+    StallHandler unit_stall_handler_;
+    sc_core::sc_signal<bool> unit_conflict_;
     sc_core::sc_signal<bool> id_stall_;
 
     // id ex signals

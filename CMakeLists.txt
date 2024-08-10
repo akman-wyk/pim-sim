@@ -78,6 +78,12 @@ add_library(pim-simulator STATIC ""
         src/core/pim_unit/pim_set_unit.h
         src/core/pim_unit/pim_load_unit.cpp
         src/core/pim_unit/pim_load_unit.h
+        src/isa/instruction.h
+        src/isa/instruction.cpp
+        src/core/core.cpp
+        src/core/core.h
+        src/base_component/stall_handler.cpp
+        src/base_component/stall_handler.h
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE

@@ -29,6 +29,11 @@ namespace pimsim {
         NLOHMANN_JSON_EXPAND(NLOHMANN_JSON_PASTE(NLOHMANN_JSON_FROM_WITH_DEFAULT, __VA_ARGS__)) \
     }
 
+#define DEFINE_TYPE_TO_JSON_FUNCTION_WITH_DEFAULT(Type, ...)                             \
+    void to_json(nlohmann::ordered_json& nlohmann_json_j, const Type& nlohmann_json_t) { \
+        NLOHMANN_JSON_EXPAND(NLOHMANN_JSON_PASTE(NLOHMANN_JSON_TO, __VA_ARGS__))         \
+    }
+
 #define DEFINE_ENUM_FROM_TO_JSON_FUNCTION(EnumType, type1, type2, type_other) \
     void to_json(nlohmann::ordered_json& j, const EnumType& m) {              \
         j = m._to_string();                                                   \

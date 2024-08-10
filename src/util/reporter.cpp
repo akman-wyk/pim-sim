@@ -90,7 +90,11 @@ void EnergyReporter::addSubModule(std::string name, EnergyReporter sub_module) {
     static_energy_ += sub_module.static_energy_;
     dynamic_energy_ += sub_module.dynamic_energy_;
     activity_time_ += sub_module.activity_time_;
-    sub_modules_.emplace(std::move(name), std::move(sub_module));
+    if (auto sub_module_found = sub_modules_.find(name); sub_module_found != sub_modules_.end()) {
+        sub_module_found->second += sub_module;
+    } else {
+        sub_modules_.emplace(std::move(name), std::move(sub_module));
+    }
 }
 
 std::vector<EnergyReportItem> EnergyReporter::getEnergyReportItem(const std::string& module_name, double all_energy,
