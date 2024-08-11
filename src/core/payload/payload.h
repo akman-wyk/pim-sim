@@ -28,9 +28,12 @@ std::stringstream& operator<<(std::stringstream& out, const std::unordered_map<i
 
 struct InstructionPayload {
     int pc{-1};
-    int ins_id{0};
+    int ins_id{-1};
+    ExecuteUnitType unit_type{ExecuteUnitType::none};
 
     [[nodiscard]] bool valid() const;
+
+    void clear();
 
     friend std::ostream& operator<<(std::ostream& out, const InstructionPayload& ins) {
         out << "pc: " << ins.pc << "\n";
@@ -64,9 +67,6 @@ struct DataConflictPayload {
     std::unordered_set<int> write_memory_id;
     std::unordered_set<int> used_memory_id;
 
-    std::unordered_set<int> read_reg_id;
-    int write_reg_id{-1};
-
     bool use_pim_unit{false};
 
     DECLARE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload)
@@ -78,9 +78,6 @@ struct DataConflictPayload {
 
     static bool checkMemoryConflict(const DataConflictPayload& ins_conflict_payload,
                                     const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict);
-
-    static bool checkRegisterConflict(const DataConflictPayload& ins_conflict_payload,
-                                      const DataConflictPayload& unit_conflict_payload);
 
     static bool checkPimUnitConflict(const DataConflictPayload& ins_conflict_payload,
                                      const DataConflictPayload& unit_conflict_payload, bool has_unit_conflict);

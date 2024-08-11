@@ -67,7 +67,9 @@ void LocalMemory::process() {
         } else {
             access_delay = reg_buffer.accessAndGetDelay(*payload_ptr);
         }
-        wait(access_delay);
+        if (payload_ptr->ins.unit_type != +ExecuteUnitType::scalar) {
+            wait(access_delay);
+        }
         payload_ptr->finish_access.notify();
     }
 }

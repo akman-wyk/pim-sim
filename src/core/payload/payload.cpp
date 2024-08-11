@@ -9,7 +9,12 @@
 namespace pimsim {
 
 bool InstructionPayload::valid() const {
-    return pc != -1;
+    return pc != -1 && ins_id != -1;
+}
+
+void InstructionPayload::clear() {
+    pc = -1;
+    ins_id = -1;
 }
 
 std::stringstream& operator<<(std::stringstream& out, const std::array<int, 4>& arr) {
@@ -81,12 +86,6 @@ bool DataConflictPayload::checkMemoryConflict(const pimsim::DataConflictPayload&
     }
 }
 
-bool DataConflictPayload::checkRegisterConflict(const pimsim::DataConflictPayload& ins_conflict_payload,
-                                                const pimsim::DataConflictPayload& unit_conflict_payload) {
-    return ins_conflict_payload.read_reg_id.find(unit_conflict_payload.write_reg_id) !=
-           ins_conflict_payload.read_reg_id.end();
-}
-
 bool DataConflictPayload::checkPimUnitConflict(const pimsim::DataConflictPayload& ins_conflict_payload,
                                                const pimsim::DataConflictPayload& unit_conflict_payload,
                                                bool has_unit_conflict) {
@@ -97,7 +96,6 @@ bool DataConflictPayload::checkDataConflict(const DataConflictPayload& ins_confl
                                             const DataConflictPayload& unit_conflict_payload) {
     bool has_unit_conflict = ins_conflict_payload.unit_type == unit_conflict_payload.unit_type;
     return checkMemoryConflict(ins_conflict_payload, unit_conflict_payload, has_unit_conflict) ||
-           checkRegisterConflict(ins_conflict_payload, unit_conflict_payload) ||
            checkPimUnitConflict(ins_conflict_payload, unit_conflict_payload, has_unit_conflict);
 }
 
@@ -111,7 +109,7 @@ DataConflictPayload& DataConflictPayload::operator+=(const pimsim::DataConflictP
 }
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload, ins_id, unit_type, read_memory_id, write_memory_id, used_memory_id,
-                             read_reg_id, write_reg_id, use_pim_unit)
+                             use_pim_unit)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_width, output_bit_width,
                              inputs_address_byte, output_address_byte, len)
