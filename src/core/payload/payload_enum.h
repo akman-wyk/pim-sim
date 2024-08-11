@@ -19,6 +19,6 @@ BETTER_ENUM(PimOutputType, int,  // NOLINT(*-explicit-constructor, *-no-recursio
             only_output = 1, output_sum, output_sum_move)
 
 BETTER_ENUM(ExecuteUnitType, int,  // NOLINT(*-explicit-constructor, *-no-recursion)
-            none = 0, scalar, simd, transfer, pim_compute, pim_output, pim_set, pim_transfer, pim_load)
+            none = 0, scalar, simd, transfer, pim_compute, pim_output, pim_set, pim_transfer, pim_load, control)
 
 }  // namespace pimsim

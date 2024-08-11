@@ -14,6 +14,14 @@
 
 namespace pimsim {
 
+BETTER_ENUM(SpecialRegId, int,  // NOLINT(*-explicit-constructor, *-no-recursion)
+            pim_input_bit_width = 0, pim_output_bit_width = 1, pimm_weight_bit_width = 2, group_size = 3,
+            activation_group_num = 4, activation_element_col_num = 5, group_input_step = 6, value_sparse_mask_addr = 7,
+            bit_sparse_meta_addr = 8,
+
+            simd_input_1_bit_width = 16, simd_input_2_bit_width = 17, simd_input_3_bit_width = 18,
+            simd_input_4_bit_width = 19, simd_output_bit_width = 20)
+
 class RegUnit : public BaseModule {
 public:
     SC_HAS_PROCESS(RegUnit);
