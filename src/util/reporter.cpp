@@ -131,6 +131,10 @@ double EnergyReporter::getTotalEnergyPJ() const {
     return total_energy_;
 }
 
+double EnergyReporter::getDynamicEnergyPJ() const {
+    return dynamic_energy_;
+}
+
 EnergyReporter& EnergyReporter::operator+=(const EnergyReporter& another) {
     total_energy_ += another.total_energy_;
     static_energy_ += another.static_energy_;
@@ -199,6 +203,10 @@ double Reporter::getTotalEnergyPJ() const {
 
 double Reporter::getLatencyNs() const {
     return latency_ * 1e6;
+}
+
+double Reporter::getDynamicEnergyPJ() const {
+    return energy_reporter_.getDynamicEnergyPJ();
 }
 
 Reporter& Reporter::operator+=(const Reporter& another) {

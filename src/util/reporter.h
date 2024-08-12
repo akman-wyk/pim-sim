@@ -58,6 +58,7 @@ public:
                                                       double total_latency, int indent_level);
 
     [[nodiscard]] double getTotalEnergyPJ() const;
+    [[nodiscard]] double getDynamicEnergyPJ() const;
 
     EnergyReporter& operator+=(const EnergyReporter& another);
 
@@ -86,6 +87,8 @@ public:
     [[nodiscard]] double getAveragePowerMW() const;
     [[nodiscard]] double getTotalEnergyPJ() const;
     [[nodiscard]] double getLatencyNs() const;
+
+    [[nodiscard]] double getDynamicEnergyPJ() const;
 
     Reporter& operator+=(const Reporter& another);
 

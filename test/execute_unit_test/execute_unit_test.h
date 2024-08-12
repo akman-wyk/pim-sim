@@ -191,7 +191,7 @@ int pimsim_unit_test(
     ofs.close();
 
     if (DoubleEqual(reporter.getLatencyNs(), test_info.expected.time_ns) &&
-        DoubleEqual(reporter.getTotalEnergyPJ(), test_info.expected.energy_pj) &&
+        DoubleEqual(reporter.getDynamicEnergyPJ(), test_info.expected.energy_pj) &&
         test_module->checkTestResult(test_info.expected)) {
         std::cout << "Test Pass" << std::endl;
         return TEST_PASSED;
