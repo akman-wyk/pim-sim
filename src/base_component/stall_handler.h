@@ -15,7 +15,7 @@ class StallHandler : public sc_core::sc_module {
 public:
     SC_HAS_PROCESS(StallHandler);
 
-    StallHandler();
+    explicit StallHandler(sc_core::sc_event& decode_new_ins_trigger);
 
     template <class InsPayload>
     void bind(ExecuteUnitSignalPorts<InsPayload>& signals, sc_core::sc_signal<bool>& conflict_signal,

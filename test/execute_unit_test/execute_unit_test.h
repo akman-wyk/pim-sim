@@ -37,7 +37,8 @@ public:
         , test_unit_config_(test_unit_config)
         , local_memory_unit_("LocalMemoryUnit", config.chip_config.core_config.local_memory_unit_config,
                              config.sim_config, nullptr, clk)
-        , test_unit_(test_unit_name, test_unit_config, config.sim_config, nullptr, clk) {
+        , test_unit_(test_unit_name, test_unit_config, config.sim_config, nullptr, clk)
+        , unit_stall_handler_(decode_new_ins_trigger_) {
         test_unit_.ports_.bind(signals_);
         unit_stall_handler_.bind(signals_, unit_conflict_, &cur_ins_conflict_info_);
 
@@ -74,26 +75,23 @@ private:
         InsPayload nop{};
         wait(8, SC_NS);
 
-        cur_ins_conflict_info_.unit_type = ExecuteUnitType::none;
-        if (ins_index_ < ins_list_.size()) {
-            ins_list_[ins_index_].payload.ins.ins_id = ins_id++;
-            cur_ins_conflict_info_ = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
-        }
-
         while (true) {
+            if (cur_ins_conflict_info_.unit_type == +ExecuteUnitType::none && ins_index_ < ins_list_.size()) {
+                ins_list_[ins_index_].payload.ins.ins_id = ins_id++;
+                cur_ins_conflict_info_ = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
+                decode_new_ins_trigger_.notify();
+            }
+            wait(0.1, SC_NS);
+
             if (!id_stall_.read() && cur_ins_conflict_info_.unit_type != +ExecuteUnitType::none) {
                 signals_.id_ex_payload_.write(ins_list_[ins_index_].payload);
                 ins_index_++;
 
-                cur_ins_conflict_info_.unit_type = ExecuteUnitType::none;
-                if (ins_index_ < ins_list_.size()) {
-                    ins_list_[ins_index_].payload.ins.ins_id = ins_id++;
-                    cur_ins_conflict_info_ = getInsPayloadConflictInfos(ins_list_[ins_index_].payload);
-                }
+                cur_ins_conflict_info_ = DataConflictPayload{.ins_id = -1, .unit_type = ExecuteUnitType::none};
             } else {
                 signals_.id_ex_payload_.write(nop);
             }
-            wait(period_ns_, SC_NS);
+            wait(period_ns_ - 0.1, SC_NS);
         }
     }
 
@@ -130,6 +128,7 @@ protected:
     int ins_index_{0};
     int ins_id{0};
     DataConflictPayload cur_ins_conflict_info_;
+    sc_core::sc_event decode_new_ins_trigger_;
 
     // modules
     LocalMemoryUnit local_memory_unit_;

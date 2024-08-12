@@ -4,9 +4,12 @@
 
 #include "stall_handler.h"
 
+#include "fmt/format.h"
+#include "util/log.h"
+
 namespace pimsim {
 
-StallHandler::StallHandler() : sc_core::sc_module("StallHandler") {
+StallHandler::StallHandler(sc_core::sc_event& decode_new_ins_trigger) : sc_core::sc_module("StallHandler") {
     SC_METHOD(processAddUnitDataConflict)
     sensitive << data_conflict_;
 
@@ -14,7 +17,7 @@ StallHandler::StallHandler() : sc_core::sc_module("StallHandler") {
     sensitive << finish_ins_ << finish_ins_id_;
 
     SC_METHOD(processUnitDataConflict)
-    sensitive << trigger_ << busy_;
+    sensitive << trigger_ << busy_ << decode_new_ins_trigger;
 }
 
 void StallHandler::processAddUnitDataConflict() {
