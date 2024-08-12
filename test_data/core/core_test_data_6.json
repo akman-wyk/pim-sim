@@ -1,0 +1,29 @@
+{
+  "comments": "test fot Pim Transfer instructions",
+  "code": [
+    {"class_code": 2, "type": 3, "opcode": 1, "rd": 1, "imm": 32},
+
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 1, "imm": 3072},
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 2, "imm": 128},
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 2048},
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 4, "imm": 4096},
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 5, "imm": 5120},
+    {"class_code": 0, "type": 3, "rs1": 1, "rs2": 2, "rs3": 3, "rs4": 4, "rd": 5},
+
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 2, "imm": 192},
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 2064},
+    {"class_code": 0, "type": 3, "rs1": 1, "rs2": 2, "rs3": 3, "rs4": 4, "rd": 5},
+
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 2, "imm": 160},
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 2088},
+    {"class_code": 0, "type": 3, "rs1": 1, "rs2": 2, "rs3": 3, "rs4": 4, "rd": 5},
+
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 2, "imm": 224},
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 2108},
+    {"class_code": 0, "type": 3, "rs1": 1, "rs2": 2, "rs3": 3, "rs4": 4, "rd": 5}
+  ],
+  "expected": {
+    "time_ns": 1845,
+    "energy_pj": 599
+  }
+}

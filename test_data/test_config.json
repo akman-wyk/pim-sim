@@ -196,6 +196,89 @@
           "report_file": "report/PimLoadUnit_test_report.txt"
         }
       ]
+    },
+    {
+      "name": "CoreTest",
+      "test_cases": [
+        {
+          "comments": "Test for SIMD instructions",
+          "config_file": "config/test/SIMD_Transfer_test_config.json",
+          "instruction_file": "test_data/core/core_test_data_1.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for Transfer instructions",
+          "config_file": "config/test/SIMD_Transfer_test_config.json",
+          "instruction_file": "test_data/core/core_test_data_2.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for Pim Load instructions",
+          "config_file": "config/test/pim_load_unit_test_config.json",
+          "instruction_file": "test_data/core/core_test_data_3.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for Pim Load instructions",
+          "config_file": "config/test/pim_set_unit_test_config.json",
+          "instruction_file": "test_data/core/core_test_data_4.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for Pim Output instructions",
+          "config_file": "config/test/pim_output_unit_test_config.json",
+          "instruction_file": "test_data/core/core_test_data_5.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for Pim Transfer instructions",
+          "config_file": "config/test/pim_transfer_unit_test_config.json",
+          "instruction_file": "test_data/core/core_test_data_6.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for Pim Compute instructions without any sparsity",
+          "config_file": "config/test/pim_compute_unit_test_config_base.json",
+          "instruction_file": "test_data/core/core_test_data_7.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for Pim Compute instructions with input bit sparsity and weight bit sparsity",
+          "config_file": "config/test/pim_compute_unit_test_config_bs.json",
+          "instruction_file": "test_data/core/core_test_data_8.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for Pim Compute instructions with weight value sparsity",
+          "config_file": "config/test/pim_compute_unit_test_config_vs.json",
+          "instruction_file": "test_data/core/core_test_data_9.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for Pim Compute instructions with input bit sparsity, weight bit sparsity and weight value sparsity",
+          "config_file": "config/test/pim_compute_unit_test_config_bs_vs.json",
+          "instruction_file": "test_data/core/core_test_data_10.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for scalar instructions",
+          "config_file": "config/test/scalar_test_config.json",
+          "instruction_file": "test_data/core/core_test_data_11.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for control instructions",
+          "config_file": "config/test/scalar_test_config.json",
+          "instruction_file": "test_data/core/core_test_data_12.json",
+          "report_file": "report/Core_test_report.txt"
+        },
+        {
+          "comments": "Test for transfer instructions with real data",
+          "config_file": "config/test/Core_Transfer_test_config.json",
+          "instruction_file": "test_data/core/core_test_data_13.json",
+          "report_file": "report/Core_test_report.txt"
+        }
+      ]
     }
   ]
 }

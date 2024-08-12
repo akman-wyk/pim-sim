@@ -192,6 +192,13 @@ add_dependencies(PimLoadUnitTest pim-simulator)
 target_link_libraries(PimLoadUnitTest PRIVATE pim-simulator)
 target_include_directories(PimLoadUnitTest PRIVATE src)
 
+add_executable(CoreTest "" test/core_test.cpp
+        test/base/test_payload.cpp
+        test/base/test_payload.h)
+add_dependencies(CoreTest pim-simulator)
+target_link_libraries(CoreTest PRIVATE pim-simulator)
+target_include_directories(CoreTest PRIVATE src)
+
 add_executable(TestWrap "" test/test_wrap.cpp)
 add_dependencies(TestWrap nlohmann_json fmt)
 target_link_libraries(TestWrap PUBLIC nlohmann_json fmt)

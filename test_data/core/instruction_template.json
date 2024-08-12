@@ -1,0 +1,27 @@
+{
+  "class_code": 0,
+  "type": 0,
+  "opcode": 0,
+
+  "rs1": 0,
+  "rs2": 0,
+  "rs3": 0,
+  "rs4": 0,
+  "rd": 0,
+  "imm": 0,
+  "offset": 0,
+
+  "value_sparse": 0,
+  "bit_sparse": 0,
+  "group": 0,
+  "group_input_mode": 0,
+
+  "group_broadcast": 0,
+
+  "outsum_move": 0,
+  "outsum": 0,
+
+  "input_num": 0,
+
+  "offset_mask": 0
+}

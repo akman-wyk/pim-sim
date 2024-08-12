@@ -4,6 +4,8 @@
 
 #include "reg_unit.h"
 
+#include "fmt/format.h"
+
 namespace pimsim {
 
 RegUnit::RegUnit(const char *name, const pimsim::RegisterUnitConfig &config, const pimsim::SimConfig &sim_config,
@@ -54,6 +56,28 @@ int RegUnit::readRegister(int id, bool special) {
         return general_regs_[special_bound_general_id];
     }
     return special_regs_[id];
+}
+
+bool RegUnit::checkRegValues(const std::array<int, GENERAL_REG_NUM> &general_reg_expected_values,
+                             const std::array<int, SPECIAL_REG_NUM> &special_reg_expected_values) {
+    for (int i = 0; i < GENERAL_REG_NUM; i++) {
+        if (general_regs_[i] != general_reg_expected_values[i]) {
+            std::cout << fmt::format("index: {}, actual: {}, expected: {}", i, general_regs_[i],
+                                     general_reg_expected_values[i])
+                      << std::endl;
+            return false;
+        }
+    }
+
+    for (int i = 0; i < SPECIAL_REG_NUM; i++) {
+        if (special_regs_[i] != special_reg_expected_values[i]) {
+            std::cout << fmt::format("index: {}, actual: {}, expected: {}", i, special_regs_[i],
+                                     special_reg_expected_values[i])
+                      << std::endl;
+            return false;
+        }
+    }
+    return true;
 }
 
 void RegUnit::readValue() {

@@ -30,6 +30,7 @@ struct TransferBatchInfo {
     int batch_data_size_byte{0};
     bool first_batch{false};
     bool last_batch{false};
+    std::vector<unsigned char> data{};
 };
 
 struct TransferSubmodulePayload {
@@ -55,7 +56,7 @@ public:
     void bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit);
 
 private:
-    static void waitAndStartNextSubmodule(const TransferSubmodulePayload& cur_payload,
+    static void waitAndStartNextSubmodule(TransferSubmodulePayload& cur_payload,
                                           SubmoduleSocket<TransferSubmodulePayload>& next_submodule_socket);
 
     std::pair<TransferInstructionInfo, DataConflictPayload> decodeAndGetInfo(const TransferInsPayload& payload) const;

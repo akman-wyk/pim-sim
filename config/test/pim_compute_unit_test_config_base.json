@@ -81,6 +81,25 @@
               "has_image": true,
               "image_file": "/mnt/d/Dropbox/Dropbox/Workspace/code/pim-sim/test_data/pim_compute/base_input_buffer_image.bin"
             }
+          },
+          {
+            "name": "local memory",
+            "type": "ram",
+            "addressing": {
+              "offset_byte": 4096,
+              "size_byte": 1024
+            },
+            "hardware_config": {
+              "size_byte": 1024,
+              "width_byte": 128,
+              "write_latency_cycle": 1,
+              "read_latency_cycle": 1,
+              "static_power_mW": 0.0,
+              "write_dynamic_power_mW": 0.0,
+              "read_dynamic_power_mW": 0.0,
+              "has_image": true,
+              "image_file": "/mnt/d/Dropbox/Dropbox/Workspace/code/pim-sim/test_data/core/act_col_mask_image.bin"
+            }
           }
         ]
       },

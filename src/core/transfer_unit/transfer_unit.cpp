@@ -75,14 +75,14 @@ void TransferUnit::processReadSubmodule() {
     while (true) {
         read_submodule_socket_.waitUntilStart();
 
-        const auto& payload = read_submodule_socket_.payload;
+        auto& payload = read_submodule_socket_.payload;
         LOG(fmt::format("transfer read start, pc: {}, batch: {}", payload.ins_info.ins.pc,
                         payload.batch_info.batch_num));
 
         int address_byte =
             payload.ins_info.src_start_address_byte + payload.batch_info.batch_num * payload.ins_info.data_width_byte;
         int size_byte = payload.batch_info.batch_data_size_byte;
-        local_memory_socket_.readData(payload.ins_info.ins, address_byte, size_byte);
+        payload.batch_info.data = local_memory_socket_.readData(payload.ins_info.ins, address_byte, size_byte);
 
         waitAndStartNextSubmodule(payload, write_submodule_socket_);
 
@@ -111,7 +111,7 @@ void TransferUnit::processWriteSubmodule() {
         int address_byte =
             payload.ins_info.dst_start_address_byte + payload.batch_info.batch_num * payload.ins_info.data_width_byte;
         int size_byte = payload.batch_info.batch_data_size_byte;
-        local_memory_socket_.writeData(payload.ins_info.ins, address_byte, size_byte, {});
+        local_memory_socket_.writeData(payload.ins_info.ins, address_byte, size_byte, payload.batch_info.data);
 
         LOG(fmt::format("transfer write end, pc: {}, batch: {}", payload.ins_info.ins.pc,
                         payload.batch_info.batch_num));
@@ -142,13 +142,13 @@ void TransferUnit::bindLocalMemoryUnit(LocalMemoryUnit* local_memory_unit) {
     local_memory_socket_.bindLocalMemoryUnit(local_memory_unit);
 }
 
-void TransferUnit::waitAndStartNextSubmodule(const pimsim::TransferSubmodulePayload& cur_payload,
+void TransferUnit::waitAndStartNextSubmodule(pimsim::TransferSubmodulePayload& cur_payload,
                                              SubmoduleSocket<pimsim::TransferSubmodulePayload>& next_submodule_socket) {
     next_submodule_socket.waitUntilFinishIfBusy();
     if (cur_payload.batch_info.first_batch) {
         next_submodule_socket.payload.ins_info = cur_payload.ins_info;
     }
-    next_submodule_socket.payload.batch_info = cur_payload.batch_info;
+    next_submodule_socket.payload.batch_info = std::move(cur_payload.batch_info);
     next_submodule_socket.start_exec.notify();
 }
 

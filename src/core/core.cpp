@@ -4,7 +4,9 @@
 
 #include "core.h"
 
+#include "fmt/format.h"
 #include "isa/isa.h"
+#include "util/log.h"
 
 namespace pimsim {
 
@@ -23,7 +25,15 @@ Core::Core(const char *name, const pimsim::Config &config, pimsim::Clock *clk, s
                          clk)
     , local_memory_unit_("LocalMemoryUnit", config.chip_config.core_config.local_memory_unit_config, config.sim_config,
                          this, clk)
-    , reg_unit_("RegUnit", config.chip_config.core_config.register_unit_config, config.sim_config, this, clk) {
+    , reg_unit_("RegUnit", config.chip_config.core_config.register_unit_config, config.sim_config, this, clk)
+    , scalar_stall_handler_(decode_new_ins_trigger_)
+    , simd_stall_handler_(decode_new_ins_trigger_)
+    , transfer_stall_handler_(decode_new_ins_trigger_)
+    , pim_compute_stall_handler_(decode_new_ins_trigger_)
+    , pim_load_stall_handler_(decode_new_ins_trigger_)
+    , pim_output_stall_handler_(decode_new_ins_trigger_)
+    , pim_set_stall_handler_(decode_new_ins_trigger_)
+    , pim_transfer_stall_handler_(decode_new_ins_trigger_) {
     SC_THREAD(issue)
 
     SC_METHOD(processStall)
@@ -40,31 +50,43 @@ Core::Core(const char *name, const pimsim::Config &config, pimsim::Clock *clk, s
 
     // bind and set modules
     int end_pc = static_cast<int>(ins_list_.size());
+    scalar_unit_.ports_.bind(scalar_signals_);
     scalar_unit_.bindLocalMemoryUnit(&local_memory_unit_);
     scalar_unit_.bindRegUnit(&reg_unit_);
     scalar_unit_.setEndPC(end_pc);
 
+    simd_unit_.ports_.bind(simd_signals_);
     simd_unit_.bindLocalMemoryUnit(&local_memory_unit_);
     simd_unit_.setEndPC(end_pc);
 
+    transfer_unit_.ports_.bind(transfer_signals_);
     transfer_unit_.bindLocalMemoryUnit(&local_memory_unit_);
     transfer_unit_.setEndPC(end_pc);
 
+    pim_compute_unit_.ports_.bind(pim_compute_signals_);
     pim_compute_unit_.bindLocalMemoryUnit(&local_memory_unit_);
     pim_compute_unit_.setEndPC(end_pc);
 
+    pim_load_unit_.ports_.bind(pim_load_signals_);
     pim_load_unit_.bindLocalMemoryUnit(&local_memory_unit_);
     pim_load_unit_.setEndPC(end_pc);
 
+    pim_output_unit_.ports_.bind(pim_output_signals_);
     pim_output_unit_.bindLocalMemoryUnit(&local_memory_unit_);
     pim_output_unit_.setEndPC(end_pc);
 
+    pim_set_unit_.ports_.bind(pim_set_signals_);
     pim_set_unit_.bindLocalMemoryUnit(&local_memory_unit_);
     pim_set_unit_.bindPimComputeUnit(&pim_compute_unit_);
     pim_set_unit_.setEndPC(end_pc);
 
+    pim_transfer_unit_.ports_.bind(pim_transfer_signals_);
     pim_transfer_unit_.bindLocalMemoryUnit(&local_memory_unit_);
     pim_transfer_unit_.setEndPC(end_pc);
+
+    reg_unit_.write_req_port_.bind(write_req_signal_);
+    reg_unit_.read_req_port_.bind(read_req_signal_);
+    reg_unit_.read_rsp_port_.bind(read_rsp_signal_);
 
     // bind stall handler
     scalar_stall_handler_.bind(scalar_signals_, scalar_conflict_, &cur_ins_conflict_info_);
@@ -84,13 +106,18 @@ EnergyReporter Core::getEnergyReporter() {
     reporter.addSubModule("PimUnit", EnergyReporter{pim_compute_unit_.getEnergyReporter()});
     reporter.addSubModule("PimUnit", EnergyReporter{pim_load_unit_.getEnergyReporter()});
     reporter.addSubModule("PimUnit", EnergyReporter{pim_output_unit_.getEnergyReporter()});
-    reporter.addSubModule("LocalMemoryUnit", EnergyReporter{});
+    reporter.addSubModule("LocalMemoryUnit", EnergyReporter{local_memory_unit_.getEnergyReporter()});
     return std::move(reporter);
 }
 
 Reporter Core::getReporter() {
     EnergyCounter::setRunningTimeNS(running_time_);
     return Reporter{running_time_.to_seconds() * 1000, getName(), getEnergyReporter(), 0};
+}
+
+bool Core::checkRegValues(const std::array<int, GENERAL_REG_NUM> &general_reg_expected_values,
+                          const std::array<int, SPECIAL_REG_NUM> &special_reg_expected_values) {
+    return reg_unit_.checkRegValues(general_reg_expected_values, special_reg_expected_values);
 }
 
 [[noreturn]] void Core::issue() {
@@ -105,10 +132,18 @@ Reporter Core::getReporter() {
 
     wait(4, SC_NS);
 
-    cur_ins_conflict_info_.unit_type = ExecuteUnitType::none;
-    int pc_increment = (ins_index_ < ins_list_.size()) ? decodeAndGetPCIncrement() : 0;
-
+    int pc_increment = 0;
     while (true) {
+        if (cur_ins_conflict_info_.unit_type == +ExecuteUnitType::none) {
+            if (ins_index_ < ins_list_.size()) {
+                pc_increment = decodeAndGetPCIncrement();
+                decode_new_ins_trigger_.notify();
+            } else {
+                pc_increment = 0;
+            }
+        }
+        wait(0.1, SC_NS);
+
         if (!id_stall_.read() && cur_ins_conflict_info_.unit_type != +ExecuteUnitType::none) {
             scalar_signals_.id_ex_payload_.write(scalar_payload_);
             simd_signals_.id_ex_payload_.write(simd_payload_);
@@ -120,8 +155,7 @@ Reporter Core::getReporter() {
             pim_transfer_signals_.id_ex_payload_.write(pim_transfer_payload_);
 
             ins_index_ += pc_increment;
-            cur_ins_conflict_info_.unit_type = ExecuteUnitType::none;
-            pc_increment = (ins_index_ < ins_list_.size()) ? decodeAndGetPCIncrement() : 0;
+            cur_ins_conflict_info_ = DataConflictPayload{.ins_id = -1, .unit_type = ExecuteUnitType::none};
         } else {
             scalar_signals_.id_ex_payload_.write(scalar_nop);
             simd_signals_.id_ex_payload_.write(simd_nop);
@@ -132,6 +166,7 @@ Reporter Core::getReporter() {
             pim_set_signals_.id_ex_payload_.write(pim_set_nop);
             pim_transfer_signals_.id_ex_payload_.write(pim_transfer_nop);
         }
+        wait(period_ns_ - 0.1, SC_NS);
     }
 }
 
@@ -158,6 +193,7 @@ void Core::processFinishRun() {
         transfer_signals_.finish_run_.read() || pim_compute_signals_.finish_run_.read() ||
         pim_load_signals_.finish_run_.read() || pim_output_signals_.finish_run_.read() ||
         pim_set_signals_.finish_run_.read() || pim_transfer_signals_.finish_run_.read()) {
+        LOG(fmt::format("finish run"));
         running_time_ = sc_core::sc_time_stamp();
         sc_stop();
     }

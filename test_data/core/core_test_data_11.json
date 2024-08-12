@@ -1,0 +1,53 @@
+{
+  "comments": "test fot scalar instructions",
+  "code": [
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 2},
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 1, "imm": 3},
+    {"class_code": 2, "type": 0, "opcode": 0, "rs1": 0, "rs2": 1, "rd": 2},
+    {"class_code": 2, "type": 0, "opcode": 1, "rs1": 0, "rs2": 1, "rd": 3},
+    {"class_code": 2, "type": 0, "opcode": 2, "rs1": 1, "rs2": 2, "rd": 4},
+    {"class_code": 2, "type": 0, "opcode": 3, "rs1": 4, "rs2": 0, "rd": 5},
+    {"class_code": 2, "type": 0, "opcode": 4, "rs1": 5, "rs2": 1, "rd": 6},
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 7, "imm": 31},
+    {"class_code": 2, "type": 0, "opcode": 5, "rs1": 3, "rs2": 7, "rd": 8},
+    {"class_code": 2, "type": 0, "opcode": 6, "rs1": 3, "rs2": 7, "rd": 9},
+    {"class_code": 2, "type": 0, "opcode": 7, "rs1": 6, "rs2": 4, "rd": 10},
+    {"class_code": 2, "type": 0, "opcode": 8, "rs1": 6, "rs2": 7, "rd": 11},
+
+    {"class_code": 2, "type": 1, "opcode": 0, "rs": 11, "rd": 12, "imm": 1},
+    {"class_code": 2, "type": 1, "opcode": 1, "rs": 9, "rd": 13, "imm": 8},
+    {"class_code": 2, "type": 1, "opcode": 2, "rs": 13, "rd": 14, "imm": 6},
+    {"class_code": 2, "type": 1, "opcode": 3, "rs": 14, "rd": 15, "imm": 10},
+    {"class_code": 2, "type": 1, "opcode": 4, "rs": 15, "rd": 16, "imm": 2},
+    {"class_code": 2, "type": 1, "opcode": 5, "rs": 15, "rd": 17, "imm": 30},
+    {"class_code": 2, "type": 1, "opcode": 6, "rs": 15, "rd": 18, "imm": 1},
+    {"class_code": 2, "type": 1, "opcode": 7, "rs": 12, "rd": 19, "imm": 5},
+    {"class_code": 2, "type": 1, "opcode": 8, "rs": 14, "rd": 20, "imm": -100},
+
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 21, "imm": 1024},
+    {"class_code": 2, "type": 2, "opcode": 1, "rs1": 21, "rs2": 20, "offset": 0},
+    {"class_code": 2, "type": 2, "opcode": 1, "rs1": 21, "rs2": 6, "offset": 4},
+    {"class_code": 2, "type": 2, "opcode": 0, "rs1": 21, "rs2": 22, "offset": 4},
+    {"class_code": 2, "type": 2, "opcode": 0, "rs1": 21, "rs2": 23, "offset": 0},
+
+    {"class_code": 2, "type": 3, "opcode": 1, "rd": 0, "imm": 114514},
+    {"class_code": 2, "type": 3, "opcode": 0, "rd": 24, "imm": 1919180},
+    {"class_code": 2, "type": 3, "opcode": 2, "rs1": 24, "rs2": 1},
+    {"class_code": 2, "type": 3, "opcode": 3, "rs1": 25, "rs2": 0}
+  ],
+  "expected": {
+    "time_ns": 155,
+    "energy_pj": 20
+  },
+  "reg_info": {
+    "check": true,
+    "general_reg_expected_values": [
+      2, 3, 5, -1, 15, 7, 56, 31, 1, -1, 11, 31, 32, -9, -54, -5,
+      -20, 3, -3, 2, -100, 1024, 56, -100, 1919180, 114514, 0, 0, 0, 0, 0, 0
+    ],
+    "special_reg_expected_values": [
+      114514, 1919180, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ]
+  }
+}

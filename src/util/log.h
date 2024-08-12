@@ -15,4 +15,4 @@ inline void log(const std::string& msg) {
 
 }  // namespace pimsim
 
-#define LOG(msg) log(msg)
+#define LOG(msg)

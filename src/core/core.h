@@ -33,6 +33,9 @@ public:
 
     Reporter getReporter();
 
+    bool checkRegValues(const std::array<int, GENERAL_REG_NUM>& general_reg_expected_values,
+                        const std::array<int, SPECIAL_REG_NUM>& special_reg_expected_values);
+
 private:
     [[noreturn]] void issue();
     void processStall();
@@ -57,6 +60,7 @@ private:
     int ins_index_{0};
     int ins_id_{0};
     DataConflictPayload cur_ins_conflict_info_;
+    sc_core::sc_event decode_new_ins_trigger_;
 
     // payloads to execute units
     ScalarInsPayload scalar_payload_;
@@ -91,6 +95,10 @@ private:
     ExecuteUnitSignalPorts<PimOutputInsPayload> pim_output_signals_;
     ExecuteUnitSignalPorts<PimSetInsPayload> pim_set_signals_;
     ExecuteUnitSignalPorts<PimTransferInsPayload> pim_transfer_signals_;
+
+    sc_core::sc_signal<RegUnitReadRequest> read_req_signal_;
+    sc_core::sc_signal<RegUnitReadResponse> read_rsp_signal_;
+    sc_core::sc_signal<RegUnitWriteRequest> write_req_signal_;
 
     // stall
     StallHandler scalar_stall_handler_, simd_stall_handler_, transfer_stall_handler_, pim_compute_stall_handler_,
