@@ -115,6 +115,13 @@ Reporter Core::getReporter() {
     return Reporter{running_time_.to_seconds() * 1000, getName(), getEnergyReporter(), 0};
 }
 
+Reporter Core::report(std::ostream &os) {
+    auto reporter = getReporter();
+
+    reporter.report(os);
+    return std::move(reporter);
+}
+
 bool Core::checkRegValues(const std::array<int, GENERAL_REG_NUM> &general_reg_expected_values,
                           const std::array<int, SPECIAL_REG_NUM> &special_reg_expected_values) {
     return reg_unit_.checkRegValues(general_reg_expected_values, special_reg_expected_values);
@@ -130,7 +137,7 @@ bool Core::checkRegValues(const std::array<int, GENERAL_REG_NUM> &general_reg_ex
     PimSetInsPayload pim_set_nop{};
     PimTransferInsPayload pim_transfer_nop{};
 
-    wait(4, SC_NS);
+    wait(period_ns_ - 1, SC_NS);
 
     int pc_increment = 0;
     while (true) {

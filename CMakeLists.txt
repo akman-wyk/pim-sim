@@ -199,6 +199,16 @@ add_dependencies(CoreTest pim-simulator)
 target_link_libraries(CoreTest PRIVATE pim-simulator)
 target_include_directories(CoreTest PRIVATE src)
 
+add_executable(LayerSimulator "" src/simulator/layer_simulator.cpp src/simulator/layer_simulator.h)
+add_dependencies(LayerSimulator pim-simulator)
+target_link_libraries(LayerSimulator PRIVATE pim-simulator)
+target_include_directories(LayerSimulator PRIVATE src)
+
+add_executable(NetworkSimulator "" src/simulator/network_simulator.cpp src/simulator/network_simulator.h)
+add_dependencies(NetworkSimulator pim-simulator)
+target_link_libraries(NetworkSimulator PRIVATE pim-simulator)
+target_include_directories(NetworkSimulator PRIVATE src)
+
 add_executable(TestWrap "" test/test_wrap.cpp)
 add_dependencies(TestWrap nlohmann_json fmt)
 target_link_libraries(TestWrap PUBLIC nlohmann_json fmt)

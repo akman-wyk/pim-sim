@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <iostream>
 #include <vector>
 
 #include "base_component/base_module.h"
@@ -32,6 +33,8 @@ public:
     EnergyReporter getEnergyReporter() override;
 
     Reporter getReporter();
+
+    Reporter report(std::ostream& os);
 
     bool checkRegValues(const std::array<int, GENERAL_REG_NUM>& general_reg_expected_values,
                         const std::array<int, SPECIAL_REG_NUM>& special_reg_expected_values);

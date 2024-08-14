@@ -8,7 +8,14 @@ namespace pimsim {
 
 void from_json(const nlohmann::ordered_json& j, Instruction& t) {
     const Instruction obj{};
-    t.class_code = j.value("class_code", obj.class_code);
+    if (j.contains("class")) {
+        t.class_code = j["class"];
+    } else if (j.contains("class_code")) {
+        t.class_code = j["class_code"];
+    } else {
+        t.class_code = obj.class_code;
+    }
+
     t.type = j.value("type", obj.type);
     t.opcode = j.value("opcode", obj.opcode);
 

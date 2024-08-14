@@ -1,0 +1,28 @@
+{
+  "data_root_dir": "/mnt/d/code/pim-sim/data",
+  "report_root_dir": "/mnt/d/code/pim-sim/report",
+  "network": "AlexNet",
+
+  "generate_report": true,
+  "test_case_config": [
+    {
+      "test": true,
+      "test_case_name": "dense",
+      "config_file_path": "../config/config_base_0.72V.json",
+      "report_file_name": "base_0.72V.txt"
+    }
+  ],
+
+  "layer_config": [
+    {"sub_dir_name": "0_conv"},
+    {"sub_dir_name": "2_conv"},
+    {"sub_dir_name": "4_conv"},
+    {"sub_dir_name": "5_conv"},
+    {"sub_dir_name": "6_conv"},
+    {"sub_dir_name": "8_linear"},
+    {"sub_dir_name": "9_linear"},
+    {"sub_dir_name": "10_linear"}
+  ],
+
+  "compare": false
+}
