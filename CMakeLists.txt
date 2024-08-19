@@ -84,6 +84,8 @@ add_library(pim-simulator STATIC ""
         src/core/core.h
         src/base_component/stall_handler.cpp
         src/base_component/stall_handler.h
+        src/util/ins_stat.cpp
+        src/util/ins_stat.h
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE
@@ -214,3 +216,5 @@ add_dependencies(TestWrap nlohmann_json fmt)
 target_link_libraries(TestWrap PUBLIC nlohmann_json fmt)
 target_include_directories(TestWrap PRIVATE src)
 target_include_directories(TestWrap PUBLIC packages/header-only)
+
+add_executable(Test "" test/test.cpp)

@@ -10,9 +10,11 @@
 
 namespace pimsim {
 
-Core::Core(const char *name, const pimsim::Config &config, pimsim::Clock *clk, std::vector<Instruction> ins_list)
+Core::Core(const char *name, const pimsim::Config &config, pimsim::Clock *clk, std::vector<Instruction> ins_list,
+           std::ostream &reg_stat_os)
     : BaseModule(name, config.sim_config, this, clk)
     , config_(config)
+    , reg_stat_os_(reg_stat_os)
     , ins_list_(std::move(ins_list))
     , scalar_unit_("ScalarUnit", config.chip_config.core_config.scalar_unit_config, config.sim_config, this, clk)
     , simd_unit_("SIMDUnit", config.chip_config.core_config.simd_unit_config, config.sim_config, this, clk)
@@ -127,6 +129,16 @@ bool Core::checkRegValues(const std::array<int, GENERAL_REG_NUM> &general_reg_ex
     return reg_unit_.checkRegValues(general_reg_expected_values, special_reg_expected_values);
 }
 
+bool Core::checkInsStat(const std::string &expected_ins_stat_file) const {
+    std::ifstream expected_ins_stat_ifs;
+    expected_ins_stat_ifs.open(expected_ins_stat_file);
+    nlohmann::ordered_json expected_ins_stat_j = nlohmann::ordered_json::parse(expected_ins_stat_ifs);
+    expected_ins_stat_ifs.close();
+
+    auto expected_ins_stat = expected_ins_stat_j.get<InsStat>();
+    return expected_ins_stat == ins_stat_;
+}
+
 [[noreturn]] void Core::issue() {
     ScalarInsPayload scalar_nop{};
     SIMDInsPayload simd_nop{};
@@ -222,6 +234,10 @@ int Core::decodeAndGetPCIncrement() {
     cur_ins_conflict_info_.ins_id = -1;
 
     const auto &ins = ins_list_[ins_index_];
+    reg_stat_os_ << fmt::format("pc: {}, ins id: {}, general reg: [{}]\n", ins_payload.pc, ins_payload.ins_id,
+                                reg_unit_.getGeneralRegistersString());
+
+    ins_stat_.addInsCount(ins.class_code, ins.type, ins.opcode, config_);
     if (ins.class_code == InstClass::control) {
         return decodeControlInsAndGetPCIncrement(ins, ins_payload);
     }
@@ -336,21 +352,23 @@ void Core::decodeSIMDIns(const pimsim::Instruction &ins, const pimsim::Instructi
     InstructionPayload simd_ins_payload{
         .pc = ins_payload.pc, .ins_id = ins_payload.ins_id, .unit_type = ExecuteUnitType::simd};
 
+    int input_cnt = ins.input_num + 1;
+
     int i1_addr = reg_unit_.readRegister(ins.rs1, false);
-    int i2_addr = (ins.input_num == 1)   ? 0
-                  : (ins.input_num == 2) ? reg_unit_.readRegister(ins.rs2, false)
-                                         : reg_unit_.readRegister(ins.rs1 + 1, false);
-    int i3_addr = (ins.input_num < 3) ? 0 : reg_unit_.readRegister(ins.rs2, false);
-    int i4_addr = (ins.input_num < 4) ? 0 : reg_unit_.readRegister(ins.rs2 + 1, false);
+    int i2_addr = (input_cnt < 2) ? 0 : reg_unit_.readRegister(ins.rs2, false);
+    int i3_addr = (input_cnt < 3) ? 0 : reg_unit_.readRegister(SpecialRegId::input_3_address, true);
+    int i4_addr = (input_cnt < 4) ? 0 : reg_unit_.readRegister(SpecialRegId::input_4_address, true);
+
+    int i1_bit_width = reg_unit_.readRegister(SpecialRegId::simd_input_1_bit_width, true);
+    int i2_bit_width = (input_cnt < 2) ? 0 : reg_unit_.readRegister(SpecialRegId::simd_input_2_bit_width, true);
+    int i3_bit_width = (input_cnt < 3) ? 0 : reg_unit_.readRegister(SpecialRegId::simd_input_3_bit_width, true);
+    int i4_bit_width = (input_cnt < 4) ? 0 : reg_unit_.readRegister(SpecialRegId::simd_input_4_bit_width, true);
 
     simd_payload_ =
         SIMDInsPayload{.ins = simd_ins_payload,
-                       .input_cnt = static_cast<unsigned int>(ins.input_num),
+                       .input_cnt = static_cast<unsigned int>(input_cnt),
                        .opcode = static_cast<unsigned int>(ins.opcode),
-                       .inputs_bit_width = {reg_unit_.readRegister(SpecialRegId::simd_input_1_bit_width, true),
-                                            reg_unit_.readRegister(SpecialRegId::simd_input_2_bit_width, true),
-                                            reg_unit_.readRegister(SpecialRegId::simd_input_3_bit_width, true),
-                                            reg_unit_.readRegister(SpecialRegId::simd_input_4_bit_width, true)},
+                       .inputs_bit_width = {i1_bit_width, i2_bit_width, i3_bit_width, i4_bit_width},
                        .output_bit_width = reg_unit_.readRegister(SpecialRegId::simd_output_bit_width, true),
                        .inputs_address_byte = {i1_addr, i2_addr, i3_addr, i4_addr},
                        .output_address_byte = reg_unit_.readRegister(ins.rd, false),

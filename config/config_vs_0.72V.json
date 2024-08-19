@@ -228,7 +228,7 @@
           "static_power_mW": 1.0,
           "dynamic_power_mW": 1.0
         },
-        "value_sparse": false,
+        "value_sparse": true,
         "value_sparse_config": {
           "mask_bit_width": 1,
           "latency_cycle": 1,

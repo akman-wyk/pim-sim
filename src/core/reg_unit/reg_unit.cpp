@@ -80,6 +80,17 @@ bool RegUnit::checkRegValues(const std::array<int, GENERAL_REG_NUM> &general_reg
     return true;
 }
 
+std::string RegUnit::getGeneralRegistersString() const {
+    std::stringstream ss;
+    for (int i = 0; i < GENERAL_REG_NUM; i++) {
+        ss << general_regs_[i];
+        if (i != GENERAL_REG_NUM - 1) {
+            ss << ", ";
+        }
+    }
+    return ss.str();
+}
+
 void RegUnit::readValue() {
     const auto &read_req = read_req_port_.read();
     const auto &cur_write_req = write_req_port_.read();

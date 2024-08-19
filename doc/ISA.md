@@ -33,7 +33,9 @@
     - 18：input 3 bit width：输入向量3每个元素的bit长度
     - 19：input 4 bit width：输入向量4每个元素的bit长度
     - 20：output bit width：输出向量每个元素的bit长度
-    - 21-31：留作其他指令扩展
+    - 21：input 3 address：input 3的起始地址
+    - 22：input 4 address：input 4的起始地址
+    - 23-31：留作其他指令扩展
   + 专用寄存器绑定通用寄存器：对于运算过程中数值频繁变化的专用寄存器，为了减小赋值专用寄存器指令的数量，可在config文件中指定，某个专用寄存器绑定到某个通用寄存器上，即该通用寄存器既可以用作通用运算，又可在部分运算时作为专用寄存器，类似MIPS32架构里的sp、ra等寄存器。绑定格式如下：
   
   ```json
@@ -139,22 +141,22 @@
 
 使用的专用寄存器：
 
-+ input bit width：输入的bit长度
-+ output bit width：输出的bit长度
-+ weight bit width：权重的bit长度
-+ group size：macro group的大小，即包含多少个macro，仅允许设置为config文件里设置的数值之一
-+ activation group num：激活的group的数量
-+ activation element col num：每个group内激活的element列的数量
-+ group input step/offset addr：每一组输入向量的起始地址相对于上一组的增量（step），或相对于rs1的偏移量的地址（offset addr）
-+ value sparse mask addr：值稀疏掩码Mask的起始地址
-+ bit sparse meta addr：Bit级稀疏Meta数据的起始地址
++ 0：input bit width：输入的bit长度
++ 1：output bit width：输出的bit长度
++ 2：weight bit width：权重的bit长度
++ 3：group size：macro group的大小，即包含多少个macro，仅允许设置为config文件里设置的数值之一
++ 4：activation group num：激活的group的数量
++ 5：activation element col num：每个group内激活的element列的数量
++ 6：group input step/offset addr：每一组输入向量的起始地址相对于上一组的增量（step），或相对于rs1的偏移量的地址（offset addr）
++ 7：value sparse mask addr：值稀疏掩码Mask的起始地址
++ 8：bit sparse meta addr：Bit级稀疏Meta数据的起始地址
 
 #### pim设置：pim-set
 
 设置pim单元的一些参数，以每个MacroGroup为单位进行设置，设置的参数包括每个macro激活的element列等
 
 + [31, 30]，2bit：class，指令类别码，值为00
-+ [29, 28]，2bit：type，指令类型码，值为00
++ [29, 28]，2bit：type，指令类型码，值为01
 + [27, 21]，7bit：reserve，保留字段
 + [20, 20]，1bit：group broadcast，表示是否进行设置的组广播
   + 0：不进行组广播，即仅对单个MacroGroup进行设置，MacroGroup编号由寄存器rs1给出
@@ -257,10 +259,11 @@
 
 + [31, 30]，2bit：class，指令类别码，值为01
 + [29, 28]，2bit：input num，input向量的个数，范围是1到4
-  + 00：1个输入向量，地址由rs1给出
-  + 01：2个输入向量，地址由rs1和rs2给出
-  + 10：3个输入向量，地址由rs1，rs1+1，rs2给出
-  + 11：4个输入向量，地址由rs1，rs1+1，rs2，rs2+1给出
+  + 00：1个输入向量
+  + 01：2个输入向量
+  + 10：3个输入向量
+  + 11：4个输入向量
+  + 备注：input 1和input 2的地址由寄存器rs1和rs2给出，input 3和input 4的地址由专用寄存器给出
 + [27, 20]，8bit：opcode，操作类别码，表示具体计算的类型
   + 0x00：add，向量加法
   + 0x01：add-scalar，向量和标量加法
@@ -269,18 +272,20 @@
   + 0x04：quantify-resadd，resadd量化
   + 0x05：quantify-multiply，乘法量化
 
-+ [19, 15]，5bit：rs1，通用寄存器1，表示input向量起始地址1
-+ [14, 10]，5bit：rs2，通用寄存器2，表示input向量起始地址2
++ [19, 15]，5bit：rs1，通用寄存器1，表示input 1的起始地址
++ [14, 10]，5bit：rs2，通用寄存器2，表示input 2的起始地址
 + [9, 5]，5bit：rs3，通用寄存器3，表示input向量长度
 + [4, 0]，5bit：rd，通用寄存器4，表示output写入的起始地址
 
 使用的专用寄存器：
 
-+ input 1 bit width：输入向量1每个元素的bit长度
-+ input 2 bit width：输入向量2每个元素的bit长度
-+ input 3 bit width：输入向量3每个元素的bit长度
-+ input 4 bit width：输入向量4每个元素的bit长度
-+ output bit width：输出向量每个元素的bit长度
++ 16：input 1 bit width：输入向量1每个元素的bit长度
++ 17：input 2 bit width：输入向量2每个元素的bit长度
++ 18：input 3 bit width：输入向量3每个元素的bit长度
++ 19：input 4 bit width：输入向量4每个元素的bit长度
++ 20：output bit width：输出向量每个元素的bit长度
++ 21：input 3 address：input 3的起始地址
++ 22：input 4 address：input 4的起始地址
 
 备注：SIMD指令也可执行向量与标量的运算，每条指令的每个输入数的标量or向量是固定的，并需要再config文件中指定
 

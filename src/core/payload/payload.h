@@ -36,12 +36,12 @@ struct InstructionPayload {
     void clear();
 
     friend std::ostream& operator<<(std::ostream& out, const InstructionPayload& ins) {
-        out << "pc: " << ins.pc << "\n";
+        out << "pc: " << ins.pc << ", ins id: " << ins.ins_id << ", unit type: " << ins.unit_type << "\n";
         return out;
     }
 
     bool operator==(const InstructionPayload& another) const {
-        return pc == another.pc && ins_id == another.ins_id;
+        return pc == another.pc && ins_id == another.ins_id && unit_type == another.unit_type;
     }
 
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(InstructionPayload)

@@ -67,7 +67,7 @@ int sc_main(int argc, char* argv[]) {
     auto test_info = ins_j.get<CoreTestInfo>();
 
     Clock clk{"clock", config.sim_config.period_ns};
-    Core core{"core", config, &clk, std::move(test_info.code)};
+    Core core{"core", config, &clk, std::move(test_info.code), std::cout};
     sc_start();
 
     std::ofstream ofs;

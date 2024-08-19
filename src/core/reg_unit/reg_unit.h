@@ -20,7 +20,7 @@ BETTER_ENUM(SpecialRegId, int,  // NOLINT(*-explicit-constructor, *-no-recursion
             bit_sparse_meta_addr = 8,
 
             simd_input_1_bit_width = 16, simd_input_2_bit_width = 17, simd_input_3_bit_width = 18,
-            simd_input_4_bit_width = 19, simd_output_bit_width = 20)
+            simd_input_4_bit_width = 19, simd_output_bit_width = 20, input_3_address = 21, input_4_address = 22)
 
 class RegUnit : public BaseModule {
 public:
@@ -36,6 +36,8 @@ public:
 
     bool checkRegValues(const std::array<int, GENERAL_REG_NUM>& general_reg_expected_values,
                         const std::array<int, SPECIAL_REG_NUM>& special_reg_expected_values);
+
+    std::string getGeneralRegistersString() const;
 
 private:
     void readValue();

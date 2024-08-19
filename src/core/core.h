@@ -21,6 +21,7 @@
 #include "isa/instruction.h"
 #include "local_memory_unit/local_memory_unit.h"
 #include "payload/payload.h"
+#include "util/ins_stat.h"
 
 namespace pimsim {
 
@@ -28,7 +29,8 @@ class Core : public BaseModule {
 public:
     SC_HAS_PROCESS(Core);
 
-    Core(const char* name, const Config& config, Clock* clk, std::vector<Instruction> ins_list);
+    Core(const char* name, const Config& config, Clock* clk, std::vector<Instruction> ins_list,
+         std::ostream& reg_stat_os);
 
     EnergyReporter getEnergyReporter() override;
 
@@ -38,6 +40,8 @@ public:
 
     bool checkRegValues(const std::array<int, GENERAL_REG_NUM>& general_reg_expected_values,
                         const std::array<int, SPECIAL_REG_NUM>& special_reg_expected_values);
+
+    bool checkInsStat(const std::string& expected_ins_stat_file) const;
 
 private:
     [[noreturn]] void issue();
@@ -57,6 +61,9 @@ private:
 
 private:
     const Config& config_;
+
+    InsStat ins_stat_{};
+    std::ostream& reg_stat_os_;
 
     // instruction
     std::vector<Instruction> ins_list_;

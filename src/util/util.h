@@ -37,4 +37,6 @@ int BytesToInt(const std::vector<unsigned char>& bytes, bool little_endian);
 
 std::vector<unsigned char> IntToBytes(int value, bool little_endian);
 
+bool check_text_file_same(const std::string& file1, const std::string& file2);
+
 }  // namespace pimsim

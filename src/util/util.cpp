@@ -4,6 +4,10 @@
 
 #include "util.h"
 
+#include <fstream>
+#include <iostream>
+#include <string>
+
 namespace pimsim {
 
 int BytesToInt(const std::vector<unsigned char>& bytes, bool little_endian) {
@@ -35,6 +39,32 @@ std::vector<unsigned char> IntToBytes(int value, bool little_endian) {
         }
     }
     return std::move(bytes);
+}
+
+bool check_text_file_same(const std::string& file1, const std::string& file2) {
+    if (std::ifstream in1(file1), in2(file2); in1 && in2) {
+        std::string line1, line2;
+        int line_num = 1;
+        std::getline(in1, line1);
+        std::getline(in2, line2);
+        while (in1 && in2) {
+            if (line1 != line2) {
+                std::cerr << "Not same at line: " << line_num << std::endl;
+                return false;
+            }
+            std::getline(in1, line1);
+            std::getline(in2, line2);
+            line_num++;
+        }
+        if (in1 || in2) {
+            std::cerr << "files do not have same lines" << std::endl;
+            return false;
+        }
+        return true;
+    } else {
+        std::cerr << "files do not exist" << std::endl;
+        return false;
+    }
 }
 
 }  // namespace pimsim

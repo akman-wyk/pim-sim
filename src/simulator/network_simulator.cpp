@@ -4,27 +4,65 @@
 
 #include "network_simulator.h"
 
+#if defined(WIN32)
+#define WEXITSTATUS(status) (((status) & 0xff00) >> 8)
+#define WIFEXITED(status)   (((status) & 0x7f) == 0)
+#elif defined(__linux__)
+#include <sys/wait.h>
+#endif
+
 namespace pimsim {
 
 Reporter test_network(const std::string& data_root_dir, const std::string& report_root_dir, const std::string& network,
-                      const TestCaseConfig& test_case_config, const std::vector<LayerConfig>& layer_config) {
+                      const TestCaseConfig& test_case_config, const std::vector<LayerConfig>& layer_config,
+                      bool& all_tests_passed) {
     auto data_dir = fmt::format("{}/{}/{}", data_root_dir, network, test_case_config.test_case_name);
     auto report_dir = fmt::format("{}/{}", report_root_dir, TEMP_REPORT_DIR_NAME);
 
     std::size_t execute_times = layer_config.size();
     Reporter total_reporter;
     for (std::size_t i = 0; i < execute_times; i++) {
-        std::cout << fmt::format("    execute file{}: {}\n", i, layer_config[i].sub_dir_name);
+        std::cout << fmt::format("    execute file{}: {}, ", i, layer_config[i].sub_dir_name);
 
         auto code_file = fmt::format("{}/{}/{}", data_dir, layer_config[i].sub_dir_name, CODE_FILE_NAME);
         auto global_image_file =
             fmt::format("{}/{}/{}", data_dir, layer_config[i].sub_dir_name, GLOBAL_IMAGE_FILE_NAME);
         auto report_json_file = fmt::format("{}/report{}.json", report_dir, i);
+        auto expected_ins_stat_file =
+            fmt::format("{}/{}/{}", data_dir, layer_config[i].sub_dir_name, EXPECTED_INS_STAT_FILE_NAME);
+        auto expected_reg_file =
+            fmt::format("{}/{}/{}", data_dir, layer_config[i].sub_dir_name, EXPECTED_REG_FILE_NAME);
+        auto actual_reg_file = fmt::format("{}/{}", report_dir, ACTUAL_REG_FILE_NAME);
 
         // execute and generate json file
-        auto cmd = fmt::format("./LayerSimulator {} {} {} -j {} >> ./log.txt 2>&1", test_case_config.config_file_path,
-                               code_file, global_image_file, report_json_file);
-        system(cmd.c_str());
+        auto cmd = fmt::format("./LayerSimulator {} {} {} {} {} {} -j {} >> ./log.txt 2>&1",
+                               test_case_config.config_file_path, code_file, global_image_file, expected_ins_stat_file,
+                               expected_reg_file, actual_reg_file, report_json_file);
+        int status = system(cmd.c_str());
+        if (status == -1) {
+            all_tests_passed = false;
+            std::cout << "Fork Error!" << std::endl;
+        } else if (!WIFEXITED(status)) {
+            all_tests_passed = false;
+            std::cout << "Abnormal Exit!" << std::endl;
+        } else {
+            if (int result = WEXITSTATUS(status); result == TEST_PASSED) {
+                std::cout << "Passed" << std::endl;
+            } else {
+                all_tests_passed = false;
+                if (result == TEST_FAILED) {
+                    std::cout << "Failed" << std::endl;
+                } else if (result == INVALID_CONFIG) {
+                    std::cout << "Invalid Config" << std::endl;
+                } else if (result == INVALID_USAGE) {
+                    std::cout << "Invalid Usage" << std::endl;
+                } else if (result == CHECK_INS_STAT_FAILED) {
+                    std::cout << "Check ins stat failed" << std::endl;
+                } else if (result == CHECK_REG_FAILED) {
+                    std::cout << "Check reg failed" << std::endl;
+                }
+            }
+        }
 
         // read json file, get reporter and add reporter
         std::ifstream ifs(report_json_file);
@@ -46,7 +84,7 @@ Reporter test_network(const std::string& data_root_dir, const std::string& repor
     return std::move(total_reporter);
 }
 
-void test_wrap(const std::string& test_config_file) {
+void test_wrap(const std::string& test_config_file, bool& all_tests_passed) {
     std::ifstream ifs(test_config_file);
     auto test_config_json = nlohmann::json::parse(ifs);
     ifs.close();
@@ -58,8 +96,9 @@ void test_wrap(const std::string& test_config_file) {
         for (int i = 0; i < test_config.test_case_config.size(); i++) {
             if (const auto& test_case = test_config.test_case_config[i]; test_case.test) {
                 std::cout << fmt::format("Testing case {}: {}", i, test_case.test_case_name) << std::endl;
-                auto reporter = test_network(test_config.data_root_dir, test_config.report_root_dir,
-                                             test_config.network, test_case, test_config.layer_config);
+                auto reporter =
+                    test_network(test_config.data_root_dir, test_config.report_root_dir, test_config.network, test_case,
+                                 test_config.layer_config, all_tests_passed);
                 reporters.emplace(test_case.test_case_name, std::move(reporter));
                 std::cout << fmt::format("Finish test case {}\n", i) << std::endl;
             }
@@ -102,6 +141,12 @@ int sc_main(int argc, char** argv) {
         std::cerr << "Usage: ./NetworkSimulator <test_config_file>" << std::endl;
         return EXIT_FAILURE;
     }
-    pimsim::test_wrap(argv[1]);
+    bool all_tests_passed = true;
+    pimsim::test_wrap(argv[1], all_tests_passed);
+    if (all_tests_passed) {
+        std::cout << "All Tests Passed!" << std::endl;
+    } else {
+        std::cout << "Some Tests Failed!!!!" << std::endl;
+    }
     return 0;
 }
