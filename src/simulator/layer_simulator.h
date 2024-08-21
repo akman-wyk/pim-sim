@@ -20,14 +20,14 @@ namespace pimsim {
 class LayerSimulator {
 public:
     LayerSimulator(std::string config_file, std::string instruction_file, std::string global_image_file,
-                   std::string expected_ins_stat_file, std::string expected_reg_file, std::string actual_reg_file);
+                   std::string expected_ins_stat_file, std::string expected_reg_file, std::string actual_reg_file, bool check);
 
     void run();
 
     void report(std::ostream& os, const std::string& report_json_file);
 
-    bool checkInsStat() const;
-    bool checkReg() const;
+    [[nodiscard]] bool checkInsStat() const;
+    [[nodiscard]] bool checkReg() const;
 
 private:
     Core* core_{nullptr};
@@ -39,6 +39,7 @@ private:
     std::string expected_ins_stat_file_;
     std::string expected_reg_file_;
     std::string actual_reg_file_;
+    bool check_;
 };
 
 }  // namespace pimsim

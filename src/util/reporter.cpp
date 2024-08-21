@@ -36,7 +36,7 @@ std::vector<EnergyReportItem> EnergyReporterCompare::getEnergyReportItem(const s
     return std::move(items);
 }
 
-void ReporterCompare::report(std::ostream& os) {
+void ReporterCompare::report(std::ostream& os, bool detail) {
     os << "Simulation Compare Result:\n";
     os << fmt::format("  - {:<25}{:.6f} ms\n", "latency diff:", latency_diff);
     os << fmt::format("  - {:<25}{:.3f}\n", "latency radio:", latency_radio);
@@ -49,27 +49,29 @@ void ReporterCompare::report(std::ostream& os) {
     os << fmt::format("  - {:<25}{:.4f}\n", "TOPS/W diff:", TOPS_per_W_diff);
     os << fmt::format("  - {:<25}{:.3f}\n", "TOPS/W radio:", TOPS_per_W_radio);
 
-    auto energy_report_items = energy_reporter_compare.getEnergyReportItem(module_name, 0);
-    energy_report_items.insert(energy_report_items.begin(),
-                               EnergyReportItem{"module", "total diff(radio)", "static diff(radio)",
-                                                "dynamic diff(radio)", "activity time diff(radio)"});
+    if (detail) {
+        auto energy_report_items = energy_reporter_compare.getEnergyReportItem(module_name, 0);
+        energy_report_items.insert(energy_report_items.begin(),
+                                   EnergyReportItem{"module", "total diff(radio)", "static diff(radio)",
+                                                    "dynamic diff(radio)", "activity time diff(radio)"});
 
-    unsigned int name_width = 0, total_width = 0, static_width = 0, dynamic_width = 0, activity_width = 0;
-    for (const auto& [name, total_energy, static_energy, dynamic_energy, activity_time] : energy_report_items) {
-        name_width = MAX(name_width, name.length());
-        total_width = MAX(total_width, total_energy.length());
-        static_width = MAX(static_width, static_energy.length());
-        dynamic_width = MAX(dynamic_width, dynamic_energy.length());
-        activity_width = MAX(activity_width, activity_time.length());
-    }
+        unsigned int name_width = 0, total_width = 0, static_width = 0, dynamic_width = 0, activity_width = 0;
+        for (const auto& [name, total_energy, static_energy, dynamic_energy, activity_time] : energy_report_items) {
+            name_width = MAX(name_width, name.length());
+            total_width = MAX(total_width, total_energy.length());
+            static_width = MAX(static_width, static_energy.length());
+            dynamic_width = MAX(dynamic_width, dynamic_energy.length());
+            activity_width = MAX(activity_width, activity_time.length());
+        }
 
-    os << "Energy Compare report form:\n";
-    for (const auto& [name, total_energy, static_energy, dynamic_energy, activity_time] : energy_report_items) {
-        os << fmt::format("    {:<{}}", name, name_width);
-        os << fmt::format("    {:<{}}", total_energy, total_width);
-        os << fmt::format("    {:<{}}", static_energy, static_width);
-        os << fmt::format("    {:<{}}", dynamic_energy, dynamic_width);
-        os << fmt::format("    {:<{}}\n", activity_time, activity_width);
+        os << "Energy Compare report form:\n";
+        for (const auto& [name, total_energy, static_energy, dynamic_energy, activity_time] : energy_report_items) {
+            os << fmt::format("    {:<{}}", name, name_width);
+            os << fmt::format("    {:<{}}", total_energy, total_width);
+            os << fmt::format("    {:<{}}", static_energy, static_width);
+            os << fmt::format("    {:<{}}", dynamic_energy, dynamic_width);
+            os << fmt::format("    {:<{}}\n", activity_time, activity_width);
+        }
     }
 }
 
@@ -161,7 +163,7 @@ Reporter::Reporter(double latency_ms, std::string module_name, const EnergyRepor
     TOPS_per_W_ = (average_power_ == 0.0 ? 0.0 : (TOPS_ / (average_power_ / 1e3)));
 }
 
-void Reporter::report(std::ostream& os) {
+void Reporter::report(std::ostream& os, bool detail) {
     os << "Simulation Result:\n";
     os << fmt::format("  - {:<20}{:.6} ms\n", "latency:", latency_);
     os << fmt::format("  - {:<20}{:.4f} mW\n", "average power:", average_power_);
@@ -170,26 +172,29 @@ void Reporter::report(std::ostream& os) {
     os << fmt::format("  - {:<20}{:.4f}\n", "TOPS/W:", TOPS_per_W_);
     os << fmt::format("  - {:<20}{}\n", "OP_count:", OP_count);
 
-    auto energy_report_items = energy_reporter_.getEnergyReportItem(module_name_, total_energy_, latency_ * 1e6, 0);
-    energy_report_items.insert(energy_report_items.begin(), EnergyReportItem{"module", "total energy", "static energy",
-                                                                             "dynamic energy", "activity time"});
+    if (detail) {
+        auto energy_report_items = energy_reporter_.getEnergyReportItem(module_name_, total_energy_, latency_ * 1e6, 0);
+        energy_report_items.insert(
+            energy_report_items.begin(),
+            EnergyReportItem{"module", "total energy", "static energy", "dynamic energy", "activity time"});
 
-    unsigned int name_width = 0, total_width = 0, static_width = 0, dynamic_width = 0, activity_width = 0;
-    for (const auto& [name, total_energy, static_energy, dynamic_energy, activity_time] : energy_report_items) {
-        name_width = MAX(name_width, name.length());
-        total_width = MAX(total_width, total_energy.length());
-        static_width = MAX(static_width, static_energy.length());
-        dynamic_width = MAX(dynamic_width, dynamic_energy.length());
-        activity_width = MAX(activity_width, activity_time.length());
-    }
+        unsigned int name_width = 0, total_width = 0, static_width = 0, dynamic_width = 0, activity_width = 0;
+        for (const auto& [name, total_energy, static_energy, dynamic_energy, activity_time] : energy_report_items) {
+            name_width = MAX(name_width, name.length());
+            total_width = MAX(total_width, total_energy.length());
+            static_width = MAX(static_width, static_energy.length());
+            dynamic_width = MAX(dynamic_width, dynamic_energy.length());
+            activity_width = MAX(activity_width, activity_time.length());
+        }
 
-    os << "Energy report form:\n";
-    for (const auto& [name, total_energy, static_energy, dynamic_energy, activity_time] : energy_report_items) {
-        os << fmt::format("    {:<{}}", name, name_width);
-        os << fmt::format("    {:<{}}", total_energy, total_width);
-        os << fmt::format("    {:<{}}", static_energy, static_width);
-        os << fmt::format("    {:<{}}", dynamic_energy, dynamic_width);
-        os << fmt::format("    {:<{}}\n", activity_time, activity_width);
+        os << "Energy report form:\n";
+        for (const auto& [name, total_energy, static_energy, dynamic_energy, activity_time] : energy_report_items) {
+            os << fmt::format("    {:<{}}", name, name_width);
+            os << fmt::format("    {:<{}}", total_energy, total_width);
+            os << fmt::format("    {:<{}}", static_energy, static_width);
+            os << fmt::format("    {:<{}}", dynamic_energy, dynamic_width);
+            os << fmt::format("    {:<{}}\n", activity_time, activity_width);
+        }
     }
 }
 

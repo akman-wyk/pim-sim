@@ -105,6 +105,15 @@ void test_wrap(const std::string& test_config_file, bool& all_tests_passed) {
         }
     }
 
+    auto network_report_file =
+        fmt::format("{}/{}/{}_report.txt", test_config.report_root_dir, test_config.network, test_config.network);
+    std::ofstream network_report_ofs(network_report_file);
+    for (auto& [name, reporter] : reporters) {
+        network_report_ofs << fmt::format("{}:\n", name);
+        reporter.report(network_report_ofs, false);
+        network_report_ofs << "\n";
+    }
+
     if (test_config.compare) {
         std::cout << "Generating compare report" << std::endl;
         for (auto& [compare, test_case_1, test_case_2] : test_config.compare_config) {
@@ -123,13 +132,13 @@ void test_wrap(const std::string& test_config_file, bool& all_tests_passed) {
             auto& r2 = reporters[test_case_2];
             auto compare_r = r1.compare(r2);
 
-            auto comp_file = fmt::format("{}/{}/{}_cmp_{}.txt", test_config.report_root_dir, test_config.network,
-                                         test_case_1, test_case_2);
-            std::ofstream comp_ofs(comp_file);
-            compare_r.report(comp_ofs);
-            comp_ofs.close();
+            network_report_ofs << fmt::format("{} compare with {}:\n", test_case_1, test_case_2);
+            compare_r.report(network_report_ofs, false);
+            network_report_ofs << "\n";
         }
     }
+
+    network_report_ofs.close();
 }
 
 }  // namespace pimsim

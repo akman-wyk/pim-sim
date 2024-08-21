@@ -30,7 +30,7 @@ public:
     SC_HAS_PROCESS(Core);
 
     Core(const char* name, const Config& config, Clock* clk, std::vector<Instruction> ins_list,
-         std::ostream& reg_stat_os);
+         bool check, std::ostream& reg_stat_os);
 
     EnergyReporter getEnergyReporter() override;
 
@@ -63,6 +63,7 @@ private:
     const Config& config_;
 
     InsStat ins_stat_{};
+    bool check{false};
     std::ostream& reg_stat_os_;
 
     // instruction

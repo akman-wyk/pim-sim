@@ -43,7 +43,7 @@ struct ReporterCompare {
     std::string module_name;
     EnergyReporterCompare energy_reporter_compare;
 
-    void report(std::ostream& os);
+    void report(std::ostream& os, bool detail = true);
 };
 
 class EnergyReporter {
@@ -82,7 +82,7 @@ public:
 
     Reporter(double latency_ms, std::string module_name, const EnergyReporter& energy_reporter, int OP_count);
 
-    void report(std::ostream& os);
+    void report(std::ostream& os, bool detail = true);
 
     [[nodiscard]] double getAveragePowerMW() const;
     [[nodiscard]] double getTotalEnergyPJ() const;

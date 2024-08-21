@@ -38,9 +38,10 @@ void PimLoadUnit::bindLocalMemoryUnit(pimsim::LocalMemoryUnit *local_memory_unit
 }
 
 EnergyReporter PimLoadUnit::getEnergyReporter() {
-    EnergyReporter pim_output_reporter;
-    pim_output_reporter.addSubModule("sram write", EnergyReporter{sram_write_energy_counter_});
-    return std::move(pim_output_reporter);
+    EnergyReporter reporter;
+    reporter.addSubModule("sram write", EnergyReporter{sram_write_energy_counter_});
+    reporter.addSubModule("pim load", EnergyReporter{this->energy_counter_});
+    return std::move(reporter);
 }
 
 void PimLoadUnit::checkPimLoadInst() {
@@ -80,6 +81,7 @@ void PimLoadUnit::processExecute() {
 
         const auto &payload = execute_socket_.payload;
         LOG(fmt::format("Pim load start execute, pc: {}", payload.ins.pc));
+        auto start_exec_time = sc_core::sc_time_stamp();
 
         // read weight data
         local_memory_socket_.readData(payload.ins, payload.src_address_byte, payload.size_byte);
@@ -111,6 +113,9 @@ void PimLoadUnit::processExecute() {
             finish_run_ = true;
             finish_run_trigger_.notify(SC_ZERO_TIME);
         }
+
+        auto exec_time = sc_time_stamp() - start_exec_time;
+        this->energy_counter_.addDynamicEnergyPJ(exec_time.to_seconds() * 1e9, 0);
 
         execute_socket_.finish();
     }

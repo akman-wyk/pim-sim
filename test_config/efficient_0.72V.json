@@ -1,0 +1,123 @@
+{
+  "data_root_dir": "/mnt/d/code/pim-sim/data",
+  "report_root_dir": "/mnt/d/code/pim-sim/report",
+  "network": "EfficientNet",
+
+  "generate_report": true,
+  "test_case_config": [
+    {
+      "test": true,
+      "test_case_name": "dense",
+      "config_file_path": "../config/config_base_0.72V.json",
+      "report_file_name": "base_0.72V.txt"
+    },
+    {
+      "test": true,
+      "test_case_name": "bit_sparse",
+      "config_file_path": "../config/config_bs_0.72V.json",
+      "report_file_name": "bs_0.72V.txt"
+    },
+    {
+      "test": true,
+      "test_case_name": "value_sparse",
+      "config_file_path": "../config/config_vs_0.72V.json",
+      "report_file_name": "vs_0.72V.txt"
+    },
+    {
+      "test": true,
+      "test_case_name": "bit_value_sparse",
+      "config_file_path": "../config/config_bs_vs_0.72V.json",
+      "report_file_name": "bs_vs_0.72V.txt"
+    }
+  ],
+
+  "layer_config": [
+    {"sub_dir_name": "0_conv"},
+    {"sub_dir_name": "1_pwconv"},
+    {"sub_dir_name": "3_pwconv"},
+    {"sub_dir_name": "5_pwconv"},
+    {"sub_dir_name": "6_pwconv"},
+    {"sub_dir_name": "8_pwconv"},
+    {"sub_dir_name": "10_pwconv"},
+    {"sub_dir_name": "11_pwconv"},
+    {"sub_dir_name": "13_pwconv"},
+    {"sub_dir_name": "14_pwconv"},
+    {"sub_dir_name": "16_pwconv"},
+    {"sub_dir_name": "18_pwconv"},
+    {"sub_dir_name": "20_pwconv"},
+    {"sub_dir_name": "21_pwconv"},
+    {"sub_dir_name": "23_pwconv"},
+    {"sub_dir_name": "25_pwconv"},
+    {"sub_dir_name": "27_pwconv"},
+    {"sub_dir_name": "28_pwconv"},
+    {"sub_dir_name": "30_pwconv"},
+    {"sub_dir_name": "32_pwconv"},
+    {"sub_dir_name": "34_pwconv"},
+    {"sub_dir_name": "35_pwconv"},
+    {"sub_dir_name": "37_pwconv"},
+    {"sub_dir_name": "39_pwconv"},
+    {"sub_dir_name": "41_pwconv"},
+    {"sub_dir_name": "42_pwconv"},
+    {"sub_dir_name": "44_pwconv"},
+    {"sub_dir_name": "46_pwconv"},
+    {"sub_dir_name": "48_pwconv"},
+    {"sub_dir_name": "49_pwconv"},
+    {"sub_dir_name": "51_pwconv"},
+    {"sub_dir_name": "53_pwconv"},
+    {"sub_dir_name": "55_pwconv"},
+    {"sub_dir_name": "56_pwconv"},
+    {"sub_dir_name": "58_pwconv"},
+    {"sub_dir_name": "60_pwconv"},
+    {"sub_dir_name": "61_pwconv"},
+    {"sub_dir_name": "63_pwconv"},
+    {"sub_dir_name": "64_pwconv"},
+    {"sub_dir_name": "66_pwconv"},
+    {"sub_dir_name": "68_pwconv"},
+    {"sub_dir_name": "70_pwconv"},
+    {"sub_dir_name": "71_pwconv"},
+    {"sub_dir_name": "73_pwconv"},
+    {"sub_dir_name": "75_pwconv"},
+    {"sub_dir_name": "77_pwconv"},
+    {"sub_dir_name": "78_pwconv"},
+    {"sub_dir_name": "80_pwconv"},
+    {"sub_dir_name": "82_pwconv"},
+    {"sub_dir_name": "84_pwconv"},
+    {"sub_dir_name": "85_pwconv"},
+    {"sub_dir_name": "87_pwconv"},
+    {"sub_dir_name": "89_pwconv"},
+    {"sub_dir_name": "91_pwconv"},
+    {"sub_dir_name": "92_pwconv"},
+    {"sub_dir_name": "94_pwconv"},
+    {"sub_dir_name": "96_pwconv"},
+    {"sub_dir_name": "98_pwconv"},
+    {"sub_dir_name": "99_pwconv"},
+    {"sub_dir_name": "101_pwconv"},
+    {"sub_dir_name": "103_pwconv"},
+    {"sub_dir_name": "105_pwconv"},
+    {"sub_dir_name": "106_pwconv"},
+    {"sub_dir_name": "108_pwconv"},
+    {"sub_dir_name": "110_pwconv"},
+    {"sub_dir_name": "112_pwconv"},
+    {"sub_dir_name": "113_pwconv"},
+    {"sub_dir_name": "115_linear"}
+  ],
+
+  "compare": true,
+  "compare_config": [
+    {
+      "compare": true,
+      "test_case_1": "dense",
+      "test_case_2": "bit_sparse"
+    },
+    {
+      "compare": true,
+      "test_case_1": "dense",
+      "test_case_2": "value_sparse"
+    },
+    {
+      "compare": true,
+      "test_case_1": "dense",
+      "test_case_2": "bit_value_sparse"
+    }
+  ]
+}

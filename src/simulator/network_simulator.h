@@ -68,4 +68,9 @@ struct TestConfig {
                                                 test_case_config, layer_config, compare, compare_config);
 };
 
+struct CompareResult {
+    std::string compare_name;
+    ReporterCompare compare_result;
+};
+
 }  // namespace pimsim

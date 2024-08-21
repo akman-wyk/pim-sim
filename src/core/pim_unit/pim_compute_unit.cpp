@@ -74,6 +74,7 @@ EnergyReporter PimComputeUnit::getEnergyReporter() {
     for (auto *macro_group : macro_group_list_) {
         pim_compute_reporter += macro_group->getEnergyReporter();
     }
+    pim_compute_reporter.addSubModule("PimCompute", EnergyReporter{this->energy_counter_});
     return std::move(pim_compute_reporter);
 }
 
@@ -145,6 +146,8 @@ void PimComputeUnit::processIssue() {
 void PimComputeUnit::processSubIns() {
     while (true) {
         process_sub_ins_socket_.waitUntilStart();
+
+        this->energy_counter_.addDynamicEnergyPJ(8 * period_ns_, 0);
 
         const auto &sub_ins_payload = process_sub_ins_socket_.payload;
         const auto &pim_ins_info = sub_ins_payload.pim_ins_info;

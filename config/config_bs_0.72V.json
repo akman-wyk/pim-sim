@@ -259,7 +259,7 @@
             },
             "hardware_config": {
               "size_byte": 4096,
-              "width_byte": 4,
+              "width_byte": 1024,
               "write_latency_cycle": 0,
               "read_latency_cycle": 0,
               "static_power_mW": 0,
@@ -390,7 +390,7 @@
             },
             "hardware_config": {
               "size_byte": 33554432,
-              "width_byte": 128,
+              "width_byte": 1024,
               "write_latency_cycle": 0,
               "read_latency_cycle": 0,
               "static_power_mW": 0,

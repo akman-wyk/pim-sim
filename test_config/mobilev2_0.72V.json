@@ -1,0 +1,92 @@
+{
+  "data_root_dir": "/mnt/d/code/pim-sim/data",
+  "report_root_dir": "/mnt/d/code/pim-sim/report",
+  "network": "MobileNetV2",
+
+  "generate_report": true,
+  "test_case_config": [
+    {
+      "test": true,
+      "test_case_name": "dense",
+      "config_file_path": "../config/config_base_0.72V.json",
+      "report_file_name": "base_0.72V.txt"
+    },
+    {
+      "test": true,
+      "test_case_name": "bit_sparse",
+      "config_file_path": "../config/config_bs_0.72V.json",
+      "report_file_name": "bs_0.72V.txt"
+    },
+    {
+      "test": true,
+      "test_case_name": "value_sparse",
+      "config_file_path": "../config/config_vs_0.72V.json",
+      "report_file_name": "vs_0.72V.txt"
+    },
+    {
+      "test": true,
+      "test_case_name": "bit_value_sparse",
+      "config_file_path": "../config/config_bs_vs_0.72V.json",
+      "report_file_name": "bs_vs_0.72V.txt"
+    }
+  ],
+
+  "layer_config": [
+    {"sub_dir_name": "0_conv"},
+    {"sub_dir_name": "1_pwconv"},
+    {"sub_dir_name": "3_pwconv"},
+    {"sub_dir_name": "4_pwconv"},
+    {"sub_dir_name": "6_pwconv"},
+    {"sub_dir_name": "7_pwconv"},
+    {"sub_dir_name": "9_pwconv"},
+    {"sub_dir_name": "10_pwconv"},
+    {"sub_dir_name": "12_pwconv"},
+    {"sub_dir_name": "13_pwconv"},
+    {"sub_dir_name": "15_pwconv"},
+    {"sub_dir_name": "16_pwconv"},
+    {"sub_dir_name": "18_pwconv"},
+    {"sub_dir_name": "19_pwconv"},
+    {"sub_dir_name": "21_pwconv"},
+    {"sub_dir_name": "22_pwconv"},
+    {"sub_dir_name": "24_pwconv"},
+    {"sub_dir_name": "25_pwconv"},
+    {"sub_dir_name": "27_pwconv"},
+    {"sub_dir_name": "28_pwconv"},
+    {"sub_dir_name": "30_pwconv"},
+    {"sub_dir_name": "31_pwconv"},
+    {"sub_dir_name": "33_pwconv"},
+    {"sub_dir_name": "34_pwconv"},
+    {"sub_dir_name": "36_pwconv"},
+    {"sub_dir_name": "37_pwconv"},
+    {"sub_dir_name": "39_pwconv"},
+    {"sub_dir_name": "40_pwconv"},
+    {"sub_dir_name": "42_pwconv"},
+    {"sub_dir_name": "43_pwconv"},
+    {"sub_dir_name": "45_pwconv"},
+    {"sub_dir_name": "46_pwconv"},
+    {"sub_dir_name": "48_pwconv"},
+    {"sub_dir_name": "49_pwconv"},
+    {"sub_dir_name": "51_pwconv"},
+    {"sub_dir_name": "52_pwconv"},
+    {"sub_dir_name": "54_linear"}
+  ],
+
+  "compare": true,
+  "compare_config": [
+    {
+      "compare": true,
+      "test_case_1": "dense",
+      "test_case_2": "bit_sparse"
+    },
+    {
+      "compare": true,
+      "test_case_1": "dense",
+      "test_case_2": "value_sparse"
+    },
+    {
+      "compare": true,
+      "test_case_1": "dense",
+      "test_case_2": "bit_value_sparse"
+    }
+  ]
+}

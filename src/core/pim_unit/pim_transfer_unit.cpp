@@ -74,6 +74,7 @@ void PimTransferUnit::processExecute() {
 
         const auto &payload = execute_socket_.payload;
         LOG(fmt::format("Pim transfer start execute, pc: {}", payload.ins.pc));
+        auto start_exec_time = sc_core::sc_time_stamp();
 
         // read ans process transfer mask
         int mask_size_byte = IntDivCeil(payload.output_num, BYTE_TO_BIT);
@@ -130,6 +131,9 @@ void PimTransferUnit::processExecute() {
             finish_run_ = true;
             finish_run_trigger_.notify(SC_ZERO_TIME);
         }
+
+        auto exec_time = sc_time_stamp() - start_exec_time;
+        this->energy_counter_.addDynamicEnergyPJ(exec_time.to_seconds() * 1e9, 0);
 
         execute_socket_.finish();
     }

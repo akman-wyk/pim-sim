@@ -11,9 +11,10 @@
 namespace pimsim {
 
 Core::Core(const char *name, const pimsim::Config &config, pimsim::Clock *clk, std::vector<Instruction> ins_list,
-           std::ostream &reg_stat_os)
+           bool check, std::ostream &reg_stat_os)
     : BaseModule(name, config.sim_config, this, clk)
     , config_(config)
+    , check(check)
     , reg_stat_os_(reg_stat_os)
     , ins_list_(std::move(ins_list))
     , scalar_unit_("ScalarUnit", config.chip_config.core_config.scalar_unit_config, config.sim_config, this, clk)
@@ -106,8 +107,9 @@ EnergyReporter Core::getEnergyReporter() {
     reporter.addSubModule("ScalarUnit", EnergyReporter{scalar_unit_.getEnergyReporter()});
     reporter.addSubModule("SIMDUnit", EnergyReporter{simd_unit_.getEnergyReporter()});
     reporter.addSubModule("PimUnit", EnergyReporter{pim_compute_unit_.getEnergyReporter()});
-    reporter.addSubModule("PimUnit", EnergyReporter{pim_load_unit_.getEnergyReporter()});
-    reporter.addSubModule("PimUnit", EnergyReporter{pim_output_unit_.getEnergyReporter()});
+    reporter.addSubModule("PimLoad", EnergyReporter{pim_load_unit_.getEnergyReporter()});
+    reporter.addSubModule("PimOutput", EnergyReporter{pim_output_unit_.getEnergyReporter()});
+    reporter.addSubModule("PimTransfer", EnergyReporter{pim_transfer_unit_.getEnergyReporter()});
     reporter.addSubModule("LocalMemoryUnit", EnergyReporter{local_memory_unit_.getEnergyReporter()});
     return std::move(reporter);
 }
@@ -234,8 +236,10 @@ int Core::decodeAndGetPCIncrement() {
     cur_ins_conflict_info_.ins_id = -1;
 
     const auto &ins = ins_list_[ins_index_];
-    reg_stat_os_ << fmt::format("pc: {}, ins id: {}, general reg: [{}]\n", ins_payload.pc, ins_payload.ins_id,
-                                reg_unit_.getGeneralRegistersString());
+    if (check) {
+        reg_stat_os_ << fmt::format("pc: {}, ins id: {}, general reg: [{}]\n", ins_payload.pc, ins_payload.ins_id,
+                                    reg_unit_.getGeneralRegistersString());
+    }
 
     ins_stat_.addInsCount(ins.class_code, ins.type, ins.opcode, config_);
     if (ins.class_code == InstClass::control) {

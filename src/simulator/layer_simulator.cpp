@@ -15,13 +15,14 @@ const std::string GLOBAL_MEMORY_NAME = "global";
 
 LayerSimulator::LayerSimulator(std::string config_file, std::string instruction_file, std::string global_image_file,
                                std::string expected_ins_stat_file, std::string expected_reg_file,
-                               std::string actual_reg_file)
+                               std::string actual_reg_file, bool check)
     : config_file_(std::move(config_file))
     , instruction_file_(std::move(instruction_file))
     , global_image_file_(std::move(global_image_file))
     , expected_ins_stat_file_(std::move(expected_ins_stat_file))
     , expected_reg_file_(std::move(expected_reg_file))
-    , actual_reg_file_(std::move(actual_reg_file)) {}
+    , actual_reg_file_(std::move(actual_reg_file))
+    , check_(check) {}
 
 void LayerSimulator::run() {
     std::cout << "Loading Instructions and Config" << std::endl;
@@ -54,7 +55,7 @@ void LayerSimulator::run() {
     std::cout << "Build Core" << std::endl;
     Clock clk{"Clock", config_.sim_config.period_ns};
     std::ofstream actual_reg_os(actual_reg_file_);
-    core_ = new Core{"Core", config_, &clk, std::move(ins_list), actual_reg_os};
+    core_ = new Core{"Core", config_, &clk, std::move(ins_list), check_, actual_reg_os};
     std::cout << "Build finish" << std::endl;
 
     std::cout << "Start Simulation" << std::endl;
@@ -108,6 +109,7 @@ struct PimArguments {
     std::string expected_ins_stat_file;
     std::string expected_reg_file;
     std::string actual_reg_file;
+    bool check;
 
     bool report_result;
     std::string simulation_report_file;
@@ -122,6 +124,10 @@ PimArguments parsePimArguments(int argc, char* argv[]) {
     parser.add_argument("stat").help("expected ins stat file");
     parser.add_argument("reg").help("expected reg file");
     parser.add_argument("actual_reg").help("actual reg file");
+    parser.add_argument("-c", "--check")
+        .help("whether to check reg and ins stat")
+        .default_value(false)
+        .implicit_value(true);
     parser.add_argument("-r", "--report")
         .help("whether to report simulation result")
         .default_value(false)
@@ -145,6 +151,7 @@ PimArguments parsePimArguments(int argc, char* argv[]) {
                         .expected_ins_stat_file = parser.get("stat"),
                         .expected_reg_file = parser.get("reg"),
                         .actual_reg_file = parser.get("actual_reg"),
+                        .check = parser.get<bool>("--check"),
                         .report_result = parser.get<bool>("--report"),
                         .simulation_report_file = simulation_report_file,
                         .report_json_file = report_json_file};
@@ -155,9 +162,13 @@ int sc_main(int argc, char* argv[]) {
 
     auto args = parsePimArguments(argc, argv);
 
-    pimsim::LayerSimulator layer_simulator{args.config_file,       args.instruction_file,
-                                           args.global_image_file, args.expected_ins_stat_file,
-                                           args.expected_reg_file, args.actual_reg_file};
+    pimsim::LayerSimulator layer_simulator{args.config_file,
+                                           args.instruction_file,
+                                           args.global_image_file,
+                                           args.expected_ins_stat_file,
+                                           args.expected_reg_file,
+                                           args.actual_reg_file,
+                                           args.check};
     layer_simulator.run();
 
     if (!args.simulation_report_file.empty()) {
@@ -172,13 +183,15 @@ int sc_main(int argc, char* argv[]) {
         layer_simulator.report(ss, args.report_json_file);
     }
 
-    if (!layer_simulator.checkInsStat()) {
-        std::cerr << "check ins stat failed" << std::endl;
-        return CHECK_INS_STAT_FAILED;
-    }
-    if (!layer_simulator.checkReg()) {
-        std::cerr << "check reg failed" << std::endl;
-        return CHECK_REG_FAILED;
+    if (args.check) {
+        if (!layer_simulator.checkInsStat()) {
+            std::cerr << "check ins stat failed" << std::endl;
+            return CHECK_INS_STAT_FAILED;
+        }
+        if (!layer_simulator.checkReg()) {
+            std::cerr << "check reg failed" << std::endl;
+            return CHECK_REG_FAILED;
+        }
     }
 
     return TEST_PASSED;
