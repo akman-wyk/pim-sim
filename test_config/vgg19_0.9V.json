@@ -1,58 +1,56 @@
 {
   "data_root_dir": "/mnt/d/code/pim-sim/data",
   "report_root_dir": "/mnt/d/code/pim-sim/report",
-  "network": "ResNet18",
+  "network": "VGG19",
 
   "generate_report": true,
   "test_case_config": [
     {
       "test": true,
       "test_case_name": "dense",
-      "config_file_path": "../config/config_base_0.72V.json",
-      "report_file_name": "base_0.72V.txt"
+      "config_file_path": "../config/config_base_0.9V.json",
+      "report_file_name": "base_0.9V.txt"
     },
     {
       "test": true,
       "test_case_name": "bit_sparse",
-      "config_file_path": "../config/config_bs_0.72V.json",
-      "report_file_name": "bs_0.72V.txt"
+      "config_file_path": "../config/config_bs_0.9V.json",
+      "report_file_name": "bs_0.9V.txt"
     },
     {
       "test": true,
       "test_case_name": "value_sparse",
-      "config_file_path": "../config/config_vs_0.72V.json",
-      "report_file_name": "vs_0.72V.txt"
+      "config_file_path": "../config/config_vs_0.9V.json",
+      "report_file_name": "vs_0.9V.txt"
     },
     {
       "test": true,
       "test_case_name": "bit_value_sparse",
-      "config_file_path": "../config/config_bs_vs_0.72V.json",
-      "report_file_name": "bs_vs_0.72V.txt"
+      "config_file_path": "../config/config_bs_vs_0.9V.json",
+      "report_file_name": "bs_vs_0.9V.txt"
     }
   ],
 
   "layer_config": [
     {"sub_dir_name": "0_conv"},
     {"sub_dir_name": "1_conv"},
-    {"sub_dir_name": "2_conv"},
+    {"sub_dir_name": "3_conv"},
     {"sub_dir_name": "4_conv"},
-    {"sub_dir_name": "5_conv"},
+    {"sub_dir_name": "6_conv"},
     {"sub_dir_name": "7_conv"},
     {"sub_dir_name": "8_conv"},
-    {"sub_dir_name": "9_pwconv"},
+    {"sub_dir_name": "9_conv"},
     {"sub_dir_name": "11_conv"},
     {"sub_dir_name": "12_conv"},
+    {"sub_dir_name": "13_conv"},
     {"sub_dir_name": "14_conv"},
-    {"sub_dir_name": "15_conv"},
-    {"sub_dir_name": "16_pwconv"},
+    {"sub_dir_name": "16_conv"},
+    {"sub_dir_name": "17_conv"},
     {"sub_dir_name": "18_conv"},
     {"sub_dir_name": "19_conv"},
-    {"sub_dir_name": "21_conv"},
-    {"sub_dir_name": "22_conv"},
-    {"sub_dir_name": "23_pwconv"},
-    {"sub_dir_name": "25_conv"},
-    {"sub_dir_name": "26_conv"},
-    {"sub_dir_name": "29_linear"}
+    {"sub_dir_name": "20_linear"},
+    {"sub_dir_name": "21_linear"},
+    {"sub_dir_name": "22_linear"}
   ],
 
   "compare": true,

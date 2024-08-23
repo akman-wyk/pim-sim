@@ -183,11 +183,12 @@ int sc_main(int argc, char* argv[]) {
         layer_simulator.report(ss, args.report_json_file);
     }
 
+    if (!layer_simulator.checkInsStat()) {
+        std::cerr << "check ins stat failed" << std::endl;
+        return CHECK_INS_STAT_FAILED;
+    }
+
     if (args.check) {
-        if (!layer_simulator.checkInsStat()) {
-            std::cerr << "check ins stat failed" << std::endl;
-            return CHECK_INS_STAT_FAILED;
-        }
         if (!layer_simulator.checkReg()) {
             std::cerr << "check reg failed" << std::endl;
             return CHECK_REG_FAILED;

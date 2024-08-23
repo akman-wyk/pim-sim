@@ -8,26 +8,26 @@
     {
       "test": true,
       "test_case_name": "dense",
-      "config_file_path": "../config/config_base_0.72V.json",
-      "report_file_name": "base_0.72V.txt"
+      "config_file_path": "../config/config_base_0.9V.json",
+      "report_file_name": "base_0.9V.txt"
     },
     {
       "test": true,
       "test_case_name": "bit_sparse",
-      "config_file_path": "../config/config_bs_0.72V.json",
-      "report_file_name": "bs_0.72V.txt"
+      "config_file_path": "../config/config_bs_0.9V.json",
+      "report_file_name": "bs_0.9V.txt"
     },
     {
       "test": true,
       "test_case_name": "value_sparse",
-      "config_file_path": "../config/config_vs_0.72V.json",
-      "report_file_name": "vs_0.72V.txt"
+      "config_file_path": "../config/config_vs_0.9V.json",
+      "report_file_name": "vs_0.9V.txt"
     },
     {
       "test": true,
       "test_case_name": "bit_value_sparse",
-      "config_file_path": "../config/config_bs_vs_0.72V.json",
-      "report_file_name": "bs_vs_0.72V.txt"
+      "config_file_path": "../config/config_bs_vs_0.9V.json",
+      "report_file_name": "bs_vs_0.9V.txt"
     }
   ],
 
