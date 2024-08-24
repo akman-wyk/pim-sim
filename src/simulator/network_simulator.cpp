@@ -15,7 +15,7 @@ namespace pimsim {
 
 Reporter test_network(const std::string& data_root_dir, const std::string& report_root_dir, const std::string& network,
                       const TestCaseConfig& test_case_config, const std::vector<LayerConfig>& layer_config,
-                      bool& all_tests_passed) {
+                      bool& all_tests_passed, double OP_count) {
     auto data_dir = fmt::format("{}/{}/{}", data_root_dir, network, test_case_config.test_case_name);
     auto report_dir = fmt::format("{}/{}", report_root_dir, TEMP_REPORT_DIR_NAME);
 
@@ -76,6 +76,8 @@ Reporter test_network(const std::string& data_root_dir, const std::string& repor
         remove(report_json_file.c_str());
     }
 
+    total_reporter.setOPCount(OP_count);
+
     auto total_report_file_path = fmt::format("{}/{}/{}", report_root_dir, network, test_case_config.report_file_name);
     std::ofstream ofs(total_report_file_path);
     total_reporter.report(ofs);
@@ -98,7 +100,7 @@ void test_wrap(const std::string& test_config_file, bool& all_tests_passed) {
                 std::cout << fmt::format("Testing case {}: {}", i, test_case.test_case_name) << std::endl;
                 auto reporter =
                     test_network(test_config.data_root_dir, test_config.report_root_dir, test_config.network, test_case,
-                                 test_config.layer_config, all_tests_passed);
+                                 test_config.layer_config, all_tests_passed, test_config.OP_count);
                 reporters.emplace(test_case.test_case_name, std::move(reporter));
                 std::cout << fmt::format("Finish test case {}\n", i) << std::endl;
             }

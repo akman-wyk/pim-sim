@@ -270,9 +270,9 @@
               "width_byte": 128,
               "write_latency_cycle": 1,
               "read_latency_cycle": 1,
-              "static_power_mW": 1.9656216,
-              "write_dynamic_power_mW": 6.8970528,
-              "read_dynamic_power_mW": 6.8970528
+              "static_power_mW": 3.6587592,
+              "write_dynamic_power_mW": 13.4694144,
+              "read_dynamic_power_mW": 13.4694144
             }
           },
           {
@@ -336,8 +336,8 @@
               "read_max_width_byte": 256,
               "write_max_width_byte": 128,
               "rw_min_unit_byte": 16,
-              "static_power_mW": 0.0912222,
-              "rw_dynamic_power_per_unit_mW": 0.3830949
+              "static_power_mW": 1.459555,
+              "rw_dynamic_power_per_unit_mW": 6.1295184
             }
           },
           {

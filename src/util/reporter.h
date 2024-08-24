@@ -94,19 +94,21 @@ public:
 
     [[nodiscard]] ReporterCompare compare(const Reporter& r2) const;
 
+    void setOPCount(double OP_count);
+
 private:
     double latency_{0.0};        // ms
     double average_power_{0.0};  // mW
     double total_energy_{0.0};   // pJ
     double TOPS_{0.0};
     double TOPS_per_W_{0.0};
-    int OP_count{0};
+    int OP_count_{0};
 
     std::string module_name_;
     EnergyReporter energy_reporter_;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Reporter, latency_, average_power_, total_energy_, TOPS_, TOPS_per_W_,
-                                                OP_count, module_name_, energy_reporter_)
+                                                OP_count_, module_name_, energy_reporter_)
 };
 
 }  // namespace pim

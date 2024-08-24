@@ -56,6 +56,7 @@ struct CompareConfig {
 struct TestConfig {
     std::string data_root_dir, report_root_dir;
     std::string network;
+    double OP_count;
 
     bool generate_report = false;
     std::vector<TestCaseConfig> test_case_config;
@@ -64,8 +65,9 @@ struct TestConfig {
     bool compare = false;
     std::vector<CompareConfig> compare_config;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(TestConfig, data_root_dir, report_root_dir, network, generate_report,
-                                                test_case_config, layer_config, compare, compare_config);
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(TestConfig, data_root_dir, report_root_dir, network, OP_count,
+                                                generate_report, test_case_config, layer_config, compare,
+                                                compare_config);
 };
 
 struct CompareResult {

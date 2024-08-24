@@ -157,7 +157,7 @@ Reporter::Reporter(double latency_ms, std::string module_name, const EnergyRepor
     , total_energy_(energy_reporter.getTotalEnergyPJ())
     , module_name_(std::move(module_name))
     , energy_reporter_(energy_reporter)
-    , OP_count(OP_count) {
+    , OP_count_(OP_count) {
     average_power_ = (latency_ms == 0.0 ? 0.0 : (energy_reporter.getTotalEnergyPJ() / (latency_ms * 1e6)));
     TOPS_ = (latency_ms == 0.0 ? 0.0 : (1.0 * OP_count / (latency_ms / 1e3) / TERA));
     TOPS_per_W_ = (average_power_ == 0.0 ? 0.0 : (TOPS_ / (average_power_ / 1e3)));
@@ -170,7 +170,7 @@ void Reporter::report(std::ostream& os, bool detail) {
     os << fmt::format("  - {:<20}{:.4f} pJ/it\n", "total energy:", total_energy_);
     os << fmt::format("  - {:<20}{:.4f}\n", "TOPS:", TOPS_);
     os << fmt::format("  - {:<20}{:.4f}\n", "TOPS/W:", TOPS_per_W_);
-    os << fmt::format("  - {:<20}{}\n", "OP_count:", OP_count);
+    os << fmt::format("  - {:<20}{}\n", "OP_count:", OP_count_);
 
     if (detail) {
         auto energy_report_items = energy_reporter_.getEnergyReportItem(module_name_, total_energy_, latency_ * 1e6, 0);
@@ -217,10 +217,10 @@ double Reporter::getDynamicEnergyPJ() const {
 Reporter& Reporter::operator+=(const Reporter& another) {
     latency_ += another.latency_;
     total_energy_ += another.total_energy_;
-    OP_count += another.OP_count;
+    OP_count_ += another.OP_count_;
 
     average_power_ = (latency_ == 0.0 ? 0.0 : (total_energy_ / (latency_ * 1e6)));
-    TOPS_ = (latency_ == 0.0 ? 0.0 : (1.0 * OP_count / (latency_ / 1e3) / TERA));
+    TOPS_ = (latency_ == 0.0 ? 0.0 : (1.0 * OP_count_ / (latency_ / 1e3) / TERA));
     TOPS_per_W_ = (average_power_ == 0.0 ? 0.0 : (TOPS_ / (average_power_ / 1e3)));
 
     energy_reporter_ += another.energy_reporter_;
@@ -275,6 +275,12 @@ ReporterCompare Reporter::compare(const Reporter& r2) const {
     r.energy_reporter_compare = energy_reporter_.compare(r2.energy_reporter_);
 
     return std::move(r);
+}
+
+void Reporter::setOPCount(double OP_count) {
+    this->OP_count_ = static_cast<int>(OP_count);
+    this->TOPS_ = (latency_ == 0.0 ? 0.0 : (1.0 * OP_count / (latency_ / 1e3) / TERA));
+    this->TOPS_per_W_ = (average_power_ == 0.0 ? 0.0 : (TOPS_ / (average_power_ / 1e3)));
 }
 
 #undef MAX

@@ -263,9 +263,9 @@
               "width_byte": 128,
               "write_latency_cycle": 1,
               "read_latency_cycle": 1,
-              "static_power_mW": 1.9656216,
-              "write_dynamic_power_mW": 6.8970528,
-              "read_dynamic_power_mW": 6.8970528
+              "static_power_mW": 3.6587592,
+              "write_dynamic_power_mW": 13.4694144,
+              "read_dynamic_power_mW": 13.4694144
             }
           },
           {

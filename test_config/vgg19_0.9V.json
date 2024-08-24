@@ -2,6 +2,7 @@
   "data_root_dir": "/mnt/d/code/pim-sim/data",
   "report_root_dir": "/mnt/d/code/pim-sim/report",
   "network": "VGG19",
+  "OP_count": 686351960,
 
   "generate_report": true,
   "test_case_config": [
