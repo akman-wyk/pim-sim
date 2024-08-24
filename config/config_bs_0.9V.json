@@ -209,14 +209,14 @@
         "sram": {
           "write_latency_cycle": 1,
           "read_latency_cycle": 1,
-          "static_power_mW": 0,
+          "static_power_mW": 0.076,
           "write_dynamic_power_per_bit_mW": 0.313375,
           "read_dynamic_power_per_bit_mW": 0.0514325
         },
         "adder_tree": {
           "latency_cycle": 1,
-          "static_power_mW": 0.001099,
-          "dynamic_power_mW": 0.033063
+          "static_power_mW": 0.017581,
+          "dynamic_power_mW": 0.529009
         },
         "shift_adder": {
           "latency_cycle": 1,
@@ -338,8 +338,8 @@
               "read_max_width_byte": 1536,
               "write_max_width_byte": 96,
               "rw_min_unit_byte": 96,
-              "static_power_mW": 6.343311,
-              "rw_dynamic_power_per_unit_mW": 29.89043856
+              "static_power_mW": 8.7573312,
+              "rw_dynamic_power_per_unit_mW": 4.34268
             }
           },
           {
