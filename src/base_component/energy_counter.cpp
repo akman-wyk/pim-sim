@@ -89,7 +89,7 @@ double EnergyCounter::getAveragePowerMW() const {
 }
 
 EnergyCounter& EnergyCounter::operator+=(const EnergyCounter& another) {
-    activity_time_ += another.activity_time_;
+    activity_time_ = std::max(activity_time_, another.activity_time_);
     dynamic_energy_ += another.dynamic_energy_;
     static_power_ += another.static_power_;
     return *this;

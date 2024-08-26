@@ -141,7 +141,7 @@ EnergyReporter& EnergyReporter::operator+=(const EnergyReporter& another) {
     total_energy_ += another.total_energy_;
     static_energy_ += another.static_energy_;
     dynamic_energy_ += another.dynamic_energy_;
-    activity_time_ += another.activity_time_;
+    activity_time_ = std::max(activity_time_, another.activity_time_);
     for (auto& [name, sub_module] : another.sub_modules_) {
         if (auto sub_module_found = sub_modules_.find(name); sub_module_found != sub_modules_.end()) {
             sub_module_found->second += sub_module;
