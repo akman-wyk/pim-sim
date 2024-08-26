@@ -72,7 +72,7 @@ EnergyReporter PimComputeUnit::getEnergyReporter() {
         pim_compute_reporter.addSubModule("meta buffer", EnergyReporter{meta_buffer_energy_counter_});
     }
     for (auto *macro_group : macro_group_list_) {
-        pim_compute_reporter += macro_group->getEnergyReporter();
+        pim_compute_reporter.accumulate(macro_group->getEnergyReporter(), true);
     }
     pim_compute_reporter.addSubModule("PimCompute", EnergyReporter{this->energy_counter_});
     return std::move(pim_compute_reporter);

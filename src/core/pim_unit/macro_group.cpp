@@ -40,7 +40,7 @@ void MacroGroup::waitUntilFinishIfBusy() {
 EnergyReporter MacroGroup::getEnergyReporter() {
     EnergyReporter macro_group_reporter;
     for (auto *macro : macro_list_) {
-        macro_group_reporter += macro->getEnergyReporter();
+        macro_group_reporter.accumulate(macro->getEnergyReporter(), true);
     }
     return std::move(macro_group_reporter);
 }

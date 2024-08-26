@@ -93,7 +93,7 @@ void EnergyReporter::addSubModule(std::string name, EnergyReporter sub_module) {
     dynamic_energy_ += sub_module.dynamic_energy_;
     activity_time_ += sub_module.activity_time_;
     if (auto sub_module_found = sub_modules_.find(name); sub_module_found != sub_modules_.end()) {
-        sub_module_found->second += sub_module;
+        sub_module_found->second.accumulate(sub_module, true);
     } else {
         sub_modules_.emplace(std::move(name), std::move(sub_module));
     }
@@ -137,19 +137,23 @@ double EnergyReporter::getDynamicEnergyPJ() const {
     return dynamic_energy_;
 }
 
-EnergyReporter& EnergyReporter::operator+=(const EnergyReporter& another) {
+void EnergyReporter::accumulate(const EnergyReporter& another, bool same_simulation) {
     total_energy_ += another.total_energy_;
     static_energy_ += another.static_energy_;
     dynamic_energy_ += another.dynamic_energy_;
-    activity_time_ = std::max(activity_time_, another.activity_time_);
+    if (same_simulation) {
+        activity_time_ = std::max(activity_time_, another.activity_time_);
+    } else {
+        activity_time_ += another.activity_time_;
+    }
+
     for (auto& [name, sub_module] : another.sub_modules_) {
         if (auto sub_module_found = sub_modules_.find(name); sub_module_found != sub_modules_.end()) {
-            sub_module_found->second += sub_module;
+            sub_module_found->second.accumulate(sub_module, same_simulation);
         } else {
             sub_modules_.emplace(name, sub_module);
         }
     }
-    return *this;
 }
 
 Reporter::Reporter(double latency_ms, std::string module_name, const EnergyReporter& energy_reporter, int OP_count)
@@ -223,7 +227,7 @@ Reporter& Reporter::operator+=(const Reporter& another) {
     TOPS_ = (latency_ == 0.0 ? 0.0 : (1.0 * OP_count_ / (latency_ / 1e3) / TERA));
     TOPS_per_W_ = (average_power_ == 0.0 ? 0.0 : (TOPS_ / (average_power_ / 1e3)));
 
-    energy_reporter_ += another.energy_reporter_;
+    energy_reporter_.accumulate(another.energy_reporter_, false);
 
     return *this;
 }

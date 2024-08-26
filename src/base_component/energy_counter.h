@@ -51,6 +51,7 @@ private:
     double activity_time_ = 0.0;   // ns
 
     std::unordered_map<int, sc_core::sc_time> dynamic_time_tag_map_{};
+    sc_core::sc_time activity_time_tag_{0.0, SC_NS};
 };
 
 }  // namespace pimsim

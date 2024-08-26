@@ -33,11 +33,16 @@ void EnergyCounter::addDynamicEnergyPJ(double latency, double power) {
 void EnergyCounter::addDynamicEnergyPJ(double latency, double power, const sc_core::sc_time& time_tag, int id_tag) {
     auto found = dynamic_time_tag_map_.find(id_tag);
     if (found == dynamic_time_tag_map_.end()) {
-        addDynamicEnergyPJ(latency, power);
+        dynamic_energy_ += latency * power;
         dynamic_time_tag_map_.emplace(id_tag, time_tag);
     } else if (found->second != time_tag) {
-        addDynamicEnergyPJ(latency, power);
+        dynamic_energy_ += latency * power;
         dynamic_time_tag_map_[id_tag] = time_tag;
+    }
+
+    if (activity_time_tag_ != time_tag) {
+        activity_time_ += latency;
+        activity_time_tag_ = time_tag;
     }
 }
 

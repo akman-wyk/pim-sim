@@ -60,7 +60,7 @@ public:
     [[nodiscard]] double getTotalEnergyPJ() const;
     [[nodiscard]] double getDynamicEnergyPJ() const;
 
-    EnergyReporter& operator+=(const EnergyReporter& another);
+    void accumulate(const EnergyReporter& another, bool same_simulation);
 
     [[nodiscard]] EnergyReporterCompare compare(const EnergyReporter& r2) const;
 
@@ -111,4 +111,4 @@ private:
                                                 OP_count_, module_name_, energy_reporter_)
 };
 
-}  // namespace pim
+}  // namespace pimsim
