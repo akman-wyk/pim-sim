@@ -15,8 +15,8 @@
             },
             "functor_cnt": 32,
             "latency_cycle": 1,
-            "static_power_per_functor_mW": 0.005030,
-            "dynamic_power_per_functor_mW": 1.154230
+            "static_power_per_functor_mW": 3.50E-05,
+            "dynamic_power_per_functor_mW": 0.01385
           },
           {
             "name": "adder-8",
@@ -28,8 +28,8 @@
             },
             "functor_cnt": 32,
             "latency_cycle": 1,
-            "static_power_per_functor_mW": 0.001297,
-            "dynamic_power_per_functor_mW": 0.290820
+            "static_power_per_functor_mW": 0,
+            "dynamic_power_per_functor_mW": 0
           },
           {
             "name": "multiply-8",
@@ -41,8 +41,8 @@
             },
             "functor_cnt": 32,
             "latency_cycle": 1,
-            "static_power_per_functor_mW": 0.004523,
-            "dynamic_power_per_functor_mW": 0.646729
+            "static_power_per_functor_mW": 0,
+            "dynamic_power_per_functor_mW": 0
           },
           {
             "name": "quantify",
@@ -55,8 +55,8 @@
             },
             "functor_cnt": 32,
             "latency_cycle": 1,
-            "static_power_per_functor_mW": 0.044366,
-            "dynamic_power_per_functor_mW": 0.982870
+            "static_power_per_functor_mW": 0,
+            "dynamic_power_per_functor_mW": 0
           },
           {
             "name": "quantify-resadd",
@@ -70,8 +70,8 @@
             },
             "functor_cnt": 32,
             "latency_cycle": 1,
-            "static_power_per_functor_mW": 0.087185,
-            "dynamic_power_per_functor_mW": 1.488710
+            "static_power_per_functor_mW": 0,
+            "dynamic_power_per_functor_mW": 0
           }
         ],
         "instruction_list": [
@@ -203,39 +203,32 @@
         },
         "ipu": {
           "latency_cycle": 1,
-          "static_power_mW": 0.011781,
-          "dynamic_power_mW": 0.303976
+          "static_power_mW": 6.52E-05,
+          "dynamic_power_mW": 0.01347
         },
         "sram": {
           "write_latency_cycle": 1,
           "read_latency_cycle": 1,
-          "static_power_mW": 2.432,
-          "write_dynamic_power_per_bit_mW": 0.313375,
-          "read_dynamic_power_per_bit_mW": 0.0514325
+          "static_power_mW": 0.017165088,
+          "write_dynamic_power_per_bit_mW": 0.04382,
+          "read_dynamic_power_per_bit_mW": 0.010011333
         },
         "adder_tree": {
           "latency_cycle": 1,
-          "static_power_mW": 0.018027,
-          "dynamic_power_mW": 0.328807
+          "static_power_mW": 1.17E-04,
+          "dynamic_power_mW": 1.67E-01
         },
         "shift_adder": {
           "latency_cycle": 1,
-          "static_power_mW": 0.003351,
-          "dynamic_power_mW": 0.315521
+          "static_power_mW": 2.96E-05,
+          "dynamic_power_mW": 1.02E-01
         },
         "result_adder": {
           "latency_cycle": 1,
-          "static_power_mW": 0.009346,
-          "dynamic_power_mW": 0.017833
+          "static_power_mW": 0.000106712,
+          "dynamic_power_mW": 0.0223125
         },
-        "value_sparse": true,
-        "value_sparse_config": {
-          "mask_bit_width": 1,
-          "latency_cycle": 1,
-          "static_power_mW": 0.282220,
-          "dynamic_power_mW": 1.247500,
-          "output_macro_group_cnt": 1
-        },
+        "value_sparse": false,
         "bit_sparse": true,
         "bit_sparse_config": {
           "mask_bit_width": 3,
@@ -313,9 +306,9 @@
               "width_byte": 128,
               "write_latency_cycle": 1,
               "read_latency_cycle": 1,
-              "static_power_mW": 3.6587592,
-              "write_dynamic_power_mW": 20.8656,
-              "read_dynamic_power_mW": 20.8656
+              "static_power_mW": 0.05417496,
+              "write_dynamic_power_mW": 8.04582792,
+              "read_dynamic_power_mW": 8.04582792
             }
           },
           {
@@ -330,9 +323,9 @@
               "width_byte": 128,
               "write_latency_cycle": 1,
               "read_latency_cycle": 1,
-              "static_power_mW": 3.6587592,
-              "write_dynamic_power_mW": 20.8656,
-              "read_dynamic_power_mW": 20.8656
+              "static_power_mW": 0.05417496,
+              "write_dynamic_power_mW": 8.04582792,
+              "read_dynamic_power_mW": 8.04582792
             }
           },
           {
@@ -347,8 +340,8 @@
               "read_max_width_byte": 128,
               "write_max_width_byte": 128,
               "rw_min_unit_byte": 128,
-              "static_power_mW": 0.624200,
-              "rw_dynamic_power_per_unit_mW": 3.079200
+              "static_power_mW": 0.003404,
+              "rw_dynamic_power_per_unit_mW": 3.63E-01
             }
           },
           {
@@ -379,24 +372,8 @@
               "read_max_width_byte": 1536,
               "write_max_width_byte": 96,
               "rw_min_unit_byte": 96,
-              "static_power_mW": 4.3786656,
-              "rw_dynamic_power_per_unit_mW": 4.34268
-            }
-          },
-          {
-            "name": "pim_mask_data_reg_buffer",
-            "type": "reg_buffer",
-            "addressing": {
-              "offset_byte": 653312,
-              "size_byte": 16384
-            },
-            "hardware_config": {
-              "size_byte": 16384,
-              "read_max_width_byte": 256,
-              "write_max_width_byte": 128,
-              "rw_min_unit_byte": 16,
-              "static_power_mW": 0.7297776,
-              "rw_dynamic_power_per_unit_mW": 0.3830949
+              "static_power_mW": 0.029624789,
+              "rw_dynamic_power_per_unit_mW": 1.25481528
             }
           },
           {
@@ -411,8 +388,8 @@
               "read_max_width_byte": 128,
               "write_max_width_byte": 128,
               "rw_min_unit_byte": 4,
-              "static_power_mW": 0.0299106,
-              "rw_dynamic_power_per_unit_mW": 0.3270501
+              "static_power_mW": 0.00022424,
+              "rw_dynamic_power_per_unit_mW": 0.052918308
             }
           },
           {
@@ -428,8 +405,8 @@
               "write_latency_cycle": 1,
               "read_latency_cycle": 1,
               "static_power_mW": 0,
-              "write_dynamic_power_mW": 520,
-              "read_dynamic_power_mW": 500,
+              "write_dynamic_power_mW": 0,
+              "read_dynamic_power_mW": 0,
               "has_image": true,
               "image_file": ""
             }

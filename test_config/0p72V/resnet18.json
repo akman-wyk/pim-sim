@@ -2,33 +2,45 @@
   "data_root_dir": "/mnt/d/code/pim-sim/data",
   "report_root_dir": "/mnt/d/code/pim-sim/report",
   "network": "ResNet18",
-  "OP_count": 982712108,
+  "OP_count": 1110845440,
 
   "generate_report": true,
   "test_case_config": [
     {
       "test": true,
       "test_case_name": "dense",
-      "config_file_path": "../config/config_base_0.9V.json",
+      "config_file_path": "../config/0p72V/config_base.json",
       "report_file_name": "base.txt"
     },
     {
       "test": true,
       "test_case_name": "bit_sparse",
-      "config_file_path": "../config/config_bs_0.9V.json",
+      "config_file_path": "../config/0p72V/config_bs.json",
       "report_file_name": "bs.txt"
     },
     {
       "test": true,
       "test_case_name": "value_sparse",
-      "config_file_path": "../config/config_vs_0.9V.json",
+      "config_file_path": "../config/0p72V/config_vs.json",
       "report_file_name": "vs.txt"
     },
     {
       "test": true,
       "test_case_name": "bit_value_sparse",
-      "config_file_path": "../config/config_bs_vs_0.9V.json",
+      "config_file_path": "../config/0p72V/config_bs_vs.json",
       "report_file_name": "bs_vs.txt"
+    },
+    {
+      "test": true,
+      "test_case_name": "bit_value_sparse_0p2",
+      "config_file_path": "../config/0p72V/config_bs_vs.json",
+      "report_file_name": "bs_vs_0p2.txt"
+    },
+    {
+      "test": true,
+      "test_case_name": "bit_value_sparse_0p4",
+      "config_file_path": "../config/0p72V/config_bs_vs.json",
+      "report_file_name": "bs_vs_0p4.txt"
     }
   ],
 

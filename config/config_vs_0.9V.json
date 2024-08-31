@@ -194,12 +194,12 @@
         "macro_size": {
           "compartment_cnt_per_macro": 16,
           "element_cnt_per_compartment": 2,
-          "row_cnt_per_element": 64,
+          "row_cnt_per_element": 16,
           "bit_width_per_row": 8
         },
         "address_space": {
           "offset_byte": 0,
-          "size_byte": 65536
+          "size_byte": 16384
         },
         "ipu": {
           "latency_cycle": 1,
@@ -215,8 +215,8 @@
         },
         "adder_tree": {
           "latency_cycle": 1,
-          "static_power_mW": 0.008924,
-          "dynamic_power_mW": 0.55954
+          "static_power_mW": 0.018027,
+          "dynamic_power_mW": 0.328807
         },
         "shift_adder": {
           "latency_cycle": 1,
@@ -245,7 +245,7 @@
             "name": "index_memory",
             "type": "ram",
             "addressing": {
-              "offset_byte": 65536,
+              "offset_byte": 16384,
               "size_byte": 8192
             },
             "hardware_config": {
@@ -259,10 +259,44 @@
             }
           },
           {
+            "name": "blank_memory",
+            "type": "ram",
+            "addressing": {
+              "offset_byte": 24576,
+              "size_byte": 512
+            },
+            "hardware_config": {
+              "size_byte": 512,
+              "width_byte": 128,
+              "write_latency_cycle": 0,
+              "read_latency_cycle": 0,
+              "static_power_mW": 0,
+              "write_dynamic_power_mW": 0,
+              "read_dynamic_power_mW": 0
+            }
+          },
+          {
+            "name": "temp_sum_memory",
+            "type": "ram",
+            "addressing": {
+              "offset_byte": 25088,
+              "size_byte": 512
+            },
+            "hardware_config": {
+              "size_byte": 512,
+              "width_byte": 128,
+              "write_latency_cycle": 0,
+              "read_latency_cycle": 0,
+              "static_power_mW": 0,
+              "write_dynamic_power_mW": 0,
+              "read_dynamic_power_mW": 0
+            }
+          },
+          {
             "name": "input_memory",
             "type": "ram",
             "addressing": {
-              "offset_byte": 73728,
+              "offset_byte": 25600,
               "size_byte": 262144
             },
             "hardware_config": {
@@ -279,7 +313,7 @@
             "name": "output_memory",
             "type": "ram",
             "addressing": {
-              "offset_byte": 335872,
+              "offset_byte": 287744,
               "size_byte": 262144
             },
             "hardware_config": {
@@ -296,7 +330,7 @@
             "name": "pim_input_reg_buffer",
             "type": "reg_buffer",
             "addressing": {
-              "offset_byte": 598016,
+              "offset_byte": 549888,
               "size_byte": 1024
             },
             "hardware_config": {
@@ -312,7 +346,7 @@
             "name": "pim_output_reg_buffer",
             "type": "reg_buffer",
             "addressing": {
-              "offset_byte": 599040,
+              "offset_byte": 550912,
               "size_byte": 4096
             },
             "hardware_config": {
@@ -328,7 +362,7 @@
             "name": "pim_mask_data_reg_buffer",
             "type": "reg_buffer",
             "addressing": {
-              "offset_byte": 701440,
+              "offset_byte": 653312,
               "size_byte": 16384
             },
             "hardware_config": {
@@ -344,17 +378,17 @@
             "name": "global",
             "type": "ram",
             "addressing": {
-              "offset_byte": 717952,
+              "offset_byte": 669824,
               "size_byte": 33554432
             },
             "hardware_config": {
               "size_byte": 33554432,
               "width_byte": 1024,
-              "write_latency_cycle": 0,
-              "read_latency_cycle": 0,
+              "write_latency_cycle": 1,
+              "read_latency_cycle": 1,
               "static_power_mW": 0,
-              "write_dynamic_power_mW": 0,
-              "read_dynamic_power_mW": 0,
+              "write_dynamic_power_mW": 520,
+              "read_dynamic_power_mW": 500,
               "has_image": true,
               "image_file": ""
             }
