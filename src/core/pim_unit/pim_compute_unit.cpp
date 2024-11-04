@@ -180,11 +180,12 @@ void PimComputeUnit::processSubInsReadData(const pimsim::PimComputeSubInsPayload
     }
     // read bit sparse meta data
     if (config_.bit_sparse && payload.bit_sparse) {
+        // TODO: 如果需要读取多次的话，尚存在一些问题
         int group_cnt = std::min(payload.activation_group_num, static_cast<int>(macro_group_list_.size()));
         read_bit_sparse_meta_socket_.payload = {
             .ins = payload.ins,
             .addr_byte = payload.bit_sparse_meta_addr_byte,
-            .size_byte = group_cnt * config_.bit_sparse_config.mask_bit_width *
+            .size_byte = config_.bit_sparse_config.mask_bit_width *
                          macro_size_.element_cnt_per_compartment * macro_size_.compartment_cnt_per_macro *
                          sub_ins_payload.group_max_activation_macro_cnt / BYTE_TO_BIT};
         read_bit_sparse_meta_socket_.start_exec.notify();

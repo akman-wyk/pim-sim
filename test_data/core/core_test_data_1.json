@@ -7,39 +7,39 @@
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 1024},
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 2, "imm": 64},
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 2048},
-    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 1},
+    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 0},
 
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 2048},
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 2560},
-    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 1},
+    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 0},
 
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 1024},
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 1536},
-    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 1},
+    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 0},
 
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 1024},
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 1536},
-    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 1},
+    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 0},
 
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 2048},
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 1024},
-    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 1},
+    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 0},
 
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 2048},
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 1024},
-    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 1},
+    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 0},
 
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 2048},
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 2560},
-    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 1},
+    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 0},
 
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 2048},
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 1024},
-    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 1},
+    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 0},
 
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 1024},
     {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 2048},
-    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 1}
+    {"class_code": 1, "opcode": 0, "rs1": 0, "rs2": 1, "rs3": 2, "rd": 3, "input_num": 0}
   ],
   "expected": {
     "time_ns": 380,
