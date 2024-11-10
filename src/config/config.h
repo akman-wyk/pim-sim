@@ -326,11 +326,29 @@ struct CoreConfig {
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(CoreConfig)
 };
 
+struct NetworkConfig {
+    int bus_width_byte{16};
+
+    std::string network_config_file_path{"./network_config.json"};
+
+    [[nodiscard]] bool checkValid() const;
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(NetworkConfig)
+};
+
+struct GlobalMemoryConfig {
+    RAMConfig hardware_config{};
+    AddressSpaceConfig addressing{};
+    int global_memory_switch_id{-10};
+
+    [[nodiscard]] bool checkValid() const;
+    DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(GlobalMemoryConfig)
+};
+
 struct ChipConfig {
     int core_cnt{1};
     CoreConfig core_config{};
-    RAMConfig global_memory_config{};
-    // NetworkConfig network_config;
+    GlobalMemoryConfig global_memory_config{};
+    NetworkConfig network_config;
 
     [[nodiscard]] bool checkValid() const;
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(ChipConfig)

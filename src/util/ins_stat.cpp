@@ -4,6 +4,7 @@
 
 #include "ins_stat.h"
 
+#include "core/core.h"
 #include "isa/isa.h"
 
 namespace pimsim {
@@ -101,12 +102,12 @@ void ControlInsStat::addInsCount(int type) {
     }
 }
 
-void InsStat::addInsCount(int class_code, int type, int opcode, const Config& config) {
+void InsStat::addInsCount(int class_code, int type, int opcode, const CoreConfig& core_config) {
     total++;
     if (class_code == InstClass::pim) {
         pim.addInsCount(type);
     } else if (class_code == InstClass::simd) {
-        simd.addInsCount(opcode, config.chip_config.core_config.simd_unit_config);
+        simd.addInsCount(opcode, core_config.simd_unit_config);
     } else if (class_code == InstClass::scalar) {
         scalar.addInsCount(type, opcode);
     } else if (class_code == InstClass::transfer) {

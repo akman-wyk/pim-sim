@@ -678,20 +678,44 @@ DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(CoreConfig, control_unit_config, 
                                                scalar_unit_config, simd_unit_config, pim_unit_config,
                                                local_memory_unit_config, transfer_unit_config)
 
+// NetworkConfig
+bool NetworkConfig::checkValid() const {
+    if (const bool valid = bus_width_byte > 0 && !network_config_file_path.empty(); !valid) {
+        std::cerr << "NetworkConfig not valid, 'bus_width_byte' must be positive and 'network_config_file_path' must "
+                     "not be empty"
+                  << std::endl;
+        return false;
+    }
+    return true;
+}
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(NetworkConfig, bus_width_byte, network_config_file_path);
+
+bool GlobalMemoryConfig::checkValid() const {
+    if (const bool valid = hardware_config.checkValid() && addressing.checkValid(); !valid) {
+        std::cerr << "GlobalMemoryConfig not valid" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(GlobalMemoryConfig, hardware_config, addressing, global_memory_switch_id)
+
 // ChipConfig
 bool ChipConfig::checkValid() const {
     if (!check_positive(core_cnt)) {
         std::cerr << "ChipConfig not valid, 'core_cnt' must be positive" << std::endl;
         return false;
     }
-    if (const bool valid = core_config.checkValid() && global_memory_config.checkValid(); !valid) {
+    if (const bool valid = core_config.checkValid() && global_memory_config.checkValid() && network_config.checkValid();
+        !valid) {
         std::cerr << "ChipConfig not valid" << std::endl;
         return false;
     }
     return true;
 }
 
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(ChipConfig, core_cnt, core_config, global_memory_config)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(ChipConfig, core_cnt, core_config, global_memory_config, network_config)
 
 // SimConfig
 bool SimConfig::checkValid() const {

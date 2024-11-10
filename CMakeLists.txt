@@ -22,8 +22,8 @@ add_library(pim-simulator STATIC ""
         src/config/config_enum.cpp
         src/config/config_enum.h
         src/util/macro_scope.h
-        src/core/local_memory_unit/local_memory.cpp
-        src/core/local_memory_unit/local_memory.h
+        src/memory/memory.cpp
+        src/memory/memory.h
         src/core/payload/payload.h
         src/core/payload/payload_enum.h
         src/base_component/base_module.cpp
@@ -34,12 +34,12 @@ add_library(pim-simulator STATIC ""
         src/base_component/energy_counter.h
         src/util/reporter.cpp
         src/util/reporter.h
-        src/core/local_memory_unit/ram.cpp
-        src/core/local_memory_unit/ram.h
+        src/memory/ram.cpp
+        src/memory/ram.h
         src/util/util.cpp
         src/util/util.h
-        src/core/local_memory_unit/reg_buffer.cpp
-        src/core/local_memory_unit/reg_buffer.h
+        src/memory/reg_buffer.cpp
+        src/memory/reg_buffer.h
         src/core/local_memory_unit/local_memory_unit.cpp
         src/core/local_memory_unit/local_memory_unit.h
         src/core/simd_unit/simd_unit.cpp
@@ -86,6 +86,18 @@ add_library(pim-simulator STATIC ""
         src/base_component/stall_handler.h
         src/util/ins_stat.cpp
         src/util/ins_stat.h
+        src/network/network.cpp
+        src/network/network.h
+        src/network/payload.h
+        src/network/switch.cpp
+        src/network/switch.h
+        src/network/switch_socket.cpp
+        src/network/switch_socket.h
+        src/memory/memory_hardware.h
+        src/memory/global_memory.cpp
+        src/memory/global_memory.h
+        src/chip/chip.cpp
+        src/chip/chip.h
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE

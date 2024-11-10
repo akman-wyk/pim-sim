@@ -1,0 +1,67 @@
+//
+// Created by wyk on 2024/11/7.
+//
+
+#include "switch.h"
+
+#include "switch_socket.h"
+
+namespace pimsim {
+
+Switch::Switch(const char* name, int core_id) : sc_module(name), core_id_(core_id) {
+    SC_THREAD(processTransport);
+}
+
+void Switch::processTransport() {
+    while (true) {
+        while (pending_queue_.empty()) {
+            wait(trigger_);
+        }
+
+        auto payload = pending_queue_.front().first;
+        auto mode = pending_queue_.front().second;
+        pending_queue_.pop();
+
+        auto send_delay =
+            network_->transferAndGetDelay(payload->src_id, payload->dst_id, payload->request_data_size_byte);
+        wait(send_delay);
+
+        auto target_switch = network_->getSwitch(payload->dst_id);
+        target_switch->receiveHandler(payload);
+        if (mode == +NetworkTransferMode::transport) {
+            auto receive_delay =
+                network_->transferAndGetDelay(payload->dst_id, payload->src_id, payload->response_data_size_byte);
+            wait(receive_delay);
+        }
+
+        if (payload->finish_network_trans != nullptr) {
+            payload->finish_network_trans->notify(SC_ZERO_TIME);
+        }
+    }
+}
+
+void Switch::transportHandler(const std::shared_ptr<NetworkPayload>& payload) {
+    pending_queue_.emplace(payload, NetworkTransferMode::transport);
+    trigger_.notify();
+}
+
+void Switch::sendHandler(const std::shared_ptr<NetworkPayload>& payload) {
+    pending_queue_.emplace(payload, NetworkTransferMode::only_send);
+    trigger_.notify();
+}
+
+void Switch::registerReceiveHandler(
+    const std::function<void(const std::shared_ptr<NetworkPayload>&)>& reveive_handler) {
+    receive_handler_ = reveive_handler;
+}
+
+void Switch::receiveHandler(const std::shared_ptr<NetworkPayload>& payload) {
+    receive_handler_(payload);
+}
+
+void Switch::bindNetwork(Network* network) {
+    network_ = network;
+    network_->registerSwitch(core_id_, this);
+}
+
+}  // namespace pimsim

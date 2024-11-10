@@ -32,6 +32,7 @@ public:
 
     void setStaticPowerMW(double power);
 
+    void addDynamicEnergyPJ(double energy);
     void addDynamicEnergyPJ(double latency, double power);
     void addDynamicEnergyPJ(double latency, double power, const sc_core::sc_time& time_tag, int id_tag);
 

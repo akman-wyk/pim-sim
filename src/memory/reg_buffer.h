@@ -5,18 +5,22 @@
 #pragma once
 #include "base_component/base_module.h"
 #include "core/payload/payload.h"
+#include "memory_hardware.h"
 
 namespace pimsim {
 
-class RegBuffer : public BaseModule {
+class RegBuffer : public MemoryHardware {
 public:
     SC_HAS_PROCESS(RegBuffer);
 
     RegBuffer(const char* name, const RegBufferConfig& config, const SimConfig& sim_config, Core* core, Clock* clk);
 
-    sc_core::sc_time accessAndGetDelay(MemoryAccessPayload& payload);
+    sc_core::sc_time accessAndGetDelay(MemoryAccessPayload& payload) override;
 
     EnergyReporter getEnergyReporter() override;
+
+    int getMemoryDataWidthByte(MemoryAccessType access_type) const override;
+    int getMemorySizeByte() const override;
 
 private:
     void initialData();

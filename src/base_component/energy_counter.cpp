@@ -25,6 +25,10 @@ void EnergyCounter::setStaticPowerMW(double power) {
     static_power_ = power;
 }
 
+void EnergyCounter::addDynamicEnergyPJ(double energy) {
+    dynamic_energy_ += energy;
+}
+
 void EnergyCounter::addDynamicEnergyPJ(double latency, double power) {
     activity_time_ += latency;
     dynamic_energy_ += latency * power;

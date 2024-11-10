@@ -8,7 +8,7 @@
 
 #include "base_component/base_module.h"
 #include "core/payload/payload.h"
-#include "local_memory.h"
+#include "memory/memory.h"
 
 namespace pimsim {
 
@@ -34,12 +34,12 @@ public:
     int getMemorySizeById(int memory_id) const;
 
 private:
-    LocalMemory* getLocalMemoryByAddress(int address_byte);
+    std::shared_ptr<Memory> getLocalMemoryByAddress(int address_byte);
 
 private:
     const LocalMemoryUnitConfig& config_;
 
-    std::vector<LocalMemory*> local_memory_list_;
+    std::vector<std::shared_ptr<Memory>> local_memory_list_;
 };
 
 }  // namespace pimsim

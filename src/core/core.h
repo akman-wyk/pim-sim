@@ -29,14 +29,11 @@ class Core : public BaseModule {
 public:
     SC_HAS_PROCESS(Core);
 
-    Core(const char* name, const Config& config, Clock* clk, std::vector<Instruction> ins_list,
-         bool check, std::ostream& reg_stat_os);
+    Core(int core_id, const char* name, const Config& config, Clock* clk, std::vector<Instruction> ins_list,
+         std::function<void()> finish_run_call, bool check = false, std::ostream& reg_stat_os = std::cout);
+    void bindNetwork(Network* network);
 
     EnergyReporter getEnergyReporter() override;
-
-    Reporter getReporter();
-
-    Reporter report(std::ostream& os);
 
     bool checkRegValues(const std::array<int, GENERAL_REG_NUM>& general_reg_expected_values,
                         const std::array<int, SPECIAL_REG_NUM>& special_reg_expected_values);
@@ -60,7 +57,9 @@ private:
     int decodeControlInsAndGetPCIncrement(const Instruction& ins, const InstructionPayload& ins_payload);
 
 private:
-    const Config& config_;
+    const int core_id_;
+    const CoreConfig& core_config_;
+    const AddressSpaceConfig& global_memory_addressing_;
 
     InsStat ins_stat_{};
     bool check{false};
@@ -96,6 +95,7 @@ private:
     // other modules
     LocalMemoryUnit local_memory_unit_;
     RegUnit reg_unit_;
+    Switch core_switch_;
 
     // signals
     ExecuteUnitSignalPorts<ScalarInsPayload> scalar_signals_;
@@ -118,8 +118,8 @@ private:
         pim_load_conflict_, pim_output_conflict_, pim_set_conflict_, pim_transfer_conflict_;
     sc_core::sc_signal<bool> id_stall_;
 
-    // running time
-    sc_core::sc_time running_time_;
+    // finish run
+    std::function<void()> finish_run_call_;
 };
 
 }  // namespace pimsim

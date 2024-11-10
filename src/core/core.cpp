@@ -4,31 +4,38 @@
 
 #include "core.h"
 
+#include <utility>
+
 #include "fmt/format.h"
 #include "isa/isa.h"
 #include "util/log.h"
 
 namespace pimsim {
 
-Core::Core(const char *name, const pimsim::Config &config, pimsim::Clock *clk, std::vector<Instruction> ins_list,
-           bool check, std::ostream &reg_stat_os)
+Core::Core(int core_id, const char *name, const Config &config, Clock *clk, std::vector<Instruction> ins_list,
+           std::function<void()> finish_run_call, bool check, std::ostream &reg_stat_os)
     : BaseModule(name, config.sim_config, this, clk)
-    , config_(config)
+    , core_id_(core_id)
+    , core_config_(config.chip_config.core_config)
+    , global_memory_addressing_(config.chip_config.global_memory_config.addressing)
+
     , check(check)
     , reg_stat_os_(reg_stat_os)
     , ins_list_(std::move(ins_list))
-    , scalar_unit_("ScalarUnit", config.chip_config.core_config.scalar_unit_config, config.sim_config, this, clk)
-    , simd_unit_("SIMDUnit", config.chip_config.core_config.simd_unit_config, config.sim_config, this, clk)
-    , transfer_unit_("TransferUnit", config.chip_config.core_config.transfer_unit_config, config.sim_config, this, clk)
-    , pim_compute_unit_("PimComputeUnit", config.chip_config.core_config.pim_unit_config, config.sim_config, this, clk)
-    , pim_load_unit_("PimLoadUnit", config.chip_config.core_config.pim_unit_config, config.sim_config, this, clk)
-    , pim_output_unit_("PimOutputUnit", config.chip_config.core_config.pim_unit_config, config.sim_config, this, clk)
-    , pim_set_unit_("PimSetUnit", config.chip_config.core_config.pim_unit_config, config.sim_config, this, clk)
-    , pim_transfer_unit_("PimTransferUnit", config.chip_config.core_config.pim_unit_config, config.sim_config, this,
-                         clk)
-    , local_memory_unit_("LocalMemoryUnit", config.chip_config.core_config.local_memory_unit_config, config.sim_config,
-                         this, clk)
-    , reg_unit_("RegUnit", config.chip_config.core_config.register_unit_config, config.sim_config, this, clk)
+    , scalar_unit_("ScalarUnit", core_config_.scalar_unit_config, config.sim_config, this, clk)
+    , simd_unit_("SIMDUnit", core_config_.simd_unit_config, config.sim_config, this, clk)
+    , transfer_unit_("TransferUnit", core_config_.transfer_unit_config, config.sim_config, this, clk, core_id,
+                     config.chip_config.global_memory_config.global_memory_switch_id)
+
+    , pim_compute_unit_("PimComputeUnit", core_config_.pim_unit_config, config.sim_config, this, clk)
+    , pim_load_unit_("PimLoadUnit", core_config_.pim_unit_config, config.sim_config, this, clk)
+    , pim_output_unit_("PimOutputUnit", core_config_.pim_unit_config, config.sim_config, this, clk)
+    , pim_set_unit_("PimSetUnit", core_config_.pim_unit_config, config.sim_config, this, clk)
+    , pim_transfer_unit_("PimTransferUnit", core_config_.pim_unit_config, config.sim_config, this, clk)
+    , local_memory_unit_("LocalMemoryUnit", core_config_.local_memory_unit_config, config.sim_config, this, clk)
+    , reg_unit_("RegUnit", core_config_.register_unit_config, config.sim_config, this, clk)
+    , core_switch_("CoreSwitch", core_id)
+
     , scalar_stall_handler_(decode_new_ins_trigger_)
     , simd_stall_handler_(decode_new_ins_trigger_)
     , transfer_stall_handler_(decode_new_ins_trigger_)
@@ -36,7 +43,9 @@ Core::Core(const char *name, const pimsim::Config &config, pimsim::Clock *clk, s
     , pim_load_stall_handler_(decode_new_ins_trigger_)
     , pim_output_stall_handler_(decode_new_ins_trigger_)
     , pim_set_stall_handler_(decode_new_ins_trigger_)
-    , pim_transfer_stall_handler_(decode_new_ins_trigger_) {
+    , pim_transfer_stall_handler_(decode_new_ins_trigger_)
+
+    , finish_run_call_(std::move(finish_run_call)) {
     SC_THREAD(issue)
 
     SC_METHOD(processStall)
@@ -64,6 +73,7 @@ Core::Core(const char *name, const pimsim::Config &config, pimsim::Clock *clk, s
 
     transfer_unit_.ports_.bind(transfer_signals_);
     transfer_unit_.bindLocalMemoryUnit(&local_memory_unit_);
+    transfer_unit_.bindSwitch(&core_switch_);
     transfer_unit_.setEndPC(end_pc);
 
     pim_compute_unit_.ports_.bind(pim_compute_signals_);
@@ -102,6 +112,10 @@ Core::Core(const char *name, const pimsim::Config &config, pimsim::Clock *clk, s
     pim_transfer_stall_handler_.bind(pim_transfer_signals_, pim_transfer_conflict_, &cur_ins_conflict_info_);
 }
 
+void Core::bindNetwork(Network *network) {
+    core_switch_.bindNetwork(network);
+}
+
 EnergyReporter Core::getEnergyReporter() {
     EnergyReporter reporter;
     reporter.addSubModule("ScalarUnit", EnergyReporter{scalar_unit_.getEnergyReporter()});
@@ -111,18 +125,6 @@ EnergyReporter Core::getEnergyReporter() {
     reporter.addSubModule("PimOutput", EnergyReporter{pim_output_unit_.getEnergyReporter()});
     reporter.addSubModule("PimTransfer", EnergyReporter{pim_transfer_unit_.getEnergyReporter()});
     reporter.addSubModule("LocalMemoryUnit", EnergyReporter{local_memory_unit_.getEnergyReporter()});
-    return std::move(reporter);
-}
-
-Reporter Core::getReporter() {
-    EnergyCounter::setRunningTimeNS(running_time_);
-    return Reporter{running_time_.to_seconds() * 1000, getName(), getEnergyReporter(), 0};
-}
-
-Reporter Core::report(std::ostream &os) {
-    auto reporter = getReporter();
-
-    reporter.report(os);
     return std::move(reporter);
 }
 
@@ -215,8 +217,7 @@ void Core::processFinishRun() {
         pim_load_signals_.finish_run_.read() || pim_output_signals_.finish_run_.read() ||
         pim_set_signals_.finish_run_.read() || pim_transfer_signals_.finish_run_.read()) {
         LOG(fmt::format("finish run"));
-        running_time_ = sc_core::sc_time_stamp();
-        sc_stop();
+        finish_run_call_();
     }
 }
 
@@ -241,7 +242,7 @@ int Core::decodeAndGetPCIncrement() {
                                     reg_unit_.getGeneralRegistersString());
     }
 
-    ins_stat_.addInsCount(ins.class_code, ins.type, ins.opcode, config_);
+    ins_stat_.addInsCount(ins.class_code, ins.type, ins.opcode, core_config_);
     if (ins.class_code == InstClass::control) {
         return decodeControlInsAndGetPCIncrement(ins, ins_payload);
     }
@@ -389,35 +390,79 @@ void Core::decodeSIMDIns(const pimsim::Instruction &ins, const pimsim::Instructi
 }
 
 void Core::decodeTransferIns(const pimsim::Instruction &ins, const pimsim::InstructionPayload &ins_payload) {
-    int src_address_byte = reg_unit_.readRegister(ins.rs1, false) + (ins.offset_mask & 0b10) * ins.offset;
-    int dst_address_byte = reg_unit_.readRegister(ins.rd, false) + (ins.offset_mask & 0b01) * ins.offset;
-    int size_byte = reg_unit_.readRegister(ins.rs2, false);
+    if (ins.type == +TransferInstType::trans) {
+        int src_address_byte = reg_unit_.readRegister(ins.rs1, false) + (ins.offset_mask & 0b10) * ins.offset;
+        int dst_address_byte = reg_unit_.readRegister(ins.rd, false) + (ins.offset_mask & 0b01) * ins.offset;
+        int size_byte = reg_unit_.readRegister(ins.rs2, false);
 
-    const auto &pim_as = config_.chip_config.core_config.pim_unit_config.address_space;
-    if (pim_as.offset_byte <= dst_address_byte && dst_address_byte + size_byte <= pim_as.end()) {
-        pim_load_payload_ = PimLoadInsPayload{
-            .ins = {.pc = ins_payload.pc, .ins_id = ins_payload.ins_id, .unit_type = ExecuteUnitType::pim_load},
-            .src_address_byte = src_address_byte,
-            .size_byte = size_byte};
+        const auto &pim_as = core_config_.pim_unit_config.address_space;
+        if (pim_as.offset_byte <= dst_address_byte && dst_address_byte + size_byte <= pim_as.end()) {
+            pim_load_payload_ = PimLoadInsPayload{
+                .ins = {.pc = ins_payload.pc, .ins_id = ins_payload.ins_id, .unit_type = ExecuteUnitType::pim_load},
+                .src_address_byte = src_address_byte,
+                .size_byte = size_byte};
 
-        cur_ins_conflict_info_ =
-            DataConflictPayload{.ins_id = pim_load_payload_.ins.ins_id, .unit_type = ExecuteUnitType::pim_load};
-        cur_ins_conflict_info_.use_pim_unit = true;
-        cur_ins_conflict_info_.addReadMemoryId(
-            local_memory_unit_.getLocalMemoryIdByAddress(pim_load_payload_.src_address_byte));
-    } else {
+            cur_ins_conflict_info_ =
+                DataConflictPayload{.ins_id = pim_load_payload_.ins.ins_id, .unit_type = ExecuteUnitType::pim_load};
+            cur_ins_conflict_info_.use_pim_unit = true;
+            cur_ins_conflict_info_.addReadMemoryId(
+                local_memory_unit_.getLocalMemoryIdByAddress(pim_load_payload_.src_address_byte));
+        } else {
+            TransferType type = TransferType::local_trans;
+            if (global_memory_addressing_.offset_byte <= src_address_byte &&
+                src_address_byte + size_byte <= global_memory_addressing_.end()) {
+                type = TransferType::global_load;
+            } else if (global_memory_addressing_.offset_byte <= dst_address_byte &&
+                       dst_address_byte + size_byte <= global_memory_addressing_.end()) {
+                type = TransferType::global_store;
+            }
+
+            transfer_payload_ = TransferInsPayload{
+                .ins = {.pc = ins_payload.pc, .ins_id = ins_payload.ins_id, .unit_type = ExecuteUnitType::transfer},
+                .type = type,
+                .src_address_byte = src_address_byte,
+                .dst_address_byte = dst_address_byte,
+                .size_byte = size_byte};
+
+            cur_ins_conflict_info_ =
+                DataConflictPayload{.ins_id = transfer_payload_.ins.ins_id, .unit_type = ExecuteUnitType::transfer};
+            if (type == +TransferType::local_trans || type == +TransferType::global_store) {
+                cur_ins_conflict_info_.addReadMemoryId(local_memory_unit_.getLocalMemoryIdByAddress(src_address_byte));
+            }
+            if (type == +TransferType::local_trans || type == +TransferType::global_load) {
+                cur_ins_conflict_info_.addWriteMemoryId(local_memory_unit_.getLocalMemoryIdByAddress(dst_address_byte));
+            }
+        }
+    } else if (ins.type == +TransferInstType::send) {
+        int src_address_byte = reg_unit_.readRegister(ins.rs1, false);
+
         transfer_payload_ = TransferInsPayload{
             .ins = {.pc = ins_payload.pc, .ins_id = ins_payload.ins_id, .unit_type = ExecuteUnitType::transfer},
+            .type = TransferType::send,
             .src_address_byte = src_address_byte,
-            .dst_address_byte = dst_address_byte,
-            .size_byte = size_byte};
-
+            .dst_address_byte = reg_unit_.readRegister(ins.rd2, false),
+            .size_byte = reg_unit_.readRegister(ins.reg_len, false),
+            .src_id = core_id_,
+            .dst_id = reg_unit_.readRegister(ins.rd1, false),
+            .transfer_id_tag = reg_unit_.readRegister(ins.reg_id, false)};
         cur_ins_conflict_info_ =
             DataConflictPayload{.ins_id = transfer_payload_.ins.ins_id, .unit_type = ExecuteUnitType::transfer};
-        cur_ins_conflict_info_.addReadMemoryId(
-            local_memory_unit_.getLocalMemoryIdByAddress(transfer_payload_.src_address_byte));
-        cur_ins_conflict_info_.addWriteMemoryId(
-            local_memory_unit_.getLocalMemoryIdByAddress(transfer_payload_.dst_address_byte));
+        cur_ins_conflict_info_.addReadMemoryId(local_memory_unit_.getLocalMemoryIdByAddress(src_address_byte));
+    } else if (ins.type == +TransferInstType::receive) {
+        int dst_address_byte = reg_unit_.readRegister(ins.rd, false);
+
+        transfer_payload_ = TransferInsPayload{
+            .ins = {.pc = ins_payload.pc, .ins_id = ins_payload.ins_id, .unit_type = ExecuteUnitType::transfer},
+            .type = TransferType::receive,
+            .src_address_byte = reg_unit_.readRegister(ins.rs2, false),
+            .dst_address_byte = dst_address_byte,
+            .size_byte = reg_unit_.readRegister(ins.reg_len, false),
+            .src_id = reg_unit_.readRegister(ins.rs1, false),
+            .dst_id = core_id_,
+            .transfer_id_tag = reg_unit_.readRegister(ins.reg_id, false)};
+        cur_ins_conflict_info_ =
+            DataConflictPayload{.ins_id = transfer_payload_.ins.ins_id, .unit_type = ExecuteUnitType::transfer};
+        cur_ins_conflict_info_.addWriteMemoryId(local_memory_unit_.getLocalMemoryIdByAddress(dst_address_byte));
     }
 }
 
@@ -438,7 +483,7 @@ void Core::decodePimComputeIns(const pimsim::Instruction &ins, const pimsim::Ins
         .value_sparse = (ins.value_sparse != 0),
         .value_sparse_mask_addr_byte = reg_unit_.readRegister(SpecialRegId::value_sparse_mask_addr, true)};
 
-    const auto &pim_unit_config = config_.chip_config.core_config.pim_unit_config;
+    const auto &pim_unit_config = core_config_.pim_unit_config;
     cur_ins_conflict_info_ =
         DataConflictPayload{.ins_id = pim_compute_payload_.ins.ins_id, .unit_type = ExecuteUnitType::pim_compute};
     cur_ins_conflict_info_.use_pim_unit = true;

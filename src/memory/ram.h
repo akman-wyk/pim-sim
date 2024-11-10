@@ -6,22 +6,26 @@
 #include <cstdint>
 #include <vector>
 
-#include "base_component/base_module.h"
-#include "base_component/energy_counter.h"
-#include "config/config.h"
-#include "core/payload/payload.h"
+#include "../base_component/base_module.h"
+#include "../base_component/energy_counter.h"
+#include "../config/config.h"
+#include "../core/payload/payload.h"
+#include "memory_hardware.h"
 
 namespace pimsim {
 
-class RAM : public BaseModule {
+class RAM : public MemoryHardware {
 public:
     SC_HAS_PROCESS(RAM);
 
     RAM(const char* name, const RAMConfig& config, const SimConfig& sim_config, Core* core, Clock* clk);
 
-    sc_core::sc_time accessAndGetDelay(MemoryAccessPayload& payload);
+    sc_core::sc_time accessAndGetDelay(MemoryAccessPayload& payload) override;
 
     EnergyReporter getEnergyReporter() override;
+
+    int getMemoryDataWidthByte(MemoryAccessType access_type) const override;
+    int getMemorySizeByte() const override;
 
 private:
     void initialData();

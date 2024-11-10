@@ -12,14 +12,21 @@ LocalMemoryUnit::LocalMemoryUnit(const char *name, const pimsim::LocalMemoryUnit
                                  const pimsim::SimConfig &sim_config, pimsim::Core *core, pimsim::Clock *clk)
     : BaseModule(name, sim_config, core, clk), config_(config) {
     for (const auto &local_memory_config : config_.local_memory_list) {
-        local_memory_list_.emplace_back(
-            new LocalMemory{local_memory_config.name.c_str(), local_memory_config, sim_config, core, clk});
+        if (local_memory_config.type == +LocalMemoryType::ram)
+            local_memory_list_.emplace_back(
+                std::make_shared<Memory>(local_memory_config.name.c_str(), local_memory_config.ram_config,
+                                         local_memory_config.addressing, sim_config, core, clk));
+        else {
+            local_memory_list_.emplace_back(
+                std::make_shared<Memory>(local_memory_config.name.c_str(), local_memory_config.reg_buffer_config,
+                                         local_memory_config.addressing, sim_config, core, clk));
+        }
     }
 }
 
 std::vector<uint8_t> LocalMemoryUnit::read_data(const pimsim::InstructionPayload &ins, int address_byte, int size_byte,
                                                 sc_core::sc_event &finish_access) {
-    auto *local_memory = getLocalMemoryByAddress(address_byte);
+    auto local_memory = getLocalMemoryByAddress(address_byte);
     if (local_memory == nullptr) {
         std::cerr
             << fmt::format(
@@ -29,20 +36,21 @@ std::vector<uint8_t> LocalMemoryUnit::read_data(const pimsim::InstructionPayload
         return {};
     }
 
-    MemoryAccessPayload payload{.ins = ins,
-                                .access_type = MemoryAccessType::read,
-                                .address_byte = address_byte - local_memory->getAddressSpaceBegin(),
-                                .size_byte = size_byte,
-                                .finish_access = finish_access};
-    local_memory->access(&payload);
-    wait(payload.finish_access);
+    auto payload = std::make_shared<MemoryAccessPayload>(
+        MemoryAccessPayload{.ins = ins,
+                            .access_type = MemoryAccessType::read,
+                            .address_byte = address_byte - local_memory->getAddressSpaceBegin(),
+                            .size_byte = size_byte,
+                            .finish_access = finish_access});
+    local_memory->access(payload);
+    wait(payload->finish_access);
 
-    return std::move(payload.data);
+    return std::move(payload->data);
 }
 
 void LocalMemoryUnit::write_data(const pimsim::InstructionPayload &ins, int address_byte, int size_byte,
                                  std::vector<uint8_t> data, sc_core::sc_event &finish_access) {
-    auto *local_memory = getLocalMemoryByAddress(address_byte);
+    auto local_memory = getLocalMemoryByAddress(address_byte);
     if (local_memory == nullptr) {
         std::cerr
             << fmt::format(
@@ -52,19 +60,20 @@ void LocalMemoryUnit::write_data(const pimsim::InstructionPayload &ins, int addr
         return;
     }
 
-    MemoryAccessPayload payload{.ins = ins,
-                                .access_type = MemoryAccessType::write,
-                                .address_byte = address_byte - local_memory->getAddressSpaceBegin(),
-                                .size_byte = size_byte,
-                                .data = std::move(data),
-                                .finish_access = finish_access};
-    local_memory->access(&payload);
-    wait(payload.finish_access);
+    auto payload = std::make_shared<MemoryAccessPayload>(
+        MemoryAccessPayload{.ins = ins,
+                            .access_type = MemoryAccessType::write,
+                            .address_byte = address_byte - local_memory->getAddressSpaceBegin(),
+                            .size_byte = size_byte,
+                            .data = std::move(data),
+                            .finish_access = finish_access});
+    local_memory->access(payload);
+    wait(payload->finish_access);
 }
 
 EnergyReporter LocalMemoryUnit::getEnergyReporter() {
     EnergyReporter local_memory_unit_reporter;
-    for (auto *local_memory : local_memory_list_) {
+    for (auto &local_memory : local_memory_list_) {
         local_memory_unit_reporter.addSubModule(local_memory->getName(), local_memory->getEnergyReporter());
     }
     return std::move(local_memory_unit_reporter);
@@ -72,7 +81,7 @@ EnergyReporter LocalMemoryUnit::getEnergyReporter() {
 
 int LocalMemoryUnit::getLocalMemoryIdByAddress(int address_byte) const {
     for (int i = 0; i < local_memory_list_.size(); i++) {
-        auto *local_memory = local_memory_list_[i];
+        auto &local_memory = local_memory_list_[i];
         if (local_memory->getAddressSpaceBegin() <= address_byte && address_byte < local_memory->getAddressSpaceEnd()) {
             return i;
         }
@@ -88,8 +97,8 @@ int LocalMemoryUnit::getMemorySizeById(int memory_id) const {
     return local_memory_list_[memory_id]->getMemorySizeByte();
 }
 
-LocalMemory *LocalMemoryUnit::getLocalMemoryByAddress(int address_byte) {
-    for (auto *local_memory : local_memory_list_) {
+std::shared_ptr<Memory> LocalMemoryUnit::getLocalMemoryByAddress(int address_byte) {
+    for (auto &local_memory : local_memory_list_) {
         if (local_memory->getAddressSpaceBegin() <= address_byte && address_byte < local_memory->getAddressSpaceEnd()) {
             return local_memory;
         }

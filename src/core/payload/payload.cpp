@@ -114,7 +114,8 @@ DEFINE_PIM_PAYLOAD_FUNCTIONS(DataConflictPayload, ins_id, unit_type, read_memory
 DEFINE_PIM_PAYLOAD_FUNCTIONS(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_width, output_bit_width,
                              inputs_address_byte, output_address_byte, len)
 
-DEFINE_PIM_PAYLOAD_FUNCTIONS(TransferInsPayload, ins, src_address_byte, dst_address_byte, size_byte)
+DEFINE_PIM_PAYLOAD_FUNCTIONS(TransferInsPayload, ins, type, src_address_byte, dst_address_byte, size_byte, src_id,
+                             dst_id, transfer_id_tag)
 
 DEFINE_PIM_PAYLOAD_FUNCTIONS(ScalarInsPayload, ins, op, src1_value, src2_value, offset, dst_reg, write_special_register)
 
@@ -145,7 +146,8 @@ DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(InstructionPayload, pc, ins_id)
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(SIMDInsPayload, ins, input_cnt, opcode, inputs_bit_width,
                                                output_bit_width, inputs_address_byte, output_address_byte, len)
 
-DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(TransferInsPayload, ins, src_address_byte, dst_address_byte, size_byte)
+DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(TransferInsPayload, ins, type, src_address_byte, dst_address_byte,
+                                               size_byte, src_id, dst_id, transfer_id_tag)
 
 DEFINE_TYPE_FROM_TO_JSON_FUNCTION_WITH_DEFAULT(ScalarInsPayload, ins, op, src1_value, src2_value, offset, dst_reg,
                                                write_special_register)

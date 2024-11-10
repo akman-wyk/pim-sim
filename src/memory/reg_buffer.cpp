@@ -11,7 +11,7 @@ namespace pimsim {
 
 RegBuffer::RegBuffer(const char *name, const pimsim::RegBufferConfig &config, const pimsim::SimConfig &sim_config,
                      pimsim::Core *core, pimsim::Clock *clk)
-    : BaseModule(name, sim_config, core, clk), config_(config) {
+    : MemoryHardware(name, sim_config, core, clk), config_(config) {
     if (data_mode_ == +DataMode::real_data) {
         initialData();
     }
@@ -69,6 +69,14 @@ void RegBuffer::initialData() {
         ifs.read(reinterpret_cast<char *>(data_.data()), config_.size_byte);
         ifs.close();
     }
+}
+
+int RegBuffer::getMemoryDataWidthByte(MemoryAccessType access_type) const {
+    return access_type == +MemoryAccessType::read ? config_.read_max_width_byte : config_.write_max_width_byte;
+}
+
+int RegBuffer::getMemorySizeByte() const {
+    return config_.size_byte;
 }
 
 }  // namespace pimsim

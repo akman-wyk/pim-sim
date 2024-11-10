@@ -117,9 +117,15 @@ struct TransferInsPayload {
 
     InstructionPayload ins{};
 
+    TransferType type{TransferType::local_trans};
+
     int src_address_byte{0};
     int dst_address_byte{0};
     int size_byte{0};
+
+    int src_id{0};
+    int dst_id{0};
+    int transfer_id_tag{0};
 
     DECLARE_PIM_PAYLOAD_FUNCTIONS(TransferInsPayload)
     DECLARE_TYPE_FROM_TO_JSON_FUNCTION_INTRUSIVE(TransferInsPayload)

@@ -67,12 +67,18 @@ int sc_main(int argc, char* argv[]) {
     auto test_info = ins_j.get<CoreTestInfo>();
 
     Clock clk{"clock", config.sim_config.period_ns};
-    Core core{"core", config, &clk, std::move(test_info.code), false, std::cout};
+    sc_core::sc_time running_time;
+    auto finish_run_call = [&running_time] {
+        running_time = sc_core::sc_time_stamp();
+        sc_stop();
+        EnergyCounter::setRunningTimeNS(running_time);
+    };
+    Core core(0, "Core_0", config, &clk, std::move(test_info.code), finish_run_call, false, std::cout);
     sc_start();
 
     std::ofstream ofs;
     ofs.open(report_file);
-    auto reporter = core.getReporter();
+    auto reporter = Reporter{running_time.to_seconds() * 1000, core.getName(), core.getEnergyReporter(), 0};
     reporter.report(ofs);
     ofs.close();
 

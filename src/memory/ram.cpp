@@ -4,14 +4,14 @@
 
 #include "ram.h"
 
-#include "fmt/core.h"
-#include "util/util.h"
+#include "../../packages/fmt/include/fmt/core.h"
+#include "../util/util.h"
 
 namespace pimsim {
 
 RAM::RAM(const char *name, const pimsim::RAMConfig &config, const pimsim::SimConfig &sim_config, pimsim::Core *core,
          pimsim::Clock *clk)
-    : BaseModule(name, sim_config, core, clk), config_(config) {
+    : MemoryHardware(name, sim_config, core, clk), config_(config) {
     if (data_mode_ == +DataMode::real_data) {
         initialData();
     }
@@ -63,6 +63,14 @@ EnergyReporter RAM::getEnergyReporter() {
     mem_energy_reporter.addSubModule("read", EnergyReporter{read_energy_counter_});
     mem_energy_reporter.addSubModule("write", EnergyReporter{write_energy_counter_});
     return std::move(mem_energy_reporter);
+}
+
+int RAM::getMemoryDataWidthByte(MemoryAccessType access_type) const {
+    return config_.width_byte;
+}
+
+int RAM::getMemorySizeByte() const {
+    return config_.size_byte;
 }
 
 }  // namespace pimsim

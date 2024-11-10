@@ -33,6 +33,7 @@ struct Instruction {
 
     // transfer
     int offset_mask{0};
+    int rd1{0}, rd2{0}, reg_id{0}, reg_len{0};
 };
 
 DECLARE_TYPE_FROM_TO_JSON_FUNCTION_NON_INTRUSIVE(Instruction)

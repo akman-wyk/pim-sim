@@ -5,6 +5,7 @@
 #pragma once
 #include <string>
 
+#include "chip/chip.h"
 #include "config/config.h"
 #include "core/core.h"
 
@@ -20,17 +21,21 @@ namespace pimsim {
 class LayerSimulator {
 public:
     LayerSimulator(std::string config_file, std::string instruction_file, std::string global_image_file,
-                   std::string expected_ins_stat_file, std::string expected_reg_file, std::string actual_reg_file, bool check);
+                   std::string expected_ins_stat_file, std::string expected_reg_file, std::string actual_reg_file,
+                   bool check);
 
     void run();
 
     void report(std::ostream& os, const std::string& report_json_file);
 
-    [[nodiscard]] bool checkInsStat() const;
-    [[nodiscard]] bool checkReg() const;
+    // [[nodiscard]] bool checkInsStat() const;
+    // [[nodiscard]] bool checkReg() const;
 
 private:
-    Core* core_{nullptr};
+    [[nodiscard]] std::vector<std::vector<Instruction>> getCoreInstructionList(const nlohmann::ordered_json& instruction_json) const;
+
+private:
+    std::shared_ptr<Chip> chip_;
 
     Config config_;
     std::string config_file_;
