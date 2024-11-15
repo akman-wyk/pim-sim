@@ -25,11 +25,13 @@ BETTER_ENUM(ControlInstType, int,  // NOLINT(*-explicit-constructor)
 
 BETTER_ENUM(ScalarRRInstOpcode, int,  // NOLINT(*-explicit-constructor)
             add = 0b0000, sub = 0b0001, mul = 0b0010, div = 0b0011, sll = 0b0100, srl = 0b0101, sra = 0b0110,
-            mod = 0b0111, min = 0b1000)
+            mod = 0b0111, min = 0b1000, max = 0b1001, s_and = 0b1010, s_or = 0b1011, eq = 0b1100, ne = 0b1101,
+            gt = 0b1110, lt = 0b1111)
 
 BETTER_ENUM(ScalarRIInstOpcode, int,  // NOLINT(*-explicit-constructor)
             addi = 0b0000, subi = 0b0001, muli = 0b0010, divi = 0b0011, slli = 0b0100, srli = 0b0101, srai = 0b0110,
-            modi = 0b0111, mini = 0b1000)
+            modi = 0b0111, mini = 0b1000, maxi = 0b1001, andi = 0b1010, ori = 0b1011, eqi = 0b1100, nei = 0b1101,
+            gti = 0b1110, lti = 0b1111)
 
 BETTER_ENUM(ScalarSLInstOpcode, int,  // NOLINT(*-explicit-constructor)
             load_local = 0b00, store_local = 0b01, load_global = 0b10, store_global = 0b11)

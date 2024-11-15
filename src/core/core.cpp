@@ -283,6 +283,13 @@ void Core::decodeScalarIns(const pimsim::Instruction &ins, const pimsim::Instruc
             case ScalarRRInstOpcode::sra: op = ScalarOperator::sra; break;
             case ScalarRRInstOpcode::mod: op = ScalarOperator::mod; break;
             case ScalarRRInstOpcode::min: op = ScalarOperator::min; break;
+            case ScalarRRInstOpcode::max: op = ScalarOperator::max; break;
+            case ScalarRRInstOpcode::s_and: op = ScalarOperator::s_and; break;
+            case ScalarRRInstOpcode::s_or: op = ScalarOperator::s_or; break;
+            case ScalarRRInstOpcode::eq: op = ScalarOperator::eq; break;
+            case ScalarRRInstOpcode::ne: op = ScalarOperator::ne; break;
+            case ScalarRRInstOpcode::gt: op = ScalarOperator::gt; break;
+            case ScalarRRInstOpcode::lt: op = ScalarOperator::lt; break;
         }
         scalar_payload_ = ScalarInsPayload{.ins = scalar_ins_payload,
                                            .op = op,
@@ -303,6 +310,13 @@ void Core::decodeScalarIns(const pimsim::Instruction &ins, const pimsim::Instruc
             case ScalarRIInstOpcode::srai: op = ScalarOperator::sra; break;
             case ScalarRIInstOpcode::modi: op = ScalarOperator::mod; break;
             case ScalarRIInstOpcode::mini: op = ScalarOperator::min; break;
+            case ScalarRIInstOpcode::maxi: op = ScalarOperator::max; break;
+            case ScalarRIInstOpcode::andi: op = ScalarOperator::s_and; break;
+            case ScalarRIInstOpcode::ori: op = ScalarOperator::s_or; break;
+            case ScalarRIInstOpcode::eqi: op = ScalarOperator::eq; break;
+            case ScalarRIInstOpcode::nei: op = ScalarOperator::ne; break;
+            case ScalarRIInstOpcode::gti: op = ScalarOperator::gt; break;
+            case ScalarRIInstOpcode::lti: op = ScalarOperator::lt; break;
         }
         scalar_payload_ = ScalarInsPayload{.ins = scalar_ins_payload,
                                            .op = op,

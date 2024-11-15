@@ -169,6 +169,34 @@ RegUnitWriteRequest ScalarUnit::executeAndWriteRegister(const pimsim::ScalarInsP
             reg_file_write_req.reg_value = std::min(payload.src1_value, payload.src2_value);
             break;
         }
+        case ScalarOperator::max: {
+            reg_file_write_req.reg_value = std::max(payload.src1_value, payload.src2_value);
+            break;
+        }
+        case ScalarOperator::s_and: {
+            reg_file_write_req.reg_value = (payload.src1_value & payload.src2_value);
+            break;
+        }
+        case ScalarOperator::s_or: {
+            reg_file_write_req.reg_value = (payload.src1_value | payload.src2_value);
+            break;
+        }
+        case ScalarOperator::eq: {
+            reg_file_write_req.reg_value = (payload.src1_value == payload.src2_value) ? 1 : 0;
+            break;
+        }
+        case ScalarOperator::ne: {
+            reg_file_write_req.reg_value = (payload.src1_value != payload.src2_value) ? 1 : 0;
+            break;
+        }
+        case ScalarOperator::gt: {
+            reg_file_write_req.reg_value = (payload.src1_value > payload.src2_value) ? 1 : 0;
+            break;
+        }
+        case ScalarOperator::lt: {
+            reg_file_write_req.reg_value = (payload.src1_value < payload.src2_value) ? 1 : 0;
+            break;
+        }
         case ScalarOperator::lui: {
             reg_file_write_req.reg_value = (payload.src2_value << 16);
             break;
