@@ -16,8 +16,8 @@ class LocalMemoryUnit : public BaseModule {
 public:
     SC_HAS_PROCESS(LocalMemoryUnit);
 
-    LocalMemoryUnit(const char* name, const LocalMemoryUnitConfig& config, const SimConfig& sim_config, Core* core,
-                    Clock* clk);
+    LocalMemoryUnit(const char* name, const LocalMemoryUnitConfig& config, const SimConfig& sim_config,
+                    const PimUnitConfig& pim_config, Core* core, Clock* clk);
 
     std::vector<uint8_t> read_data(const InstructionPayload& ins, int address_byte, int size_byte,
                                    sc_core::sc_event& finish_access);
@@ -38,8 +38,11 @@ private:
 
 private:
     const LocalMemoryUnitConfig& config_;
+    const PimUnitConfig& pim_config_;
 
     std::vector<std::shared_ptr<Memory>> local_memory_list_;
+
+    EnergyCounter pim_load_energy_counter_;
 };
 
 }  // namespace pimsim

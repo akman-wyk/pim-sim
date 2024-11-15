@@ -101,7 +101,7 @@ std::vector<std::vector<Instruction>> LayerSimulator::getCoreInstructionList(
 
     std::vector<std::vector<Instruction>> core_inst_list;
     for (int core_id = 0; core_id < core_cnt; core_id++) {
-        auto core_key = fmt::format("core{}", core_id);
+        auto core_key = fmt::format("{}", core_id);
         const auto& core_inst_json = instruction_json.at(core_key);
 
         std::vector<Instruction> core_inst;

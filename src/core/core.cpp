@@ -32,7 +32,8 @@ Core::Core(int core_id, const char *name, const Config &config, Clock *clk, std:
     , pim_output_unit_("PimOutputUnit", core_config_.pim_unit_config, config.sim_config, this, clk)
     , pim_set_unit_("PimSetUnit", core_config_.pim_unit_config, config.sim_config, this, clk)
     , pim_transfer_unit_("PimTransferUnit", core_config_.pim_unit_config, config.sim_config, this, clk)
-    , local_memory_unit_("LocalMemoryUnit", core_config_.local_memory_unit_config, config.sim_config, this, clk)
+    , local_memory_unit_("LocalMemoryUnit", core_config_.local_memory_unit_config, config.sim_config,
+                         core_config_.pim_unit_config, this, clk)
     , reg_unit_("RegUnit", core_config_.register_unit_config, config.sim_config, this, clk)
     , core_switch_("CoreSwitch", config.sim_config, this, clk, core_id)
 
@@ -414,45 +415,45 @@ void Core::decodeTransferIns(const pimsim::Instruction &ins, const pimsim::Instr
         int size_byte = reg_unit_.readRegister(ins.rs2, false);
 
         const auto &pim_as = core_config_.pim_unit_config.address_space;
-        if (pim_as.offset_byte <= dst_address_byte && dst_address_byte + size_byte <= pim_as.end()) {
-            pim_load_payload_ = PimLoadInsPayload{
-                .ins = {.pc = ins_payload.pc, .ins_id = ins_payload.ins_id, .unit_type = ExecuteUnitType::pim_load},
-                .src_address_byte = src_address_byte,
-                .size_byte = size_byte};
+        // if (pim_as.offset_byte <= dst_address_byte && dst_address_byte + size_byte <= pim_as.end()) {
+        //     pim_load_payload_ = PimLoadInsPayload{
+        //         .ins = {.pc = ins_payload.pc, .ins_id = ins_payload.ins_id, .unit_type = ExecuteUnitType::pim_load},
+        //         .src_address_byte = src_address_byte,
+        //         .size_byte = size_byte};
 
-            cur_ins_conflict_info_ =
-                DataConflictPayload{.ins_id = pim_load_payload_.ins.ins_id, .unit_type = ExecuteUnitType::pim_load};
-            cur_ins_conflict_info_.use_pim_unit = true;
-            cur_ins_conflict_info_.addReadMemoryId(
-                local_memory_unit_.getLocalMemoryIdByAddress(pim_load_payload_.src_address_byte));
-        } else {
-            TransferType type = TransferType::local_trans;
-            if (global_memory_addressing_.offset_byte <= src_address_byte &&
-                src_address_byte + size_byte <= global_memory_addressing_.end()) {
-                type = TransferType::global_load;
-                src_address_byte -= global_memory_addressing_.offset_byte;
-            } else if (global_memory_addressing_.offset_byte <= dst_address_byte &&
-                       dst_address_byte + size_byte <= global_memory_addressing_.end()) {
-                type = TransferType::global_store;
-                dst_address_byte -= global_memory_addressing_.offset_byte;
-            }
-
-            transfer_payload_ = TransferInsPayload{
-                .ins = {.pc = ins_payload.pc, .ins_id = ins_payload.ins_id, .unit_type = ExecuteUnitType::transfer},
-                .type = type,
-                .src_address_byte = src_address_byte,
-                .dst_address_byte = dst_address_byte,
-                .size_byte = size_byte};
-
-            cur_ins_conflict_info_ =
-                DataConflictPayload{.ins_id = transfer_payload_.ins.ins_id, .unit_type = ExecuteUnitType::transfer};
-            if (type == +TransferType::local_trans || type == +TransferType::global_store) {
-                cur_ins_conflict_info_.addReadMemoryId(local_memory_unit_.getLocalMemoryIdByAddress(src_address_byte));
-            }
-            if (type == +TransferType::local_trans || type == +TransferType::global_load) {
-                cur_ins_conflict_info_.addWriteMemoryId(local_memory_unit_.getLocalMemoryIdByAddress(dst_address_byte));
-            }
+        //     cur_ins_conflict_info_ =
+        //         DataConflictPayload{.ins_id = pim_load_payload_.ins.ins_id, .unit_type = ExecuteUnitType::pim_load};
+        //     cur_ins_conflict_info_.use_pim_unit = true;
+        //     cur_ins_conflict_info_.addReadMemoryId(
+        //         local_memory_unit_.getLocalMemoryIdByAddress(pim_load_payload_.src_address_byte));
+        // } else {
+        TransferType type = TransferType::local_trans;
+        if (global_memory_addressing_.offset_byte <= src_address_byte &&
+            src_address_byte + size_byte <= global_memory_addressing_.end()) {
+            type = TransferType::global_load;
+            src_address_byte -= global_memory_addressing_.offset_byte;
+        } else if (global_memory_addressing_.offset_byte <= dst_address_byte &&
+                   dst_address_byte + size_byte <= global_memory_addressing_.end()) {
+            type = TransferType::global_store;
+            dst_address_byte -= global_memory_addressing_.offset_byte;
         }
+
+        transfer_payload_ = TransferInsPayload{
+            .ins = {.pc = ins_payload.pc, .ins_id = ins_payload.ins_id, .unit_type = ExecuteUnitType::transfer},
+            .type = type,
+            .src_address_byte = src_address_byte,
+            .dst_address_byte = dst_address_byte,
+            .size_byte = size_byte};
+
+        cur_ins_conflict_info_ =
+            DataConflictPayload{.ins_id = transfer_payload_.ins.ins_id, .unit_type = ExecuteUnitType::transfer};
+        if (type == +TransferType::local_trans || type == +TransferType::global_store) {
+            cur_ins_conflict_info_.addReadMemoryId(local_memory_unit_.getLocalMemoryIdByAddress(src_address_byte));
+        }
+        if (type == +TransferType::local_trans || type == +TransferType::global_load) {
+            cur_ins_conflict_info_.addWriteMemoryId(local_memory_unit_.getLocalMemoryIdByAddress(dst_address_byte));
+        }
+        // }
     } else if (ins.type == +TransferInstType::send) {
         int src_address_byte = reg_unit_.readRegister(ins.rs1, false);
 
