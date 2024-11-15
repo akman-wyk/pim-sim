@@ -8,16 +8,17 @@
 #include "network.h"
 #include "payload.h"
 #include "systemc.h"
+#include "base_component/base_module.h"
 
 namespace pimsim {
 
 class SwitchSocket;
 
-class Switch : sc_core::sc_module {
+class Switch : public BaseModule {
     SC_HAS_PROCESS(Switch);
 
 public:
-    Switch(const char* name, int core_id);
+    Switch(const char* name, const SimConfig& sim_config, Core* core, Clock* clk, int core_id);
 
     [[noreturn]] void processTransport();
 

@@ -34,7 +34,7 @@ Core::Core(int core_id, const char *name, const Config &config, Clock *clk, std:
     , pim_transfer_unit_("PimTransferUnit", core_config_.pim_unit_config, config.sim_config, this, clk)
     , local_memory_unit_("LocalMemoryUnit", core_config_.local_memory_unit_config, config.sim_config, this, clk)
     , reg_unit_("RegUnit", core_config_.register_unit_config, config.sim_config, this, clk)
-    , core_switch_("CoreSwitch", core_id)
+    , core_switch_("CoreSwitch", config.sim_config, this, clk, core_id)
 
     , scalar_stall_handler_(decode_new_ins_trigger_)
     , simd_stall_handler_(decode_new_ins_trigger_)
@@ -141,6 +141,10 @@ bool Core::checkInsStat(const std::string &expected_ins_stat_file) const {
 
     auto expected_ins_stat = expected_ins_stat_j.get<InsStat>();
     return expected_ins_stat == ins_stat_;
+}
+
+int Core::getCoreId() const {
+    return core_id_;
 }
 
 [[noreturn]] void Core::issue() {
@@ -426,9 +430,11 @@ void Core::decodeTransferIns(const pimsim::Instruction &ins, const pimsim::Instr
             if (global_memory_addressing_.offset_byte <= src_address_byte &&
                 src_address_byte + size_byte <= global_memory_addressing_.end()) {
                 type = TransferType::global_load;
+                src_address_byte -= global_memory_addressing_.offset_byte;
             } else if (global_memory_addressing_.offset_byte <= dst_address_byte &&
                        dst_address_byte + size_byte <= global_memory_addressing_.end()) {
                 type = TransferType::global_store;
+                dst_address_byte -= global_memory_addressing_.offset_byte;
             }
 
             transfer_payload_ = TransferInsPayload{

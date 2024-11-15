@@ -11,7 +11,9 @@
 namespace pimsim {
 
 Network::Network(std::string name, const NetworkConfig& config, const SimConfig& sim_config)
-    : config_(config), sim_config_(sim_config), name_(std::move(name)) {}
+    : config_(config), sim_config_(sim_config), name_(std::move(name)) {
+    readLatencyEnergyFile(config.network_config_file_path);
+}
 
 sc_core::sc_time Network::transferAndGetDelay(int src_id, int dst_id, int data_size_byte) {
     auto per_flit_latency_ns = latency_map_[src_id][dst_id] * sim_config_.period_ns;

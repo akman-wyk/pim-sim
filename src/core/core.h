@@ -40,6 +40,8 @@ public:
 
     bool checkInsStat(const std::string& expected_ins_stat_file) const;
 
+    [[nodiscard]] int getCoreId() const;
+
 private:
     [[noreturn]] void issue();
     void processStall();

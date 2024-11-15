@@ -9,9 +9,9 @@
 
 namespace pimsim {
 
-inline void log(const std::string& msg) {
-    std::cout << sc_core::sc_time_stamp() << ", " << msg << std::endl;
-}
+class Core;
+
+void log(const std::string& msg, Core* core);
 
 }  // namespace pimsim
 

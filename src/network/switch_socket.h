@@ -14,7 +14,7 @@ class SwitchSocket {
 public:
     SwitchSocket() = default;
 
-    void bindSwitch(Switch* switch_);
+    void bindSwitch(Switch* _switch_);
 
     // two mode:
     // load and store are transport mode sends data and requires response, block (use event_ptr)

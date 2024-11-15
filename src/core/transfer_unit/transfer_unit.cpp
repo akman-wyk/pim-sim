@@ -52,14 +52,13 @@ void TransferUnit::processIssue() {
 
         const auto& payload = transfer_fsm_out_.read();
         const auto& [ins_info, conflict_payload] = decodeAndGetInfo(payload);
+        ports_.data_conflict_port_.write(conflict_payload);
 
         if (payload.type == +TransferType::send) {
             processSendHandshake(payload.dst_id, payload.transfer_id_tag);
         } else if (payload.type == +TransferType::receive) {
             processReceiveHandshake(payload.src_id, payload.transfer_id_tag);
         }
-
-        ports_.data_conflict_port_.write(conflict_payload);
 
         int process_times = IntDivCeil(payload.size_byte, ins_info.batch_max_data_size_byte);
         TransferSubmodulePayload submodule_payload{.ins_info = ins_info};
@@ -228,6 +227,11 @@ void TransferUnit::switchReceiveHandler(const std::shared_ptr<NetworkPayload>& p
     auto data_transfer_payload = payload->getRequestPayload<DataTransferInfo>();
     auto remote_is_sender = data_transfer_payload->is_sender;
 
+    LOG(fmt::format(
+        "receive network message from {}, remote is {}, status: {}, sender_core_id: {}, expected_sender_core_id: {}",
+        payload->src_id, (remote_is_sender ? "sender" : "receiver"), data_transfer_payload->status._to_string(),
+        data_transfer_payload->sender_id, expected_sender_core_id_));
+
     if (remote_is_sender) {
         // remote core execute send inst to this core
         auto status = data_transfer_payload->status;
@@ -258,6 +262,7 @@ void TransferUnit::switchReceiveHandler(const std::shared_ptr<NetworkPayload>& p
 void TransferUnit::processSendHandshake(int dst_id, int transfer_id_tag) {
     expected_receiver_core_id_ = dst_id;
     expected_transfer_id_tag_ = transfer_id_tag;
+    LOG(fmt::format("send handshake start, dst_id: {}, transfer_id_tag: {}", dst_id, transfer_id_tag));
 
     auto request = std::make_shared<DataTransferInfo>(DataTransferInfo{.sender_id = core_id_,
                                                                        .receiver_id = dst_id,
@@ -274,11 +279,13 @@ void TransferUnit::processSendHandshake(int dst_id, int transfer_id_tag) {
     switch_socket_.send_message(network_payload);
     wait(sender_wait_receiver_ready_);
 
+    LOG(fmt::format("send handshake end, dst_id: {}, transfer_id_tag: {}", dst_id, transfer_id_tag));
     expected_receiver_core_id_ = -1;
     expected_transfer_id_tag_ = -1;
 }
 
 void TransferUnit::processSendData(int dst_id, int transfer_id_tag, int dst_address_byte, int data_size_byte) {
+    LOG(fmt::format("send data start, dst_id: {}, transfer_id_tag: {}", dst_id, transfer_id_tag));
     auto resuest = std::make_shared<DataTransferInfo>(DataTransferInfo{.sender_id = core_id_,
                                                                        .receiver_id = dst_id,
                                                                        .is_sender = true,
@@ -292,10 +299,12 @@ void TransferUnit::processSendData(int dst_id, int transfer_id_tag, int dst_addr
                                                                            .response_data_size_byte = 0,
                                                                            .response_payload = nullptr});
     switch_socket_.send_message(network_payload);
+    LOG(fmt::format("send data end, dst_id: {}, transfer_id_tag: {}", dst_id, transfer_id_tag));
 }
 
 void TransferUnit::processReceiveHandshake(int src_id, int transfer_id_tag) {
     expected_sender_core_id_ = src_id;
+    LOG(fmt::format("receive handshake start, src_id: {}, transfer_id_tag: {}", src_id, transfer_id_tag));
 
     if (auto found = receiver_waiting_sender_map.find(src_id);
         found == receiver_waiting_sender_map.end() || found->second != transfer_id_tag) {
@@ -319,13 +328,19 @@ void TransferUnit::processReceiveData(int src_id) {
                                                                            .request_payload = data_transfer_response,
                                                                            .response_data_size_byte = 0,
                                                                            .response_payload = nullptr});
+    int transfer_id_tag = receiver_waiting_sender_map[src_id];
     receiver_waiting_sender_map[src_id] = -1;
     switch_socket_.send_message(network_payload);
+    LOG(fmt::format("receive handshake end, src_id: {}, transfer_id_tag: {}", src_id, transfer_id_tag));
 
+    LOG(fmt::format("receive data start, src_id: {}, transfer_id_tag: {}", src_id,
+                    receiver_waiting_sender_map[src_id]));
     wait(receiver_wait_data_ready_);
+    LOG(fmt::format("receive data end, src_id: {}, transfer_id_tag: {}", src_id, transfer_id_tag));
 }
 
 void TransferUnit::processLoadGlobalData(const InstructionPayload& ins, int src_address_byte, int data_size_byte) {
+    LOG(fmt::format("load global data start, pc: {}", ins.pc));
     auto global_trans =
         std::make_shared<MemoryAccessPayload>(MemoryAccessPayload{.ins = ins,
                                                                   .access_type = MemoryAccessType::read,
@@ -339,9 +354,11 @@ void TransferUnit::processLoadGlobalData(const InstructionPayload& ins, int src_
                                                                            .response_data_size_byte = data_size_byte,
                                                                            .response_payload = nullptr});
     switch_socket_.load(network_payload);
+    LOG(fmt::format("load global data end, pc: {}", ins.pc));
 }
 
 void TransferUnit::processStoreGlobalData(const InstructionPayload& ins, int dst_address_byte, int data_size_byte) {
+    LOG(fmt::format("store global data start, pc: {}", ins.pc));
     auto global_trans =
         std::make_shared<MemoryAccessPayload>(MemoryAccessPayload{.ins = ins,
                                                                   .access_type = MemoryAccessType::write,
@@ -352,9 +369,10 @@ void TransferUnit::processStoreGlobalData(const InstructionPayload& ins, int dst
                                                                            .dst_id = global_memory_switch_id_,
                                                                            .request_data_size_byte = data_size_byte,
                                                                            .request_payload = global_trans,
-                                                                           .response_data_size_byte = 0,
+                                                                           .response_data_size_byte = 1,
                                                                            .response_payload = nullptr});
     switch_socket_.store(network_payload);
+    LOG(fmt::format("store global data end, pc: {}", ins.pc));
 }
 
 }  // namespace pimsim

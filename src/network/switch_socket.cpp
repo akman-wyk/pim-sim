@@ -6,8 +6,8 @@
 
 namespace pimsim {
 
-void SwitchSocket::bindSwitch(Switch* switch_) {
-    this->switch_ = switch_;
+void SwitchSocket::bindSwitch(Switch* _switch_) {
+    this->switch_ = _switch_;
 }
 
 void SwitchSocket::load(const std::shared_ptr<NetworkPayload>& payload) {

@@ -1,0 +1,23 @@
+{
+  "comments": "test for load and store",
+  "code": [
+    [
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 3072},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 1, "imm": 64},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 2, "imm": 1024},
+
+      {"class_code": 6, "type": 0, "rs1": 0, "rs2": 1, "rd": 2, "offset": 0, "offset_mask": 0}
+    ],
+    [
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 3072},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 1, "imm": 64},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 2, "imm": 1024},
+
+      {"class_code": 6, "type": 0, "rs1": 0, "rs2": 1, "rd": 2, "offset": 0, "offset_mask": 0}
+    ]
+  ],
+  "expected": {
+    "time_ns": 490,
+    "energy_pj": 740
+  }
+}

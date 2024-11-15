@@ -1,0 +1,40 @@
+{
+  "comments": "test for 3 cores: core 0 send to core 1, core 2 send to core 0",
+  "code": [
+    [
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 1},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 1, "imm": 1024},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 2, "imm": 1024},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 23358},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 4, "imm": 64},
+
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 5, "imm": 2},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 6, "imm": 2048},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 7, "imm": 2048},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 8, "imm": 114514},
+
+      {"class_code": 6, "type": 2, "rs1": 1, "rd1": 0, "rd2": 2, "reg_id": 3, "reg_len": 4},
+      {"class_code": 6, "type": 3, "rs1": 5, "rs2": 6, "rd": 7, "reg_id": 8, "reg_len": 4}
+    ],
+    [
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 1024},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 1, "imm": 0},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 2, "imm": 1024},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 23358},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 4, "imm": 64},
+      {"class_code": 6, "type": 3, "rs1": 1, "rs2": 0, "rd": 2, "reg_id": 3, "reg_len": 4}
+    ],
+    [
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 0, "imm": 1024},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 1, "imm": 0},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 2, "imm": 1024},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 3, "imm": 114514},
+      {"class_code": 2, "type": 3, "opcode": 0, "rd": 4, "imm": 64},
+      {"class_code": 6, "type": 2, "rs1": 0, "rd1": 1, "rd2": 2, "reg_id": 3, "reg_len": 4}
+    ]
+  ],
+  "expected": {
+    "time_ns": 420,
+    "energy_pj": 440
+  }
+}

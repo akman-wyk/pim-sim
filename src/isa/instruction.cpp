@@ -42,10 +42,14 @@ void from_json(const nlohmann::ordered_json& j, Instruction& t) {
     t.outsum = j.value("outsum", obj.outsum);
     t.input_num = j.value("input_num", obj.input_num);
     t.offset_mask = j.value("offset_mask", obj.offset_mask);
+    t.rd1 = j.value("rd1", obj.rd1);
+    t.rd2 = j.value("rd2", obj.rd2);
+    t.reg_id = j.value("reg_id", obj.reg_id);
+    t.reg_len = j.value("reg_len", obj.reg_len);
 }
 
 DEFINE_TYPE_TO_JSON_FUNCTION_WITH_DEFAULT(Instruction, class_code, type, opcode, rs1, rs2, rs3, rs4, rd, imm, offset,
                                           value_sparse, bit_sparse, group, group_input_mode, group_broadcast,
-                                          outsum_move, outsum, input_num, offset_mask)
+                                          outsum_move, outsum, input_num, offset_mask, rd1, rd2, reg_id, reg_len)
 
 }  // namespace pimsim

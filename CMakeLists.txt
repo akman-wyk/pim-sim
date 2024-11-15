@@ -98,6 +98,7 @@ add_library(pim-simulator STATIC ""
         src/memory/global_memory.h
         src/chip/chip.cpp
         src/chip/chip.h
+        src/util/log.cpp
 )
 set_target_properties(pim-simulator PROPERTIES OUTPUT_NAME "pim-simulator")
 target_include_directories(pim-simulator PRIVATE
@@ -117,11 +118,6 @@ target_link_libraries(pim-simulator PUBLIC
         fmt
         ghc_filesystem
 )
-
-add_executable(ChipTest "" src/main.cpp)
-add_dependencies(ChipTest pim-simulator)
-target_link_libraries(ChipTest PRIVATE pim-simulator)
-target_include_directories(ChipTest PRIVATE src)
 
 add_executable(ConfigTest test/other_test/config_test.cpp
         src/config/config.h
@@ -212,6 +208,13 @@ add_executable(CoreTest "" test/core_test.cpp
 add_dependencies(CoreTest pim-simulator)
 target_link_libraries(CoreTest PRIVATE pim-simulator)
 target_include_directories(CoreTest PRIVATE src)
+
+add_executable(ChipTest "" test/chip_test.cpp
+        test/base/test_payload.cpp
+        test/base/test_payload.h)
+add_dependencies(ChipTest pim-simulator)
+target_link_libraries(ChipTest PRIVATE pim-simulator)
+target_include_directories(ChipTest PRIVATE src)
 
 add_executable(LayerSimulator "" src/simulator/layer_simulator.cpp src/simulator/layer_simulator.h)
 add_dependencies(LayerSimulator pim-simulator)
